@@ -6,7 +6,7 @@ Implementation of the soliton model
   - [ ] Find proper framework(s)
   - [ ] Visualize soliton graphs
 - [ ] Check for validity of soliton graphs
-- [ ] Animation
+- [ ] Simulation/ Animation
   - [ ]  Find way to animate a soliton traversing the molecule
   - [ ]  Let soliton make a valid soliton path
     - [ ]  Make soliton choose every possible edge at each node in some case
