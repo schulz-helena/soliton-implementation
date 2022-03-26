@@ -3,7 +3,7 @@ Implementation of the soliton model
 
 ## Praktikum
 - [ ] Visualisation
-  - [ ] Find proper framework(s)
+  - [x] Find proper framework(s)
   - [ ] Visualize soliton graphs
 - [ ] Check for validity of soliton graphs
 - [ ] Simulation/ Animation
