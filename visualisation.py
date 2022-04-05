@@ -181,13 +181,19 @@ if __name__ == "__main__":
     #x_values, y_values = double_edge(molecule_nx, 1, 2)
     #plt.plot(x_values, y_values, color = 'blue')
 
-    nx.draw(molecule_nx,
+    '''nx.draw(molecule_nx,
             pos,
             labels=molecule_atom,
             with_labels=True,
             node_color='white',
             connectionstyle='bar, fraction=0.03',
-            arrowstyle='-')
+            arrowstyle='-')'''
+
+    nx.draw(molecule_nx,
+            pos,
+            labels=molecule_atom,
+            with_labels=True,
+            node_color='white')
 
     plt.show()
 
