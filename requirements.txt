@@ -2,3 +2,6 @@ rdkit                     2021.09.5
 networkx                  2.7.1
 ffmpeg                    5.0.0
 scipy (not used)
+pysmiles
+re
+matplotlib
