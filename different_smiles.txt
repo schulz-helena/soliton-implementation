@@ -1,0 +1,16 @@
+'C1=CC=CC=C1C=CC=CC2=CC=CC=C2' zwei Ringe, verbunden durch mehrere Atome
+'C1=CC{1}=CC=C1C{=2}=CC=C{=3}C2=C{4}C=CC=C2'
+'C1{1}=C{3}C1{=2}' kleines Dreieck
+'C1=CC=C2C=CC=CC2=C1' Naphthalin
+'[H][C@@](O)(CO)[C@@]([H])(O)[C@]([H])(O)[C@@]([H])(O)C=O' d-glucose (doesnt draw the one double edge 
+                                                                    because pysmiles counts Hs as atoms while rdkit doesnt -> 
+                                                                    binding information between node numbers is messed up)
+                                                                    -> solution: tell user to not put Hs in
+'[C@@](O)(CO)[C@@](O)[C@](O)[C@@](O)C=O'
+'CC(O)=O' acetic acid
+'N1N=CC=CC2=CC=CC=C12' 1,2-Benzodiazepine
+'S(SC1=NC2=CC=CC=C2S1)C1=NC2=CC=CC=C2S1' 2,2'-Dibenzothiazyl disulfide
+'CCN1CCN(CC2=CC=C(NC3=NC=C(F)C(=N3)C3=CC(F)=C4N=C(C)N(C(C)C)C4=C3)N=C2)CC1' Abemaciclib
+'COC1=CC2=C(C=C1)N(C(=O)C1=CC=C(Cl)C=C1)C(C)=C2CC(=O)OCC(O)=O' Acemetacin
+'S=C1NC2=C(S1)C=CC=C2' 2-mercaptobenzothiazole
+'CC(C)NC1=CC=C(NC2=CC=CC=C2)C=C1' 4-(Isopropylamino)diphenylamine
