@@ -9,7 +9,18 @@ from rdkit import Chem
 from rdkit.Chem import AllChem
 
 
-def double_edge(graph, node1, node2):
+def double_edge(graph: nx.Graph, node1: int, node2: int):
+    """Get x and y values for drawing a line as a second edge
+
+    Args:
+        graph (nx.Graph): graph the second edge should be added to
+        node1 (int): beginning node of edge
+        node2 (int): end node of edge
+
+    Returns:
+        list: x values
+        list: y values
+    """
     pos = nx.get_node_attributes(graph, 'pos')
     coord1 = pos[node1]
     coord2 = pos[node2]
@@ -37,16 +48,26 @@ def double_edge(graph, node1, node2):
 
 
 def transform_user_input(user_input: str):
+    """Transform the users input into smiles string and dictionary with external nodes
+
+    Args:
+        user_input (str): user input
+
+    Returns:
+        dict: external nodes with node ids as keys as node labels as values
+        list: smiles string (used with pysmiles)
+        list: modified smiles string (used with rdkit)
+    """
     #external nodes are put in "{}" in user input
     external_nodes = {} #dictionary for external nodes
     current = 0
     #find node labels of external nodes (numbers)
     matches_labels = re.findall(r"[{][-=]*[0-9]*[}]", user_input)
     #replace node labels with Cs, then count Cs in string and replace each C with count
-    input_with_C = re.sub(r"[{][-=]*[0-9]*[}]", "{C}", user_input)
-    input_with_nums = input_with_C
+    input_with_c = re.sub(r"[{][-=]*[0-9]*[}]", "{C}", user_input)
+    input_with_nums = input_with_c
     while True:
-        if (re.search(r"[C]", input_with_nums) == None):
+        if (re.search(r"[C]", input_with_nums) is None):
             break
         input_with_nums = re.sub(r"[CSNOF]", str(current), input_with_nums, count = 1) #TODO: also put in other possible atoms
         current += 1
@@ -69,8 +90,17 @@ def transform_user_input(user_input: str):
     return external_nodes, input_as_smiles, rdkit_smiles
 
 
-def mol_to_nx3(user_input: str):
-    external_nodes, smiles, rdkit_smiles = transform_user_input(user_input)
+def mol_to_nx3(external_nodes: dict, smiles: str, rdkit_smiles: str):
+    """Transform user input into molecule and then into nx graph
+
+    Args:
+        smiles (str): smiles string for use with pysmiles
+        rdkit_smiles (str): smiles string for use with rdkit
+        external_nodes (dict): external nodes
+
+    Returns:
+        nx.Graph: graph that visualizes the molecule
+    """
     mol_pysmiles = read_smiles(smiles, reinterpret_aromatic=False)
     bindings = nx.get_edge_attributes(mol_pysmiles, 'order')
     mol_rdkit = Chem.MolFromSmiles(rdkit_smiles)
@@ -92,7 +122,7 @@ def mol_to_nx3(user_input: str):
                    label=node_label,
                    pos=(x_coord, y_coord),
                    weight = 0)
-            node_label = chr(ord(node_label)+1)  # TODO: noch ändern: nach z dann aa usw.
+            node_label = chr(ord(node_label)+1)  #TODO: noch ändern: nach z dann aa usw.
 
     for bond in mol_rdkit.GetBonds():
         #print(bond.GetBeginAtomIdx(), bond.GetEndAtomIdx())
@@ -120,15 +150,52 @@ def mol_to_nx3(user_input: str):
                 plt.plot(x_values, y_values, color = 'black', linewidth = 1)
     return graph
 
+def validate_soliton_graph(graph: nx.Graph, external_nodes: dict):
+    """Check if graph is a soliton graph
+
+    Args:
+        graph (nx.Graph): graph that should be validated
+        external_nodes (dict): external nodes of graph
+    """
+    weights = nx.get_node_attributes(graph, 'weight')
+    labels = nx.get_node_attributes(graph, 'label')
+    # No self-loops
+    selfloops = list(nx.nodes_with_selfloops(graph))
+    if len(selfloops) > 0:
+        for node in selfloops:
+            print(f"Self-loop at node {labels[node]}")
+    # Only node degress between 1 and 3 allowed
+    for (node, val) in graph.degree():
+        if val > 3:
+            print(f"Node {labels[node]} has too many neighbours")
+    # External nodes must have weight of 1 or 2 and must have degree 1
+    for key in external_nodes:
+        if weights[key] > 2:
+            print(f"The weight of node {labels[key]} is too high")
+        del weights[key]
+        if graph.degree(key) > 1:
+            print(f"Node {labels[key]} has too many neighbours")
+    # Inner nodes have exactly one double edge
+    for node in weights:
+        if weights[node] > graph.degree(node) + 1:
+            print(f"The weight of node {labels[node]} is too high")
+    # There has to be at least one external node
+    if len(external_nodes) < 1:
+        print("You must have at least one external node")
+
+
 
 if __name__ == "__main__":
 
-    molecule_nx = mol_to_nx3('COC1=CC2=C(C=C1)N(C(=O)C1=CC=C(Cl)C=C1)C(C)=C2CC(=O)OCC(O)=O')
+    ext_nodes, smi, rdkit_smi = transform_user_input('COC1=CC2=C(C=C1)N(C(=O)C1=CC=C(Cl)C=C1)C(C)=C2CC(=O)OCC(O)=O')
+    molecule_nx = mol_to_nx3(ext_nodes, smi, rdkit_smi)
 
     labels = nx.get_node_attributes(molecule_nx, 'label')
     pos = nx.get_node_attributes(molecule_nx, 'pos')
 
     plt.axis('equal')
+
+    validate_soliton_graph(molecule_nx, ext_nodes)
 
     #print(nx.get_node_attributes(molecule_nx, 'weight'))
     #print(nx.get_edge_attributes(molecule_nx, 'weight'))
