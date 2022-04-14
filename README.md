@@ -10,7 +10,7 @@ Implementation of the soliton model
   - [ ]  Find way to animate a soliton traversing the molecule
   - [ ]  Let soliton make a valid soliton path
     - [ ]  Make soliton choose every possible edge at each node in some case
-    - [ ]  Let soliton change every bond it traverses
+    - [x]  Let soliton change every bond it traverses
   - [ ]  Implement possibility to skip step by step animation and show result immediately
 - [ ] Build application 
 - [x] Allow user to define input molecule 
