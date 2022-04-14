@@ -4,6 +4,7 @@ import re
 
 import matplotlib.pyplot as plt
 import networkx as nx
+from numpy import double
 from pysmiles import read_smiles
 from rdkit import Chem
 from rdkit.Chem import AllChem
@@ -45,6 +46,13 @@ def double_edge(graph: nx.Graph, node1: int, node2: int):
         y_values = [coord1[1]+0.1, coord2[1]+0.1]
 
     return x_values, y_values
+
+def double_edge_positions_dict(graph: nx.Graph):
+    xs_and_ys = {}
+    for edge in graph.edges:
+        x_values, y_values = double_edge(graph, edge[0], edge[1])
+        xs_and_ys[edge] = x_values, y_values
+    return xs_and_ys
 
 
 def transform_user_input(user_input: str):
@@ -139,16 +147,22 @@ def mol_to_nx3(external_nodes: dict, smiles: str, rdkit_smiles: str):
                 graph.edges[(bond.GetBeginAtomIdx(), bond.GetEndAtomIdx())]['weight'] = 2
                 graph.nodes[bond.GetBeginAtomIdx()]['weight'] = nx.get_node_attributes(graph, 'weight')[bond.GetBeginAtomIdx()] + 1
                 graph.nodes[bond.GetEndAtomIdx()]['weight'] = nx.get_node_attributes(graph, 'weight')[bond.GetEndAtomIdx()] + 1
-                x_values, y_values = double_edge(graph, bond.GetBeginAtomIdx(), bond.GetEndAtomIdx())
-                plt.plot(x_values, y_values, color = 'black', linewidth = 1)
+                #x_values, y_values = double_edge(graph, bond.GetBeginAtomIdx(), bond.GetEndAtomIdx())
+                #plt.plot(x_values, y_values, color = 'black', linewidth = 1)
         elif ((bond.GetEndAtomIdx(), bond.GetBeginAtomIdx()) in bindings):
             if (bindings[(bond.GetEndAtomIdx(), bond.GetBeginAtomIdx())] == 2):
                 graph.edges[(bond.GetBeginAtomIdx(), bond.GetEndAtomIdx())]['weight'] = 2
                 graph.nodes[bond.GetBeginAtomIdx()]['weight'] = nx.get_node_attributes(graph, 'weight')[bond.GetBeginAtomIdx()] + 1
                 graph.nodes[bond.GetEndAtomIdx()]['weight'] = nx.get_node_attributes(graph, 'weight')[bond.GetEndAtomIdx()] + 1
-                x_values, y_values = double_edge(graph, bond.GetBeginAtomIdx(), bond.GetEndAtomIdx())
-                plt.plot(x_values, y_values, color = 'black', linewidth = 1)
-    return graph
+                #x_values, y_values = double_edge(graph, bond.GetBeginAtomIdx(), bond.GetEndAtomIdx())
+                #plt.plot(x_values, y_values, color = 'black', linewidth = 1)
+    return graph, bindings
+
+def add_double_edges(graph: nx.Graph, bindings: dict, xs_and_ys: dict):
+    for edge in graph.edges:
+        if bindings[edge] == 2:
+            x_values, y_values = xs_and_ys[edge]
+            plt.plot(x_values, y_values, color = 'black', linewidth = 1)
 
 def validate_soliton_graph(graph: nx.Graph, external_nodes: dict):
     """Check if graph is a soliton graph
@@ -187,8 +201,8 @@ def validate_soliton_graph(graph: nx.Graph, external_nodes: dict):
 
 if __name__ == "__main__":
 
-    ext_nodes, smi, rdkit_smi = transform_user_input('COC1=CC2=C(C=C1)N(C(=O)C1=CC=C(Cl)C=C1)C(C)=C2CC(=O)OCC(O)=O')
-    molecule_nx = mol_to_nx3(ext_nodes, smi, rdkit_smi)
+    ext_nodes, smi, rdkit_smi = transform_user_input('C1{1}=C{3}C1{=2}')
+    molecule_nx, bindings = mol_to_nx3(ext_nodes, smi, rdkit_smi)
 
     labels = nx.get_node_attributes(molecule_nx, 'label')
     pos = nx.get_node_attributes(molecule_nx, 'pos')
@@ -197,12 +211,15 @@ if __name__ == "__main__":
 
     validate_soliton_graph(molecule_nx, ext_nodes)
 
+    xs_and_ys = double_edge_positions_dict(molecule_nx)
+
     #print(nx.get_node_attributes(molecule_nx, 'weight'))
     #print(nx.get_edge_attributes(molecule_nx, 'weight'))
     # adjacency matrix
     #matrix = nx.to_numpy_matrix(molecule_nx)
     #print(matrix)
 
+    add_double_edges(molecule_nx, bindings, xs_and_ys)
     nx.draw(molecule_nx,
             pos,
             labels=labels,
