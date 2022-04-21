@@ -23,12 +23,9 @@ def simple_update(frame_num: int, graph: nx.Graph, ax: Axes, path: list, binding
 
     label = nx.get_node_attributes(graph, 'label')
     pos = nx.get_node_attributes(graph, 'pos')
-    color_map = []
+    #ax.set_title(f"Frame {frame_num}") #set the title
     for node in graph:
-        if node != path[frame_num]:
-            color_map.append('white')
-        else:
-            color_map.append('blue')
+        if node == path[frame_num]:
             if frame_num != 0:
                 if (path[frame_num-1], path[frame_num]) in bindings:
                     if bindings[(path[frame_num-1], path[frame_num])] == 2:
@@ -40,22 +37,18 @@ def simple_update(frame_num: int, graph: nx.Graph, ax: Axes, path: list, binding
                         bindings[(path[frame_num], path[frame_num-1])] = 1
                     else:
                         bindings[(path[frame_num], path[frame_num-1])] = 2
-            #position = pos[node]
-            #x = position[0]
-            #y = position[1]
-            #ax.add_patch(plt.Circle((x+0.16, y-0.05), radius = 0.04, color='black'))
-            #if frame_num != 0:
-                #graph.remove_edge(path[frame_num-1], path[frame_num])
+            position = pos[node]
+            x = [position[0]+0.12]
+            y = [position[1]-0.05] #TODO: implement smart algorithm that computes best positons and markersize for soliton pebble
     
     for edge in graph.edges:
         if bindings[edge] == 2:
             x_values, y_values = xs_and_ys[edge]
             plt.plot(x_values, y_values, color = 'black', linewidth = 1)
+    
+    nx.draw(graph, pos=pos, labels=label, with_labels=True, node_color = 'white', ax=ax)
+    plt.plot(x, y, marker="o", markersize=6, markeredgecolor="black", markerfacecolor="black")
 
-    nx.draw(graph, pos=pos, labels=label, with_labels=True, node_color = color_map, ax=ax)
-
-    # Set the title
-    ax.set_title(f"Frame {frame_num}")
 
 
 def simple_animation(graph: nx.Graph, path: list, bindings: dict, xs_and_ys: dict, frames: int):
@@ -77,16 +70,10 @@ def simple_animation(graph: nx.Graph, path: list, bindings: dict, xs_and_ys: dic
 
 if __name__ == "__main__":
 
-    '''g = nx.Graph()
-    g.add_node(0, label = '0', pos = (-1.81, 0.02))
-    g.add_node(1, label = '1', pos = (-0.72, -0.00))
-    g.add_node(2, label = '2', pos = (0.72, 0.00))
-    g.add_node(3, label = '3', pos = (1.81, -0.02))
-    g.add_edge(0,1)
-    g.add_edge(1,2)
-    g.add_edge(2,3)'''
-
-    smiles = 'C1{1}=C{3}C1{=2}'
+    #smiles = 'C1{1}=C{2}C1{=3}'
+    #a_path = [1,0,2,4,5]
+    smiles = 'C1=CC{1}=CC=C1C{=2}=CC=C{=3}C2=C{4}C=CC=C2'
+    a_path = [3,2,4,5,6,7,8]
 
     ext_nodes, smi, rdkit_smi = v.transform_user_input(smiles)
     mol_pysmiles = read_smiles(smi, reinterpret_aromatic=False)
@@ -96,7 +83,6 @@ if __name__ == "__main__":
     g, nix = v.mol_to_nx3(ext_nodes, smi, rdkit_smi)
     xs_and_ys = v.double_edge_positions_dict(g)
 
-    a_path = [1,0,2,4,5]
 
     bind = simple_animation(g, a_path, binds, xs_and_ys, len(a_path))
 
