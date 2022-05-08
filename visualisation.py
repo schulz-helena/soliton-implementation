@@ -16,7 +16,7 @@ class Visualisation:
             soliton_graph (SolitonGraph): soliton graph that should be visualized
         """
 
-        def add_double_edges(graph: nx.Graph, bindings: dict, double_edge_positions: dict):
+        def plot_double_edges(graph: nx.Graph, bindings: dict, double_edge_positions: dict):
             for edge in graph.edges:
                 if bindings[edge] == 2:
                     x_values, y_values = double_edge_positions[edge]
@@ -24,10 +24,9 @@ class Visualisation:
 
         labels = nx.get_node_attributes(soliton_graph.graph, 'label')
         pos = nx.get_node_attributes(soliton_graph.graph, 'pos')
-        soliton_graph.validate_soliton_graph()
 
         plt.axis('equal')
-        add_double_edges(soliton_graph.graph, soliton_graph.bindings, soliton_graph.double_edge_positions)
+        plot_double_edges(soliton_graph.graph, soliton_graph.bindings, soliton_graph.double_edge_positions)
         nx.draw(soliton_graph.graph,
                 pos,
                 labels=labels,
@@ -37,6 +36,7 @@ class Visualisation:
 
 if __name__ == "__main__":
     my_graph = SolitonGraph('CC=CC')
+    my_graph.validate_soliton_graph()
     matrix = nx.to_numpy_matrix(my_graph.graph) #adjacency matrix
     print(matrix)
     Visualisation.visualize_soliton_graph(my_graph)
