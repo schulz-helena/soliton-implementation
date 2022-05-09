@@ -1,6 +1,10 @@
+"""Class that represents a soliton graph
+
+    Attributes: exterior nodes (node id as key, node label as value), smiles string for use with pysmiles and for use with rdkit, binding types (edge as key, binding type as value),
+                nx-graph, positions for a second line for each edge 
+"""
 import re
 
-import matplotlib.pyplot as plt
 import networkx as nx
 from pysmiles import read_smiles
 from rdkit import Chem
@@ -16,6 +20,7 @@ class SolitonGraph:
         self.bindings = self.create_binding_dict()
         self.graph = self.smiles_to_graph()
         self.double_edge_positions = self.find_double_edge_positions()
+
 
     def set_bindings(self, bindings):
         self.bindings = bindings
