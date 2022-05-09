@@ -9,7 +9,7 @@ from soliton_graph import SolitonGraph
 class Visualisation:
 
     @staticmethod
-    def visualize_soliton_graph(soliton_graph: SolitonGraph):
+    def visualize_soliton_graph(soliton_graph: SolitonGraph, bindings: dict, show: bool): #bindings as an extra argument so we can use this method in animation (there we have different bidnings for each time step)
         """Plot a visualisation of a soliton graph
 
         Args:
@@ -26,17 +26,16 @@ class Visualisation:
         pos = nx.get_node_attributes(soliton_graph.graph, 'pos')
 
         plt.axis('equal')
-        plot_double_edges(soliton_graph.graph, soliton_graph.bindings, soliton_graph.double_edge_positions)
+        plot_double_edges(soliton_graph.graph, bindings, soliton_graph.double_edge_positions)
         nx.draw(soliton_graph.graph,
                 pos,
                 labels=labels,
                 with_labels=True,
                 node_color='white')
-        plt.show()
+        if show == True:
+            plt.show()
 
 if __name__ == "__main__":
     my_graph = SolitonGraph('CC=CC')
     my_graph.validate_soliton_graph()
-    matrix = nx.to_numpy_matrix(my_graph.graph) #adjacency matrix
-    print(matrix)
-    Visualisation.visualize_soliton_graph(my_graph)
+    Visualisation.visualize_soliton_graph(my_graph, my_graph.bindings, True)
