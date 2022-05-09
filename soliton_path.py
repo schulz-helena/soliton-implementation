@@ -1,7 +1,11 @@
+"""Class that represents a soliton path
+
+    Attributes: path (consisting of node ids), the according soliton graph, the bindings and adjacency matrices for each timestep
+"""
+import copy
 from dataclasses import dataclass
 
 import networkx as nx
-import numpy as np
 
 from soliton_graph import SolitonGraph
 
@@ -18,32 +22,34 @@ class SolitonPath:
 
 
     def find_bindings_for_each_timestep(self):
+        soliton_graph_copy = copy.deepcopy(self.soliton_graph) #working on a copy of the soliton graph so no unwanted changes occur
         bindings_list = []
-        bindings_copy = self.soliton_graph.bindings.copy()
+        bindings_copy = soliton_graph_copy.bindings.copy()
         bindings_list.append(bindings_copy)
         # for each node in soliton path: change binding of edge that soliton just traversed:
         for i in range(1, len(self.path)): # starting at 1 because self.path[0] has no predecessor node
-            if (self.path[i-1], self.path[i]) in self.soliton_graph.bindings:
-                if self.soliton_graph.bindings[(self.path[i-1], self.path[i])] == 2:
-                    self.soliton_graph.bindings[(self.path[i-1], self.path[i])] = 1
+            if (self.path[i-1], self.path[i]) in soliton_graph_copy.bindings:
+                if soliton_graph_copy.bindings[(self.path[i-1], self.path[i])] == 2:
+                    soliton_graph_copy.bindings[(self.path[i-1], self.path[i])] = 1
                 else:
-                    self.soliton_graph.bindings[(self.path[i-1], self.path[i])] = 2
+                    soliton_graph_copy.bindings[(self.path[i-1], self.path[i])] = 2
             else:
-                if self.soliton_graph.bindings[(self.path[i], self.path[i-1])] == 2:
-                    self.soliton_graph.bindings[(self.path[i], self.path[i-1])] = 1
+                if soliton_graph_copy.bindings[(self.path[i], self.path[i-1])] == 2:
+                    soliton_graph_copy.bindings[(self.path[i], self.path[i-1])] = 1
                 else:
-                    self.soliton_graph.bindings[(self.path[i], self.path[i-1])] = 2
-            bindings_copy = self.soliton_graph.bindings.copy()
+                    soliton_graph_copy.bindings[(self.path[i], self.path[i-1])] = 2
+            bindings_copy = soliton_graph_copy.bindings.copy()
             bindings_list.append(bindings_copy)
         return bindings_list
 
 
     def find_adjacency_matrices_for_each_timestep(self):
+        soliton_graph_copy = copy.deepcopy(self.soliton_graph)
         adjacency_matrices_list = []
         for i in range(0, len(self.bindings_list)):
             bindings = self.bindings_list[i]
-            self.soliton_graph.set_bindings(bindings) #change bindings in graph which changes edge weights which changes adjacency matrix
-            matrix = nx.to_numpy_matrix(self.soliton_graph.graph)
+            soliton_graph_copy.set_bindings(bindings) #change bindings in graph which changes edge weights which changes adjacency matrix
+            matrix = nx.to_numpy_matrix(soliton_graph_copy.graph)
             adjacency_matrices_list.append(matrix)
         return adjacency_matrices_list
 
