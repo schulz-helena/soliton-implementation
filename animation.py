@@ -43,7 +43,7 @@ class Animation:
         fig, ax = plt.subplots() # Build plot
         frames = len(soliton_path.path) #as much frames as there are nodes in the soliton path
         ani = animation.FuncAnimation(fig, update, interval = 800, frames=frames, fargs=(ax, soliton_graph, soliton_path)) #interval in milliseconds(default 200)
-        ani.save('test2.gif', writer='ffmpeg')
+        ani.save('animation.gif', writer='ffmpeg')
 
 if __name__ == "__main__":
 
