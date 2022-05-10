@@ -37,16 +37,11 @@ class SolitonPath:
         bindings_list.append(bindings_copy)
         # for each node in soliton path: change binding of edge that soliton just traversed:
         for i in range(1, len(self.path)): # starting at 1 because self.path[0] has no predecessor node
-            if (self.path[i-1], self.path[i]) in soliton_graph_copy.bindings:
-                if soliton_graph_copy.bindings[(self.path[i-1], self.path[i])] == 2:
-                    soliton_graph_copy.bindings[(self.path[i-1], self.path[i])] = 1
-                else:
-                    soliton_graph_copy.bindings[(self.path[i-1], self.path[i])] = 2
+            if soliton_graph_copy.bindings[tuple(sorted((self.path[i-1], self.path[i])))] == 2:
+                soliton_graph_copy.bindings[tuple(sorted((self.path[i-1], self.path[i])))] = 1
             else:
-                if soliton_graph_copy.bindings[(self.path[i], self.path[i-1])] == 2:
-                    soliton_graph_copy.bindings[(self.path[i], self.path[i-1])] = 1
-                else:
-                    soliton_graph_copy.bindings[(self.path[i], self.path[i-1])] = 2
+                soliton_graph_copy.bindings[tuple(sorted((self.path[i-1], self.path[i])))] = 2
+
             bindings_copy = soliton_graph_copy.bindings.copy()
             bindings_list.append(bindings_copy)
         return bindings_list
