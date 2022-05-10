@@ -17,7 +17,8 @@ class Animation:
         """Animation function that uses update function and saves animation
 
         Args:
-            frames (int): number of frames for animation
+            soliton_graph (SolitonGraph): graph that should be animated
+            soliton_path (SolitonPath): path the soliton should traverse in the animation
         """
 
         def update(frame_num: int, ax: Axes, soliton_graph: SolitonGraph, soliton_path: SolitonPath):
@@ -26,6 +27,8 @@ class Animation:
             Args:
                 frame_num (int): frame number (is increased every time animation calls this function)
                 ax (Axes): axes of the plot
+                soliton_graph (SolitonGraph): graph that should be animated
+                soliton_path (SolitonPath): path the soliton should traverse in the animation
             """
             ax.clear()
             ax.axis('equal') # force the x and y axes to have equal number of pixels per data unit (makes circles be round)
@@ -36,13 +39,13 @@ class Animation:
             x = [position[0]+0.12]
             y = [position[1]-0.05] #TODO: implement smart algorithm that computes best positons and markersize for soliton pebble
     
-            Visualisation.visualize_soliton_graph(soliton_graph, soliton_path.bindings_list[frame_num], False)
-            plt.plot(x, y, marker="o", markersize=6, markeredgecolor="black", markerfacecolor="black")
+            Visualisation.visualize_soliton_graph(soliton_graph, soliton_path.bindings_list[frame_num], False) # use visualisation of graph at current timestep
+            plt.plot(x, y, marker="o", markersize=6, markeredgecolor="black", markerfacecolor="black") # plot soliton on top
 
 
         fig, ax = plt.subplots() # Build plot
-        frames = len(soliton_path.path) #as much frames as there are nodes in the soliton path
-        ani = animation.FuncAnimation(fig, update, interval = 800, frames=frames, fargs=(ax, soliton_graph, soliton_path)) #interval in milliseconds(default 200)
+        frames = len(soliton_path.path) # as much frames as there are nodes in the soliton path
+        ani = animation.FuncAnimation(fig, update, interval = 800, frames=frames, fargs=(ax, soliton_graph, soliton_path)) # interval in milliseconds(default 200)
         ani.save('animation.gif', writer='ffmpeg')
 
 if __name__ == "__main__":
