@@ -36,22 +36,22 @@ class SolitonGraph:
         Returns:
             dict: exterior nodes with node ids as keys as node labels as values
         """
-        #exterior nodes are put in "{}" in user input
-        exterior_nodes = {} #dictionary for exterior nodes
+        # exterior nodes are put in "{}" in user input
+        exterior_nodes = {} # dictionary for exterior nodes
         current = 0
-        #find node labels of exterior nodes (numbers)
+        # find node labels of exterior nodes (numbers)
         matches_labels = re.findall(r"[{][-=]*[0-9]*[}]", user_input)
-        #replace node labels with Cs, then count Cs in string and replace each C with count
+        # replace node labels with Cs, then count Cs in string and replace each C with count
         input_with_c = re.sub(r"[{][-=]*[0-9]*[}]", "{C}", user_input)
         input_with_nums = input_with_c
         while True:
             if (re.search(r"[C]", input_with_nums) is None):
                 break
-            input_with_nums = re.sub(r"[C]", str(current), input_with_nums, count = 1) #[CSNOF]
+            input_with_nums = re.sub(r"[C]", str(current), input_with_nums, count = 1) # [CSNOF]
             current += 1
-        #find node ids in input_with_nums (because node id is just the atom count)
+        # find node ids in input_with_nums (because node id is just the atom count)
         matches_ids = re.findall(r"[{][-=]*[0-9]*[}]", input_with_nums)
-        #put exterior nodes in dictionary (node id as key and node label as value)
+        # put exterior nodes in dictionary (node id as key and node label as value)
         for i in range (0, len(matches_labels)):
             matches_ids[i] = re.sub(r"[}]", "", re.sub(r"[{]", "", matches_ids[i]))
             matches_labels[i] = re.sub(r"[}]", "", re.sub(r"[{][-=]*", "", matches_labels[i]))
@@ -97,7 +97,11 @@ class SolitonGraph:
         """
         mol_pysmiles = read_smiles(self.pysmiles_smiles, reinterpret_aromatic=False) # binding information are taken from pysmiles
         bindings = nx.get_edge_attributes(mol_pysmiles, 'order')
-        return bindings
+        bindings_sorted_tuples = {}
+        for edge in bindings:
+            val = bindings[edge]
+            bindings_sorted_tuples[tuple(sorted(edge))] = val
+        return bindings_sorted_tuples
 
 
     def smiles_to_graph(self):
@@ -131,15 +135,15 @@ class SolitonGraph:
             graph.add_edge(bond.GetBeginAtomIdx(),
                     bond.GetEndAtomIdx(),
                     weight = 1)
-            #increase node weight of begin atom and end atom by 1
+            # increase node weight of begin atom and end atom by 1
             graph.nodes[bond.GetBeginAtomIdx()]['weight'] = nx.get_node_attributes(graph, 'weight')[bond.GetBeginAtomIdx()] + 1
             graph.nodes[bond.GetEndAtomIdx()]['weight'] = nx.get_node_attributes(graph, 'weight')[bond.GetEndAtomIdx()] + 1
             # if its a double bond increase edge and node weights
             if ((bond.GetBeginAtomIdx(), bond.GetEndAtomIdx()) in self.bindings):
                 if (self.bindings[(bond.GetBeginAtomIdx(), bond.GetEndAtomIdx())] == 2):
-                    #put edge weight to 2
+                    # put edge weight to 2
                     graph.edges[(bond.GetBeginAtomIdx(), bond.GetEndAtomIdx())]['weight'] = 2
-                    #increase node weight of begin atom and end atom by 1
+                    # increase node weight of begin atom and end atom by 1
                     graph.nodes[bond.GetBeginAtomIdx()]['weight'] = nx.get_node_attributes(graph, 'weight')[bond.GetBeginAtomIdx()] + 1
                     graph.nodes[bond.GetEndAtomIdx()]['weight'] = nx.get_node_attributes(graph, 'weight')[bond.GetEndAtomIdx()] + 1
             elif ((bond.GetEndAtomIdx(), bond.GetBeginAtomIdx()) in self.bindings):
@@ -176,13 +180,13 @@ class SolitonGraph:
             y_values = [coord1[1], coord2[1]]
 
             dx = x_values[1] - x_values[0]
-            #no division by 0 allowed
+            # no division by 0 allowed
             if (dx == 0):
                 dx = 0.001
             dy = y_values[1] - y_values[0]
             slope = dy/dx
 
-            #0.1 (the value that is added) is just some value for now, could be chosen better maybe 
+            # 0.1 (the value that is added) is just some value for now, could be chosen better maybe 
             # TODO: compute slope for different edges and then find the perfect distance for them → find an algorithm/ formula to compute perfect distance
             # TODO: sometimes use + and sometimes - the distance (so second edge is always on outside or always on inside of circel)
             if (abs(slope) >= 1):
