@@ -8,8 +8,8 @@ Implementation of the soliton model
 - [x] Check for validity of soliton graphs
 - [x] Animation
   - [x]  Find way to animate a soliton traversing the molecule
-- [ ] Computation of soliton paths
-    - [ ]  Make soliton choose every possible edge at each node in some case
+- [x] Computation of soliton paths
+    - [x]  Make soliton choose every possible edge at each node in some case
     - [x]  Let soliton change every bond it traverses
 - [ ] Build application 
   - [x] Allow user to define input molecule
