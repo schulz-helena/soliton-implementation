@@ -15,14 +15,14 @@ class SolitonPath:
 
     path: list
     soliton_graph: SolitonGraph
-    bindings_list: list
-
-    #def __post_init__(self):
-        #self.bindings_list = self.find_bindings_for_each_timestep()
-        #self.adjacency_matrices_list = self.find_adjacency_matrices_for_each_timestep()
+    #bindings_list: list
 
     def __post_init__(self):
+        self.bindings_list = self.find_bindings_for_each_timestep()
         self.adjacency_matrices_list = self.find_adjacency_matrices_for_each_timestep()
+
+    #def __post_init__(self):
+        #self.adjacency_matrices_list = self.find_adjacency_matrices_for_each_timestep()
 
 
     def find_bindings_for_each_timestep(self):
@@ -68,7 +68,7 @@ if __name__ == "__main__":
     #my_graph = SolitonGraph('CC=CC')
     #my_path = SolitonPath([0,1,2,3], my_graph)
     my_graph = SolitonGraph('C1{1}=C{3}C1{=2}')
-    my_bindings_list = [{(0, 1): 1, (0, 2): 2, (0, 4): 1, (2, 3): 1, (2, 4): 1, (4, 5): 2}, {(0, 1): 2, (0, 2): 2, (0, 4): 1, (2, 3): 1, (2, 4): 1, (4, 5): 2}, {(0, 1): 2, (0, 2): 1, (0, 4): 1, (2, 3): 1, (2, 4): 1, (4, 5): 2}, {(0, 1): 2, (0, 2): 1, (0, 4): 1, (2, 3): 1, (2, 4): 2, (4, 5): 2}, {(0, 1): 2, (0, 2): 1, (0, 4): 1, (2, 3): 1, (2, 4): 2, (4, 5): 1}]
-    my_path = SolitonPath([1, 0, 2, 4, 5], my_graph, my_bindings_list)
+    #my_bindings_list = [{(0, 1): 1, (0, 2): 2, (0, 4): 1, (2, 3): 1, (2, 4): 1, (4, 5): 2}, {(0, 1): 2, (0, 2): 2, (0, 4): 1, (2, 3): 1, (2, 4): 1, (4, 5): 2}, {(0, 1): 2, (0, 2): 1, (0, 4): 1, (2, 3): 1, (2, 4): 1, (4, 5): 2}, {(0, 1): 2, (0, 2): 1, (0, 4): 1, (2, 3): 1, (2, 4): 2, (4, 5): 2}, {(0, 1): 2, (0, 2): 1, (0, 4): 1, (2, 3): 1, (2, 4): 2, (4, 5): 1}]
+    my_path = SolitonPath([1, 0, 2, 4, 5], my_graph)
     print(my_path.bindings_list)
     print(my_path.adjacency_matrices_list)
