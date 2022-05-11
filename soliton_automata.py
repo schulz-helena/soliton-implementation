@@ -19,8 +19,11 @@ class SolitonAutomata:
     end: int
 
     def __post_init__(self):
-        path, bindings_list = self.call_find_first_path()
-        self.soliton_path = SolitonPath(path, self.soliton_graph, bindings_list)
+        #path, bindings_list = self.call_find_first_path()
+        #self.soliton_path = SolitonPath(path, self.soliton_graph, bindings_list)
+        self.paths = self.call_find_all_paths()
+        if self.paths == []:
+            print("Zwischen diesen beiden externen Knoten gibt es keinen Solitonpfad")
 
 
     def change_bindings(self, bindings: dict, edge: tuple):
@@ -66,6 +69,25 @@ class SolitonAutomata:
         return akt, path, bindings, bind, bindings_list
 
 
+    def build_copies(self, akt: int, path: list, bindings: dict, bind: int):
+        """Helping function to copy all variables that are changed during find_all_paths
+
+        Args:
+            akt (int): node that was currently added to path
+            path (list): current found path
+            bindings (dict): current binding types of all edges in the graph
+            bind (int): binding type of the last edge that was traversed
+
+        Returns:
+            int, list, dict, int: akt_copy, path_copy, bindings_copy, bind_copy
+        """
+        akt_copy = copy.deepcopy(akt)
+        path_copy = copy.deepcopy(path)
+        bindings_copy = copy.deepcopy(bindings)
+        bind_copy = copy.deepcopy(bind)
+        return akt_copy, path_copy, bindings_copy, bind_copy
+
+
     def find_first_path(self, graph: nx.Graph, bindings: dict, end: int, path: list, akt: int, bind: int, bindings_list: list):
         """Find first soliton path between two exterior nodes
             A path can only be a soliton path if the edges traversed by the soliton have alternating binding types (1,2,1,2,..)
@@ -109,6 +131,48 @@ class SolitonAutomata:
                     akt, path, bindings, bind, bindings_list = self.restore(path, bindings, bindings_list) # otherwise our decision was wrong, so we have to make it undone and try again with another node
 
         return False # if at some point no new node could be added, then no path can be found 
+
+
+    def find_all_paths(self, graph: nx.Graph, bindings: dict, end: int, path: list, akt: int, bind: int, paths: list):
+        """Find all possible soliton paths between two exterior nodes
+            A path can only be a soliton path if the edges traversed by the soliton have alternating binding types (1,2,1,2,..)
+
+        Args:
+            graph (nx.Graph): graph the path should be found in
+            bindings (dict): current binding types of all edges in the graph
+            end (int): end node of path
+            path (list): current found path
+            akt (int): node that was currently added to path
+            bind (int): binding type of the last edge that was traversed
+            paths (list): contains all currently found paths
+
+        Returns:
+            list: contains all found paths (is empty if no path exists)
+        """
+        # base case: if end node is reachable then add end node to path and add finished path to paths
+        if end in list(nx.neighbors(graph, akt)) and bindings[tuple(sorted((akt, end)))] != bind:
+            path.append(end)
+            bindings = self.change_bindings(bindings, (akt, end)) # change binding of traversed edge
+            paths.append(path)
+            return paths
+
+        # iterate over all nodes that are adjacent to latest node in path
+        for node in list(nx.neighbors(graph, akt)):
+            if node != path[len(path)-2] and bindings[tuple(sorted((akt, node)))] != bind: # soliton is not allowed to make a direct turnaround and edge to next node has to have the right binding type
+                akt_copy, path_copy, bindings_copy, bind_copy = self.build_copies(akt, path, bindings, bind) #make copies so we can backtrack later
+                path.append(node)
+                bind = bindings[tuple(sorted((akt, node)))] # change bind to binding type of edge that was just traversed
+                bindings = self.change_bindings(bindings, tuple(sorted((akt, node))))
+                akt = node
+                # call function recursively: if we can find a path if we go further with the decision we just made (with the node we just added) then paths is changed (new path added)
+                paths = self.find_all_paths(graph, bindings, end, path, akt, bind, paths)
+                # try different decisions (nodes) next, so we need variables in the state before the last decision
+                akt = akt_copy
+                path = path_copy
+                bindings = bindings_copy
+                bind = bind_copy
+
+        return paths # if at some point no new node could be added, then all possible paths are found
     
 
     def call_find_first_path(self):
@@ -120,8 +184,9 @@ class SolitonAutomata:
                 list: found path
                 list: bindings_list for the found path 
         """
-        graph = self.soliton_graph.graph
-        bindings = self.soliton_graph.bindings
+        soliton_graph_copy = copy.deepcopy(self.soliton_graph) # working on copy of graph so no unwanted changes are made
+        graph = soliton_graph_copy.graph
+        bindings = soliton_graph_copy.bindings
         path = [self.start]
         akt = self.start
         bind = 0
@@ -134,11 +199,29 @@ class SolitonAutomata:
         return res 
 
 
+    def call_find_all_paths(self):
+        """Initialising some parameteres and then calling the find_all_paths function with them
+
+        Returns:
+            list: list of all found paths (returns empty list when no path is found)
+        """
+        paths = []
+        soliton_graph_copy = copy.deepcopy(self.soliton_graph) # working on copy of graph so no unwanted changes are made
+        graph = soliton_graph_copy.graph
+        bindings = soliton_graph_copy.bindings
+        path = [self.start]
+        akt = self.start
+        bind = 0
+        res = self.find_all_paths(graph, bindings, self.end, path, akt, bind, paths)
+        return res 
+
+
+
 if __name__ == "__main__":
 
     my_graph = SolitonGraph('C1{1}=C{3}C1{=2}')
     #my_graph = SolitonGraph('C1=CC=CC=C1C{1}=CC{2}=CC=CC2=CC=CC=C2')
-    automata = SolitonAutomata(my_graph, 1, 5)
-    print(automata.soliton_path.adjacency_matrices_list)
-    print(automata.soliton_path.path)
-    #print(automata.call_find_first_path(7, 10))
+    automata = SolitonAutomata(my_graph, 5, 3)
+    #automata = SolitonAutomata(my_graph, 7, 10)
+    #print(automata.soliton_path.adjacency_matrices_list)
+    print(automata.paths)
