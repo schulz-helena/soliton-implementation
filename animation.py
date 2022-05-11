@@ -50,6 +50,6 @@ class Animation:
 
 if __name__ == "__main__":
 
-    my_graph = SolitonGraph('C1=CC=CC=C1C=C{1}C=CC{2}=CC2=CC=CC=C2')
-    my_path = SolitonPath([8,7,6,5,4,3,2,1,0,5,6,7,9,10,11,12], my_graph)
+    my_graph = SolitonGraph('C1{1}=C{3}C1{=2}')
+    my_path = SolitonPath([5, 4, 2, 0, 4, 2, 3], my_graph)
     Animation.graph_animation(my_graph, my_path)
