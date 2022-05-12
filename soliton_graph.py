@@ -49,7 +49,7 @@ class SolitonGraph:
         while True:
             if (re.search(r"[C]", input_with_nums) is None):
                 break
-            input_with_nums = re.sub(r"[C]", str(current), input_with_nums, count = 1) # [CSNOF]
+            input_with_nums = re.sub(r"[CSNOF]", str(current), input_with_nums, count = 1) # [CSNOF]
             current += 1
         # find node ids in input_with_nums (because node id is just the atom count)
         matches_ids = re.findall(r"[{][-=]*[0-9]*[}]", input_with_nums)
@@ -107,6 +107,29 @@ class SolitonGraph:
         return bindings_sorted_tuples
 
 
+    def next_node_label(self, node_label: str):
+        """Helping function to find the next node label for a given node label (for initialisation of grapg)
+
+        Args:
+            node_label (str): given node label
+
+        Returns:
+            str: the computed (next) node label
+        """
+        if len(node_label) == 1: # e.g.: a -> b
+            node_label = chr(ord(node_label)+1)
+        elif node_label[1] == 'z': # e.g. bz -> ca
+            node_label_list = list(node_label) # convert to list so we can change chars at certain index
+            node_label_list[0] = chr(ord(node_label[0])+1)
+            node_label_list[1] = 'a'
+            node_label = "".join(node_label_list) # convert back to string
+        else: #e.g. ab -> ac
+            node_label_list = list(node_label)
+            node_label_list[1] = chr(ord(node_label[1])+1)
+            node_label = "".join(node_label_list)
+        return node_label
+
+
     def smiles_to_graph(self):
         """Transform user input into molecule and then into nx graph
 
@@ -116,7 +139,10 @@ class SolitonGraph:
         mol_rdkit = Chem.MolFromSmiles(self.rdkit_smiles) # atom position information are taken from rdkit
         AllChem.Compute2DCoords(mol_rdkit)
         graph = nx.Graph()
-        node_label = 'a'
+        if len(mol_rdkit.GetAtoms()) > 26: # if we have more than 26 atoms then node labels a - z are not sufficient
+            node_label = 'aa'
+        else:
+            node_label = 'a'
 
         for atom in mol_rdkit.GetAtoms():
             pos = mol_rdkit.GetConformer().GetAtomPosition(atom.GetIdx())
@@ -132,7 +158,7 @@ class SolitonGraph:
                     label=node_label,
                     pos=(x_coord, y_coord),
                     weight = 0)
-                node_label = chr(ord(node_label)+1)  #TODO: noch ändern: nach z dann aa usw.
+                node_label = self.next_node_label(node_label)
 
         for bond in mol_rdkit.GetBonds():
             graph.add_edge(bond.GetBeginAtomIdx(),
