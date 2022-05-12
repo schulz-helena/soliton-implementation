@@ -3,7 +3,6 @@
     Attributes: soliton graph the automata is based on, start and end node for paths, list of soliton paths (right now only the first found soliton path)
 """
 import copy
-from dataclasses import dataclass
 
 import networkx as nx
 
@@ -11,19 +10,23 @@ from soliton_graph import SolitonGraph
 from soliton_path import SolitonPath
 
 
-@dataclass
 class SolitonAutomata:
 
-    soliton_graph: SolitonGraph
-    start: int
-    end: int
-
-    def __post_init__(self):
+    def __init__(self, soliton_graph, start, end):
         #path, bindings_list = self.call_find_first_path()
         #self.soliton_path = SolitonPath(path, self.soliton_graph, bindings_list)
-        self.paths = self.call_find_all_paths()
-        if self.paths == []:
+        self.soliton_graph = soliton_graph
+        self.start = self.soliton_graph.exterior_nodes_reverse[start]
+        self.end = self.soliton_graph.exterior_nodes_reverse[end]
+        self.paths_ids = self.call_find_all_paths()
+        if self.paths_ids == []:
             print("Zwischen diesen beiden externen Knoten gibt es keinen Solitonpfad")
+        self.paths = [] # the path that the user gets as an output (with node labels instead of node ids)
+        for path_ids in self.paths_ids:
+            path = copy.deepcopy(path_ids)
+            for i in range(0, len(path)):
+                path[i] = nx.get_node_attributes(self.soliton_graph.graph, 'label')[path[i]]
+            self.paths.append(path)
 
 
     def change_bindings(self, bindings: dict, edge: tuple):
@@ -221,7 +224,8 @@ if __name__ == "__main__":
 
     my_graph = SolitonGraph('C1{1}=C{3}C1{=2}')
     #my_graph = SolitonGraph('C1=CC=CC=C1C{1}=CC{2}=CC=CC2=CC=CC=C2')
-    automata = SolitonAutomata(my_graph, 5, 3)
-    #automata = SolitonAutomata(my_graph, 7, 10)
+    automata = SolitonAutomata(my_graph, 2, 3)
+    #automata = SolitonAutomata(my_graph, 1, 2)
     #print(automata.soliton_path.adjacency_matrices_list)
+    print(automata.paths_ids)
     print(automata.paths)
