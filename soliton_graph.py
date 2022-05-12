@@ -1,7 +1,7 @@
 """Class that represents a soliton graph
 
-    Attributes: exterior nodes (node id as key, node label as value), smiles string for use with pysmiles and for use with rdkit, binding types (edge as key, binding type as value),
-                nx-graph, positions for a second line for each edge 
+    Attributes: exterior nodes (node id as key, node label as value and other way around), two smiles strings (for use with pysmiles and for use with rdkit), 
+                binding types (edge as key, binding type as value), nx-graph, positions for a second line for each edge 
 """
 import re
 
@@ -14,7 +14,7 @@ from rdkit.Chem import AllChem
 class SolitonGraph:
 
     def __init__(self, user_input: str):
-        self.exterior_nodes = self.find_exterior_nodes(user_input)
+        self.exterior_nodes, self.exterior_nodes_reverse = self.find_exterior_nodes(user_input)
         self.pysmiles_smiles = self.create_pysmiles_smiles(user_input)
         self.rdkit_smiles = self.create_rdkit_smiles(user_input)
         self.bindings = self.create_binding_dict()
@@ -35,9 +35,11 @@ class SolitonGraph:
 
         Returns:
             dict: exterior nodes with node ids as keys as node labels as values
+            dict: exterior nodes with node labels as keys as node ids as values
         """
         # exterior nodes are put in "{}" in user input
         exterior_nodes = {} # dictionary for exterior nodes
+        exterior_nodes_reverse = {}
         current = 0
         # find node labels of exterior nodes (numbers)
         matches_labels = re.findall(r"[{][-=]*[0-9]*[}]", user_input)
@@ -56,8 +58,9 @@ class SolitonGraph:
             matches_ids[i] = re.sub(r"[}]", "", re.sub(r"[{]", "", matches_ids[i]))
             matches_labels[i] = re.sub(r"[}]", "", re.sub(r"[{][-=]*", "", matches_labels[i]))
             exterior_nodes[int(matches_ids[i])] = int(matches_labels[i])
+            exterior_nodes_reverse[int(matches_labels[i])] = int(matches_ids[i])
 
-        return exterior_nodes
+        return exterior_nodes, exterior_nodes_reverse
 
 
     def create_pysmiles_smiles(self, user_input: str):
