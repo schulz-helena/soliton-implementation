@@ -41,6 +41,7 @@ class Visualisation:
                 labels=labels,
                 with_labels=True,
                 node_color='white')
+        plt.savefig('database/graph.jpg', bbox_inches='tight', format='jpg', dpi=1200)
         if show == True:
             plt.show()
 
@@ -49,3 +50,4 @@ if __name__ == "__main__":
     my_graph = SolitonGraph('C1=CC=CC=C1C{1}=CC{2}=CC=CC2=CC=CC=C2')
     my_graph.validate_soliton_graph()
     Visualisation.visualize_soliton_graph(my_graph, my_graph.bindings, True)
+    
