@@ -237,28 +237,39 @@ class SolitonGraph:
     def validate_soliton_graph(self):
         """Check if graph is a soliton graph
         """
+        errors = []
         weights = nx.get_node_attributes(self.graph, 'weight')
         labels = nx.get_node_attributes(self.graph, 'label')
         # No self-loops
         selfloops = list(nx.nodes_with_selfloops(self.graph))
         if len(selfloops) > 0:
             for node in selfloops:
-                print(f"Self-loop at node {labels[node]}")
+                errors.append(f"Self-loop at node {labels[node]}")
+                #print(f"Self-loop at node {labels[node]}")
         # Only node degress between 1 and 3 allowed
         for (node, val) in self.graph.degree():
             if val > 3:
-                print(f"Node {labels[node]} has too many neighbours")
+                errors.append(f"Node {labels[node]} has too many neighbours")
+                #print(f"Node {labels[node]} has too many neighbours")
         # exterior nodes must have weight of 1 or 2 and must have degree 1
         for key in self.exterior_nodes:
             if weights[key] > 2:
-                print(f"The weight of node {labels[key]} is too high")
+                errors.append(f"The weight of node {labels[key]} is too high")
+                #print(f"The weight of node {labels[key]} is too high")
             del weights[key]
             if self.graph.degree(key) > 1:
-                print(f"Node {labels[key]} has too many neighbours")
+                errors.append(f"Node {labels[key]} has too many neighbours")
+                #print(f"Node {labels[key]} has too many neighbours")
         # Inner nodes have exactly one double edge
         for node in weights:
             if weights[node] > self.graph.degree(node) + 1:
-                print(f"The weight of node {labels[node]} is too high")
+                errors.append(f"The weight of node {labels[node]} is too high")
+                #print(f"The weight of node {labels[node]} is too high")
+            elif weights[node] < self.graph.degree(node) + 1:
+                errors.append(f"The weight of node {labels[node]} is too low")
+                #print(f"The weight of node {labels[node]} is too low")
         # There has to be at least one exterior node
         if len(self.exterior_nodes) < 1:
-            print("You must have at least one exterior node")
+            errors.append("You must have at least one exterior node")
+            #print("You must have at least one exterior node")
+        return errors
