@@ -6,9 +6,12 @@
 #
 # WARNING! All changes made in this file will be lost!
 
+import os
+
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QMessageBox
 
+from soliton_automata import SolitonAutomata
 from soliton_graph import SolitonGraph
 from visualisation import Visualisation
 
@@ -88,7 +91,8 @@ class Ui_MainWindow(object):
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
         # What I added:
-        self.submit_molecule.clicked.connect(self.submit_clicked)
+        self.submit_molecule.clicked.connect(self.submit_molecule_clicked)
+        self.submit_exterior_nodes.clicked.connect(self.submit_exterior_nodes_clicked)
         self.save.hide()
         self.exterior_nodes_label.hide()
         self.exterior_nodes_label_2.hide()
@@ -108,22 +112,52 @@ class Ui_MainWindow(object):
         self.welcome_label_2.setText(_translate("MainWindow", "Please specify your molecule below:"))
         self.save.setText(_translate("MainWindow", "Save"))
 
-    def submit_clicked(self):
+    def submit_molecule_clicked(self):
+        self.node_1.clear()
+        self.node_2.clear()
         smiles_string = self.molecule_lineedit.text()
         try:
-            my_graph = SolitonGraph(smiles_string)
-            print(my_graph.validate_soliton_graph())
-            Visualisation.visualize_soliton_graph(my_graph, my_graph.bindings, False)
+            self.my_graph = SolitonGraph(smiles_string)
+            errors = self.my_graph.validate_soliton_graph()
+            Visualisation.visualize_soliton_graph(self.my_graph, self.my_graph.bindings, False)
             self.display_molecule.setPixmap(QtGui.QPixmap("database/graph.jpg"))
             self.welcome_label_1.hide()
             self.welcome_label_2.hide()
-            self.save.show()
-            self.exterior_nodes_label.show()
-            self.exterior_nodes_label_2.show()
-            self.node_1.show()
-            self.node_2.show()
-            self.submit_exterior_nodes.show()
+            if errors != []:
+                self.save.hide()
+                self.exterior_nodes_label.hide()
+                self.exterior_nodes_label_2.hide()
+                self.node_1.hide()
+                self.node_2.hide()
+                self.submit_exterior_nodes.hide()
+                msg = QMessageBox()
+                msg.setWindowTitle("No soliton graph")
+                msg.setText("You specified a molecule that does not fulfill the requirements of a soliton graph")
+                msg.setIcon(QMessageBox.Warning)
+                msg.setStandardButtons(QMessageBox.Retry)
+                msg.setInformativeText("See details for all incorrect parts of your molecule.")
+                details = ""
+                for error in errors:
+                    details = details + error + "\n"
+                msg.setDetailedText(details)
+                x = msg.exec_() # show messagebox
+            else:
+                self.save.show()
+                self.exterior_nodes_label.show()
+                self.exterior_nodes_label_2.show()
+                self.node_1.show()
+                self.node_2.show()
+                self.submit_exterior_nodes.show()
+                for key in self.my_graph.exterior_nodes_reverse:
+                    self.node_1.addItem(str(key))
+                    self.node_2.addItem(str(key))
         except:
+            self.save.hide()
+            self.exterior_nodes_label.hide()
+            self.exterior_nodes_label_2.hide()
+            self.node_1.hide()
+            self.node_2.hide()
+            self.submit_exterior_nodes.hide()
             msg = QMessageBox()
             msg.setWindowTitle("Incorrect input")
             msg.setText("The syntax of your input is not correct")
@@ -131,7 +165,31 @@ class Ui_MainWindow(object):
             msg.setStandardButtons(QMessageBox.Retry)
             msg.setInformativeText("Please try again with another input string.")
             msg.setDetailedText("Some details..") #TODO: Write a more detailed text to help user
-            x = msg.exec_() # show messagebox
+            x = msg.exec_()
+
+    def submit_exterior_nodes_clicked(self):
+        node1 = int(self.node_1.currentText())
+        node2 = int(self.node_2.currentText())
+        if node1 != node2:
+            automata = SolitonAutomata(self.my_graph, node1, node2)
+            if automata.paths == []:
+                msg = QMessageBox()
+                msg.setWindowTitle("No path found")
+                msg.setText("There exists no soliton path between these exterior nodes")
+                msg.setIcon(QMessageBox.Information)
+                msg.setStandardButtons(QMessageBox.Retry)
+                msg.setInformativeText("Please try again with different exterior nodes.")
+                x = msg.exec_()
+            else:
+                print(automata.paths) # TODO: instead of printing open new window with found paths
+        else:
+            msg = QMessageBox()
+            msg.setWindowTitle("Equal nodes")
+            msg.setText("You chose the same exterior node twice")
+            msg.setIcon(QMessageBox.Warning)
+            msg.setStandardButtons(QMessageBox.Retry)
+            msg.setInformativeText("Please try again with two differing nodes.")
+            x = msg.exec_()
 
 
 if __name__ == "__main__":
