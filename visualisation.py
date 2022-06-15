@@ -1,5 +1,7 @@
 """Visualisation of a molecule as a graph
 """
+import os
+
 import matplotlib.pyplot as plt
 import networkx as nx
 
@@ -31,6 +33,10 @@ class Visualisation:
                     x_values, y_values = double_edge_positions[edge]
                     plt.plot(x_values, y_values, color = 'black', linewidth = 1)
 
+        # remove current graph visualisation picture from database folder
+        if os.path.exists('database/graph.jpg'):
+            os.remove('database/graph.jpg')
+        plt.clf() # clear plot
         labels = nx.get_node_attributes(soliton_graph.graph, 'label')
         pos = nx.get_node_attributes(soliton_graph.graph, 'pos')
 
