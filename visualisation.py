@@ -11,7 +11,7 @@ from soliton_graph import SolitonGraph
 class Visualisation:
 
     @staticmethod
-    def visualize_soliton_graph(soliton_graph: SolitonGraph, bindings: dict, show: bool): # bindings as an extra argument so we can use this method in animation (there we have different bindings for each time step)
+    def visualize_soliton_graph(soliton_graph: SolitonGraph, bindings: dict, show: bool, save: bool): # bindings as an extra argument so we can use this method in animation (there we have different bindings for each time step)
         """Plot a visualisation of a soliton graph
 
         Args:
@@ -34,8 +34,8 @@ class Visualisation:
                     plt.plot(x_values, y_values, color = 'black', linewidth = 1)
 
         # remove current graph visualisation picture from database folder
-        if os.path.exists('database/graph.jpg'):
-            os.remove('database/graph.jpg')
+        #if os.path.exists('database/graph.jpg'):
+            #os.remove('database/graph.jpg')
         plt.clf() # clear plot
         labels = nx.get_node_attributes(soliton_graph.graph, 'label')
         pos = nx.get_node_attributes(soliton_graph.graph, 'pos')
@@ -47,7 +47,8 @@ class Visualisation:
                 labels=labels,
                 with_labels=True,
                 node_color='white')
-        plt.savefig('database/graph.jpg', bbox_inches='tight', format='jpg', dpi=1200)
+        if save == True:        
+            plt.savefig('database/graph.jpg', bbox_inches='tight', format='jpg', dpi=1200)
         if show == True:
             plt.show()
 
