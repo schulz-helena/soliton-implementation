@@ -21,12 +21,19 @@ class SolitonAutomata:
         self.paths_ids = self.call_find_all_paths()
         if self.paths_ids == []:
             print("There exists no soliton path between these exterior nodes")
-        self.paths = [] # the path that the user gets as an output (with node labels instead of node ids)
+        self.paths = [] # paths with node labels instead of node ids
+        self.paths_for_user = [] # representation of the path the user gets as an output
         for path_ids in self.paths_ids:
             path = copy.deepcopy(path_ids)
+            path_string = "" # for user output
             for i in range(0, len(path)):
                 path[i] = nx.get_node_attributes(self.soliton_graph.graph, 'label')[path[i]]
+                if i == len(path) - 1:
+                    path_string = path_string + f"{path[i]}"
+                else:
+                    path_string = path_string + f"{path[i]} - "
             self.paths.append(path)
+            self.paths_for_user.append(path_string)
 
 
     def change_bindings(self, bindings: dict, edge: tuple):
