@@ -4,7 +4,7 @@
 'C1{1}=C{3}C1{=2}' kleines Dreieck
 'C1=CC=C2C=CC=CC2=C1' Naphthalin
 '[H][C@@](O)(CO)[C@@]([H])(O)[C@]([H])(O)[C@@]([H])(O)C=O' d-glucose (doesnt draw the one double edge 
-                                                                    because pysmiles counts Hs as atoms while rdkit doesnt -> 
+animation.py                                                                    because pysmiles counts Hs as atoms while rdkit doesnt -> 
                                                                     binding information between node numbers is messed up)
                                                                     -> solution: tell user to not put Hs in
 '[C@@](O)(CO)[C@@](O)[C@](O)[C@@](O)C=O'
