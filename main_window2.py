@@ -6,8 +6,12 @@
 #
 # WARNING! All changes made in this file will be lost!
 
+import base64
+import re
+
+from PIL import Image
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QDialog, QMessageBox
+from PyQt5.QtWidgets import QDialog, QMessageBox, QScrollArea
 
 from animation import Animation
 from soliton_automata import SolitonAutomata
@@ -110,6 +114,8 @@ class Ui_MainWindow(object):
         self.submit_exterior_nodes.clicked.connect(self.submit_exterior_nodes_clicked)
         self.show_matrices.clicked.connect(self.show_matrices_clicked)
         self.show_end_result.clicked.connect(self.show_end_result_clicked)
+        self.show_animation.clicked.connect(self.show_animation_clicked)
+        self.save.clicked.connect(self.save_clicked)
         self.save.hide()
         self.exterior_nodes_label.hide()
         self.exterior_nodes_label_2.hide()
@@ -156,6 +162,11 @@ class Ui_MainWindow(object):
                 self.node_1.hide()
                 self.node_2.hide()
                 self.submit_exterior_nodes.hide()
+                self.soliton_paths_label.hide()
+                self.paths.hide()
+                self.show_matrices.hide()
+                self.show_end_result.hide()
+                self.show_animation.hide()
                 msg = QMessageBox()
                 msg.setWindowTitle("No soliton graph")
                 msg.setText("You specified a molecule that does not fulfill the requirements of a soliton graph")
@@ -174,6 +185,11 @@ class Ui_MainWindow(object):
                 self.node_1.show()
                 self.node_2.show()
                 self.submit_exterior_nodes.show()
+                self.soliton_paths_label.hide()
+                self.paths.hide()
+                self.show_matrices.hide()
+                self.show_end_result.hide()
+                self.show_animation.hide()
                 for key in self.my_graph.exterior_nodes_reverse:
                     self.node_1.addItem(str(key))
                     self.node_2.addItem(str(key))
@@ -184,6 +200,11 @@ class Ui_MainWindow(object):
             self.node_1.hide()
             self.node_2.hide()
             self.submit_exterior_nodes.hide()
+            self.soliton_paths_label.hide()
+            self.paths.hide()
+            self.show_matrices.hide()
+            self.show_end_result.hide()
+            self.show_animation.hide()
             msg = QMessageBox()
             msg.setWindowTitle("Incorrect input")
             msg.setText("The syntax of your input is not correct")
@@ -193,6 +214,17 @@ class Ui_MainWindow(object):
             msg.setDetailedText("Some details..") #TODO: Write a more detailed text to help user
             x = msg.exec_()
 
+    def save_clicked(self):
+        option = QtWidgets.QFileDialog.Options()
+        name = QtWidgets.QFileDialog.getSaveFileName(self.centralwidget, 'Save File', 'graph.jpg', options = option)
+        path = name[0]
+        file = open('database/graph.jpg', 'rb')
+        data = file.read()
+        file.close()
+        file = open(path, "wb")
+        file.write(data)
+        file.close()
+
     def submit_exterior_nodes_clicked(self):
         self.paths.clear()
         node1 = int(self.node_1.currentText())
@@ -200,6 +232,11 @@ class Ui_MainWindow(object):
         if node1 != node2:
             self.automata = SolitonAutomata(self.my_graph, node1, node2)
             if self.automata.paths == []:
+                self.soliton_paths_label.hide()
+                self.paths.hide()
+                self.show_matrices.hide()
+                self.show_end_result.hide()
+                self.show_animation.hide()
                 msg = QMessageBox()
                 msg.setWindowTitle("No path found")
                 msg.setText("There exists no soliton path between these exterior nodes")
@@ -215,8 +252,13 @@ class Ui_MainWindow(object):
                 self.show_animation.show()
                 for path in self.automata.paths_for_user:
                     self.paths.addItem(str(path))
-                print(self.automata.paths)
+                #print(self.automata.paths)
         else:
+            self.soliton_paths_label.hide()
+            self.paths.hide()
+            self.show_matrices.hide()
+            self.show_end_result.hide()
+            self.show_animation.hide()
             msg = QMessageBox()
             msg.setWindowTitle("Equal nodes")
             msg.setText("You chose the same exterior node twice")
@@ -226,16 +268,62 @@ class Ui_MainWindow(object):
             x = msg.exec_()
     
     def show_matrices_clicked(self):
-        dlg = QDialog()
+
+        def save_matrices():
+            option = QtWidgets.QFileDialog.Options()
+            name = QtWidgets.QFileDialog.getSaveFileName(self.centralwidget, 'Save File', 'matrices.txt', options = option)
+            path = name[0]
+            file = open('database/matrices.txt', 'rb')
+            data = file.read()
+            file.close()
+            file = open(path, "wb")
+            file.write(data)
+            file.close()
+
         index = self.paths.currentIndex()
-        label = QtWidgets.QLabel(str(index),dlg)
-        label.move(50,50)
-        dlg.setWindowTitle("Matrices")
-        #dlg.resize(540, 380)
+        desired_path = SolitonPath(self.automata.paths_ids[index], self.my_graph)
+    
+        dlg = QDialog()
+        scrollArea = QScrollArea(dlg)
+        widget = QtWidgets.QWidget()
+        vbox = QtWidgets.QHBoxLayout()
+        file = open("database/matrices.txt", 'w')
+        for object in desired_path.adjacency_matrices_list:
+            matrix = str(object)
+            matrix = re.sub(r"[matrix(]", "", matrix)
+            matrix = re.sub(r"[)]", "", matrix)
+            file.write(matrix)
+            file.write('\n')
+            label = QtWidgets.QLabel(matrix)
+            vbox.addWidget(label)
+        file.close()
+        widget.setLayout(vbox)
+        scrollArea.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOn)
+        scrollArea.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOn)
+        #scrollArea.setWidgetResizable(True)
+        scrollArea.setWidget(widget)
+        scrollArea.setFixedSize(540, 380)
+        save_button = QtWidgets.QPushButton("Save", dlg)
+        save_button.setGeometry(QtCore.QRect(450, 330, 70, 30))
+        save_button.clicked.connect(save_matrices)
+
+        dlg.setWindowTitle("Adjacency Matrices")
         dlg.setFixedSize(540, 380)
         dlg.exec_()
     
     def show_end_result_clicked(self):
+
+        def save_end_result():
+            option = QtWidgets.QFileDialog.Options()
+            name = QtWidgets.QFileDialog.getSaveFileName(self.centralwidget, 'Save File', 'result.jpg', options = option)
+            path = name[0]
+            file = open('database/result.jpg', 'rb')
+            data = file.read()
+            file.close()
+            file = open(path, "wb")
+            file.write(data)
+            file.close()
+
         index = self.paths.currentIndex()
         desired_path = SolitonPath(self.automata.paths_ids[index], self.my_graph)
         Animation.graph_animation(self.my_graph, desired_path)
@@ -245,12 +333,45 @@ class Ui_MainWindow(object):
         label.setGeometry(QtCore.QRect(0, 0, 540, 380))
         label.setPixmap(QtGui.QPixmap("database/result.jpg"))
         label.setScaledContents(True)
+        save_button = QtWidgets.QPushButton("Save", dlg)
+        save_button.setGeometry(QtCore.QRect(470, 350, 70, 30))
+        save_button.clicked.connect(save_end_result)
+
         dlg.setWindowTitle("End result")
         dlg.setFixedSize(540, 380)
         dlg.exec_()
 
     def show_animation_clicked(self):
-        return
+        
+        def save_animation():
+            option = QtWidgets.QFileDialog.Options()
+            name = QtWidgets.QFileDialog.getSaveFileName(self.centralwidget, 'Save File', 'animation.gif', options = option)
+            path = name[0]
+            file = open('database/animation.gif', 'rb')
+            data = file.read()
+            file.close()
+            file = open(path, "wb")
+            file.write(data)
+            file.close()
+
+        index = self.paths.currentIndex()
+        desired_path = SolitonPath(self.automata.paths_ids[index], self.my_graph)
+        Animation.graph_animation(self.my_graph, desired_path)
+
+        dlg = QDialog()
+        label = QtWidgets.QLabel(dlg)
+        label.setGeometry(QtCore.QRect(0, 0, 540, 380))
+        movie = QtGui.QMovie('database/animation.gif')
+        movie.setScaledSize(QtCore.QSize(540,380))
+        label.setMovie(movie)
+        movie.start()
+        save_button = QtWidgets.QPushButton("Save", dlg)
+        save_button.setGeometry(QtCore.QRect(470, 350, 70, 30))
+        save_button.clicked.connect(save_animation)
+
+        dlg.setWindowTitle("Animation")
+        dlg.setFixedSize(540, 380)
+        dlg.exec_()
 
 
 if __name__ == "__main__":
