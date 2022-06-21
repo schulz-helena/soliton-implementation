@@ -14,7 +14,7 @@ Implementation of the soliton model
 - [ ] Build application 
   - [x] Allow user to define input molecule
   - [ ] Write application with a GUI
-  - [ ] Implement possibility to skip step by step animation and show result immediately
+  - [x] Implement possibility to skip step by step animation and show result immediately
 
 ## Bachelorarbeit
 - [ ] Extend implementation to multiple solitons 
