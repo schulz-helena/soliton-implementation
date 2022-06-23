@@ -39,9 +39,9 @@ class Animation:
             x = [position[0]+0.12]
             y = [position[1]-0.05] #TODO: implement smart algorithm that computes best positons and markersize for soliton pebble
     
-            Visualisation.visualize_soliton_graph(soliton_graph, soliton_path.bindings_list[frame_num], False, False) # use visualisation of graph at current timestep
+            Visualisation.visualize_soliton_graph(soliton_graph, soliton_path.bindings_list[frame_num], False, None) # use visualisation of graph at current timestep
             plt.plot(x, y, marker="o", markersize=6, markeredgecolor="black", markerfacecolor="black") # plot soliton on top
-            plt.savefig('database/result.jpg', bbox_inches='tight', format='jpg', dpi=1200)
+            #plt.savefig('database/result.jpg', bbox_inches='tight', format='jpg', dpi=1200)
 
 
         fig, ax = plt.subplots() # Build plot
