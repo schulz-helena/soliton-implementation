@@ -11,13 +11,14 @@ from soliton_graph import SolitonGraph
 class Visualisation:
 
     @staticmethod
-    def visualize_soliton_graph(soliton_graph: SolitonGraph, bindings: dict, show: bool, save: bool): # bindings as an extra argument so we can use this method in animation (there we have different bindings for each time step)
+    def visualize_soliton_graph(soliton_graph: SolitonGraph, bindings: dict, show: bool, title: str): # bindings as an extra argument so we can use this method in animation (there we have different bindings for each time step)
         """Plot a visualisation of a soliton graph
 
         Args:
             soliton_graph (SolitonGraph): soliton graph that should be visualized
             bindings (dict): binding types for each edge in the graph
             show (bool): if the plot should be displayed or not (use False when using visualisation in animation, use True when using it as a stand-alone visualisation)
+            title (str): title the saved image of the visualisation should have (if title == None then image is not saved)
         """
 
         def plot_double_edges(graph: nx.Graph, bindings: dict, double_edge_positions: dict):
@@ -47,8 +48,8 @@ class Visualisation:
                 labels=labels,
                 with_labels=True,
                 node_color='white')
-        if save == True:        
-            plt.savefig('database/graph.jpg', bbox_inches='tight', format='jpg', dpi=1200)
+        if title != None:        
+            plt.savefig(f'database/{title}.jpg', bbox_inches='tight', format='jpg', dpi=1200)
         if show == True:
             plt.show()
 
