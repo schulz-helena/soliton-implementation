@@ -6,7 +6,6 @@
 #
 # WARNING! All changes made in this file will be lost!
 
-import base64
 import re
 
 from PIL import Image
@@ -151,7 +150,7 @@ class Ui_MainWindow(object):
         try:
             self.my_graph = SolitonGraph(smiles_string)
             errors = self.my_graph.validate_soliton_graph()
-            Visualisation.visualize_soliton_graph(self.my_graph, self.my_graph.bindings, False, True)
+            Visualisation.visualize_soliton_graph(self.my_graph, self.my_graph.bindings, False, "graph")
             self.display_molecule.setPixmap(QtGui.QPixmap("database/graph.jpg"))
             self.welcome_label_1.hide()
             self.welcome_label_2.hide()
@@ -226,6 +225,7 @@ class Ui_MainWindow(object):
         file.close()
 
     def submit_exterior_nodes_clicked(self):
+        self.path_index = None # we need this variable later in show_animation_clicked
         self.paths.clear()
         node1 = int(self.node_1.currentText())
         node2 = int(self.node_2.currentText())
@@ -326,7 +326,9 @@ class Ui_MainWindow(object):
 
         index = self.paths.currentIndex()
         desired_path = SolitonPath(self.automata.paths_ids[index], self.my_graph)
-        Animation.graph_animation(self.my_graph, desired_path)
+        bindings_index = len(desired_path.path) - 1
+        Visualisation.visualize_soliton_graph(self.my_graph, desired_path.bindings_list[bindings_index], False, "result")
+        #Animation.graph_animation(self.my_graph, desired_path)
 
         dlg = QDialog()
         label = QtWidgets.QLabel(dlg)
@@ -354,9 +356,10 @@ class Ui_MainWindow(object):
             file.write(data)
             file.close()
 
-        index = self.paths.currentIndex()
-        desired_path = SolitonPath(self.automata.paths_ids[index], self.my_graph)
-        Animation.graph_animation(self.my_graph, desired_path)
+        if self.path_index != self.paths.currentIndex():
+            self.path_index = self.paths.currentIndex()
+            desired_path = SolitonPath(self.automata.paths_ids[self.path_index], self.my_graph)
+            Animation.graph_animation(self.my_graph, desired_path)
 
         dlg = QDialog()
         label = QtWidgets.QLabel(dlg)
