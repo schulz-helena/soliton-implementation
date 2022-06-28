@@ -160,7 +160,7 @@ class SolitonAutomata:
             list: contains all found paths (is empty if no path exists)
         """
         # base case: if end node is reachable then add end node to path and add finished path to paths
-        if end in list(nx.neighbors(graph, akt)) and bindings[tuple(sorted((akt, end)))] != bind:
+        if end in list(nx.neighbors(graph, akt)) and bindings[tuple(sorted((akt, end)))] != bind and end != path[len(path)-2]: # also in this case a direct turnaround is not allowed
             path.append(end)
             bindings = self.change_bindings(bindings, (akt, end)) # change binding of traversed edge
             paths.append(path)
@@ -169,7 +169,7 @@ class SolitonAutomata:
         # iterate over all nodes that are adjacent to latest node in path
         for node in list(nx.neighbors(graph, akt)):
             if node != path[len(path)-2] and bindings[tuple(sorted((akt, node)))] != bind: # soliton is not allowed to make a direct turnaround and edge to next node has to have the right binding type
-                akt_copy, path_copy, bindings_copy, bind_copy = self.build_copies(akt, path, bindings, bind) #make copies so we can backtrack later
+                akt_copy, path_copy, bindings_copy, bind_copy = self.build_copies(akt, path, bindings, bind) # make copies so we can backtrack later
                 path.append(node)
                 bind = bindings[tuple(sorted((akt, node)))] # change bind to binding type of edge that was just traversed
                 bindings = self.change_bindings(bindings, tuple(sorted((akt, node))))
@@ -229,10 +229,10 @@ class SolitonAutomata:
 
 if __name__ == "__main__":
 
-    my_graph = SolitonGraph('C1{1}=C{3}C1{=2}')
-    #my_graph = SolitonGraph('C1=CC=CC=C1C{1}=CC{2}=CC=CC2=CC=CC=C2')
-    automata = SolitonAutomata(my_graph, 2, 3)
-    #automata = SolitonAutomata(my_graph, 1, 2)
+    #my_graph = SolitonGraph('C1{1}=C{3}C1{=2}')
+    my_graph = SolitonGraph('C1=CC=CC=C1C=C{1}C=CC{2}=CC2=CC=CC=C2')
+    #automata = SolitonAutomata(my_graph, 2, 3)
+    automata = SolitonAutomata(my_graph, 1, 1)
     #print(automata.soliton_path.adjacency_matrices_list)
     print(automata.paths_ids)
     print(automata.paths)
