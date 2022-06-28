@@ -134,7 +134,12 @@ class Ui_MainWindow(QMainWindow):
         self.display_molecule.setAutoFillBackground(False)
         self.display_molecule.setText("")
         self.display_molecule.setPixmap(QtGui.QPixmap("database/startscreen.jpg"))
+        #self.display_molecule.setPixmap(QtGui.QPixmap("database/startscreen.jpg").scaled(self.display_molecule.size(), QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)) #.scaled(540 ,380, QtCore.Qt.AspectRatioMode.KeepAspectRatio)
         self.display_molecule.setScaledContents(True)
+        self.display_molecule.setAutoFillBackground(True)
+        p = self.display_molecule.palette()
+        p.setColor(self.display_molecule.backgroundRole(), QtCore.Qt.red)
+        self.display_molecule.setPalette(p)
         #self.display_molecule.setFixedSize(0,0)
         self.display_molecule.setObjectName("display_molecule")
         self.gridLayout.addWidget(self.display_molecule, 0, 0, 2, 5, QtCore.Qt.AlignHCenter|QtCore.Qt.AlignVCenter) # !!!
@@ -148,7 +153,7 @@ class Ui_MainWindow(QMainWindow):
         QtCore.QMetaObject.connectSlotsByName(self)
 
         self._heightForWidthFactor = 1.0 * 380 / 540
-        self._resizeImage(self.centralwidget.size())
+        #self._resizeImage(self.centralwidget.size())
 
         # What I added:
         self.submit_molecule.clicked.connect(self.submit_molecule_clicked)
@@ -180,8 +185,6 @@ class Ui_MainWindow(QMainWindow):
         self.show_end_result.hide()
         self.hide_retain_space(self.show_animation)
         self.show_animation.hide()
-
-        self.count = 0
 
 
     def retranslateUi(self):
@@ -282,43 +285,29 @@ class Ui_MainWindow(QMainWindow):
         self.paths.clear()
         node1 = int(self.node_1.currentText())
         node2 = int(self.node_2.currentText())
-        if node1 != node2:
-            self.automata = SolitonAutomata(self.my_graph, node1, node2)
-            if self.automata.paths == []:
-                self.soliton_paths_label.hide()
-                self.paths.hide()
-                self.show_matrices.hide()
-                self.show_end_result.hide()
-                self.show_animation.hide()
-                msg = QMessageBox()
-                msg.setWindowTitle("No path found")
-                msg.setText("There exists no soliton path between these exterior nodes")
-                msg.setIcon(QMessageBox.Information)
-                msg.setStandardButtons(QMessageBox.Retry)
-                msg.setInformativeText("Please try again with different exterior nodes.")
-                x = msg.exec_()
-            else:
-                self.soliton_paths_label.show()
-                self.paths.show()
-                self.show_matrices.show()
-                self.show_end_result.show()
-                self.show_animation.show()
-                for path in self.automata.paths_for_user:
-                    self.paths.addItem(str(path))
-                #print(self.automata.paths)
-        else:
+        self.automata = SolitonAutomata(self.my_graph, node1, node2)
+        if self.automata.paths == []:
             self.soliton_paths_label.hide()
             self.paths.hide()
             self.show_matrices.hide()
             self.show_end_result.hide()
             self.show_animation.hide()
             msg = QMessageBox()
-            msg.setWindowTitle("Equal nodes")
-            msg.setText("You chose the same exterior node twice")
-            msg.setIcon(QMessageBox.Warning)
+            msg.setWindowTitle("No path found")
+            msg.setText("There exists no soliton path between these exterior nodes")
+            msg.setIcon(QMessageBox.Information)
             msg.setStandardButtons(QMessageBox.Retry)
-            msg.setInformativeText("Please try again with two differing nodes.")
+            msg.setInformativeText("Please try again with different exterior nodes.")
             x = msg.exec_()
+        else:
+            self.soliton_paths_label.show()
+            self.paths.show()
+            self.show_matrices.show()
+            self.show_end_result.show()
+            self.show_animation.show()
+            for path in self.automata.paths_for_user:
+                self.paths.addItem(str(path))
+            #print(self.automata.paths)
     
     def show_matrices_clicked(self):
 
@@ -448,7 +437,6 @@ class Ui_MainWindow(QMainWindow):
         # For efficiency, we pass the size from the event to _resizeImage()
         self._resizeImage(event.size())
         #self._resizeImage(self.centralwidget.size())
-        self.count += 1
     
     '''def resizeEvent(self, event: QtGui.QResizeEvent) -> None:
         old_size = event.oldSize()
