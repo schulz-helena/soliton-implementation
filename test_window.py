@@ -8,6 +8,7 @@
 
 import math
 import re
+from operator import indexOf
 
 from PIL import Image
 from PyQt5 import QtCore, QtGui, QtWidgets
@@ -204,9 +205,9 @@ class Ui_MainWindow(QMainWindow):
     def submit_molecule_clicked(self):
         self.node_1.clear()
         self.node_2.clear()
-        smiles_string = self.molecule_lineedit.text()
+        self.smiles_string = self.molecule_lineedit.text()
         try:
-            self.my_graph = SolitonGraph(smiles_string)
+            self.my_graph = SolitonGraph(self.smiles_string)
             errors = self.my_graph.validate_soliton_graph()
             Visualisation.visualize_soliton_graph(self.my_graph, self.my_graph.bindings, False, "graph")
             self.display_molecule.setPixmap(QtGui.QPixmap("database/graph.jpg"))
@@ -272,13 +273,14 @@ class Ui_MainWindow(QMainWindow):
     def save_clicked(self):
         option = QtWidgets.QFileDialog.Options()
         name = QtWidgets.QFileDialog.getSaveFileName(self.centralwidget, 'Save File', 'graph.jpg', options = option)
-        path = name[0]
-        file = open('database/graph.jpg', 'rb')
-        data = file.read()
-        file.close()
-        file = open(path, "wb")
-        file.write(data)
-        file.close()
+        if name != ('', ''):
+            path = name[0]
+            file = open('database/graph.jpg', 'rb')
+            data = file.read()
+            file.close()
+            file = open(path, "wb")
+            file.write(data)
+            file.close()
 
     def submit_exterior_nodes_clicked(self):
         self.path_index = None # we need this variable later in show_animation_clicked
@@ -300,6 +302,7 @@ class Ui_MainWindow(QMainWindow):
             msg.setInformativeText("Please try again with different exterior nodes.")
             x = msg.exec_()
         else:
+            self.soliton_paths_label.setText(f"Soliton paths ({len(self.automata.paths)}):")
             self.soliton_paths_label.show()
             self.paths.show()
             self.show_matrices.show()
@@ -314,13 +317,14 @@ class Ui_MainWindow(QMainWindow):
         def save_matrices():
             option = QtWidgets.QFileDialog.Options()
             name = QtWidgets.QFileDialog.getSaveFileName(self.centralwidget, 'Save File', 'matrices.txt', options = option)
-            path = name[0]
-            file = open('database/matrices.txt', 'rb')
-            data = file.read()
-            file.close()
-            file = open(path, "wb")
-            file.write(data)
-            file.close()
+            if name != ('', ''): # only do the following if user clicked on save button (without this line the application closes with an error if save action is cancelled)
+                path = name[0]
+                file = open('database/matrices.txt', 'rb')
+                data = file.read()
+                file.close()
+                file = open(path, "wb")
+                file.write(data)
+                file.close()
 
         index = self.paths.currentIndex()
         desired_path = SolitonPath(self.automata.paths_ids[index], self.my_graph)
@@ -328,14 +332,29 @@ class Ui_MainWindow(QMainWindow):
         dlg = QDialog()
         scrollArea = QScrollArea(dlg)
         widget = QtWidgets.QWidget()
-        vbox = QtWidgets.QHBoxLayout()
+        vbox = QtWidgets.QVBoxLayout()
         file = open("database/matrices.txt", 'w')
-        for object in desired_path.adjacency_matrices_list:
-            matrix = str(object)
+        file.write(f"Molecule: {self.smiles_string} \n")
+        file.write(f"Soliton path: {self.automata.paths_for_user[index]} \n \n")
+        matrix_label_horizontal = " "
+        matrix_label_horizontal2 = "   "
+        for key in self.my_graph.labels:
+            matrix_label_horizontal = matrix_label_horizontal + f"  {self.my_graph.labels[key]}"
+            matrix_label_horizontal2 = matrix_label_horizontal2 + f"  {self.my_graph.labels[key]}"
+        for i in range(len(desired_path.adjacency_matrices_list)):
+            file.write(f"Timestep {i}: \n")
+            file.write(f"{matrix_label_horizontal} \n")
+            #vbox.addWidget(QtWidgets.QLabel(f"{matrix_label_horizontal2}"))
+            matrix = str(desired_path.adjacency_matrices_list[i])
             matrix = re.sub(r"[matrix(]", "", matrix)
             matrix = re.sub(r"[)]", "", matrix)
-            file.write(matrix)
-            file.write('\n')
+            #file.write(f"{matrix} \n")
+            for j in range(len(matrix.splitlines())):
+                #vbox.addWidget(QtWidgets.QLabel(f"{self.my_graph.labels[j]}{matrix.splitlines()[j]}"))
+                file.write(f"{self.my_graph.labels[j]}")
+                file.write(f"{matrix.splitlines()[j]} \n")
+            file.write(f"\n")
+            #vbox.addWidget(QtWidgets.QLabel(f""))
             label = QtWidgets.QLabel(matrix)
             vbox.addWidget(label)
         file.close()
@@ -358,13 +377,14 @@ class Ui_MainWindow(QMainWindow):
         def save_end_result():
             option = QtWidgets.QFileDialog.Options()
             name = QtWidgets.QFileDialog.getSaveFileName(self.centralwidget, 'Save File', 'result.jpg', options = option)
-            path = name[0]
-            file = open('database/result.jpg', 'rb')
-            data = file.read()
-            file.close()
-            file = open(path, "wb")
-            file.write(data)
-            file.close()
+            if name != ('', ''):
+                path = name[0]
+                file = open('database/result.jpg', 'rb')
+                data = file.read()
+                file.close()
+                file = open(path, "wb")
+                file.write(data)
+                file.close()
 
         index = self.paths.currentIndex()
         desired_path = SolitonPath(self.automata.paths_ids[index], self.my_graph)
@@ -390,13 +410,14 @@ class Ui_MainWindow(QMainWindow):
         def save_animation():
             option = QtWidgets.QFileDialog.Options()
             name = QtWidgets.QFileDialog.getSaveFileName(self.centralwidget, 'Save File', 'animation.gif', options = option)
-            path = name[0]
-            file = open('database/animation.gif', 'rb')
-            data = file.read()
-            file.close()
-            file = open(path, "wb")
-            file.write(data)
-            file.close()
+            if name != ('', ''):
+                path = name[0]
+                file = open('database/animation.gif', 'rb')
+                data = file.read()
+                file.close()
+                file = open(path, "wb")
+                file.write(data)
+                file.close()
 
         if self.path_index != self.paths.currentIndex():
             self.path_index = self.paths.currentIndex()
