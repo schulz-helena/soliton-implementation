@@ -58,8 +58,8 @@ class SolitonGraph:
         for i in range (0, len(matches_labels)):
             matches_ids[i] = re.sub(r"[}]", "", re.sub(r"[{]", "", matches_ids[i]))
             matches_labels[i] = re.sub(r"[}]", "", re.sub(r"[{][-=]*", "", matches_labels[i]))
-            exterior_nodes[int(matches_ids[i])] = int(matches_labels[i])
-            exterior_nodes_reverse[int(matches_labels[i])] = int(matches_ids[i])
+            exterior_nodes[int(matches_ids[i])] = matches_labels[i]
+            exterior_nodes_reverse[matches_labels[i]] = int(matches_ids[i])
 
         return exterior_nodes, exterior_nodes_reverse
 
@@ -140,7 +140,7 @@ class SolitonGraph:
         mol_rdkit = Chem.MolFromSmiles(self.rdkit_smiles) # atom position information are taken from rdkit
         AllChem.Compute2DCoords(mol_rdkit)
         graph = nx.Graph()
-        if len(mol_rdkit.GetAtoms()) > 26: # if we have more than 26 atoms then node labels a - z are not sufficient
+        if (len(mol_rdkit.GetAtoms()) - len(self.exterior_nodes)) > 26: # if we have more than 26 atoms then node labels a - z are not sufficient
             node_label = 'aa'
         else:
             node_label = 'a'
@@ -151,7 +151,7 @@ class SolitonGraph:
             y_coord = pos.y * 1.2
             if atom.GetIdx() in self.exterior_nodes:
                 graph.add_node(atom.GetIdx(),
-                    label=str(self.exterior_nodes[atom.GetIdx()]),
+                    label=self.exterior_nodes[atom.GetIdx()],
                     pos=(x_coord, y_coord),
                     weight = 0)
             else:

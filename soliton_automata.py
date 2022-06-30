@@ -16,8 +16,8 @@ class SolitonAutomata:
         #path, bindings_list = self.call_find_first_path()
         #self.soliton_path = SolitonPath(path, self.soliton_graph, bindings_list)
         self.soliton_graph = soliton_graph
-        self.start = self.soliton_graph.exterior_nodes_reverse[start]
-        self.end = self.soliton_graph.exterior_nodes_reverse[end]
+        self.start = self.soliton_graph.exterior_nodes_reverse[str(start)]
+        self.end = self.soliton_graph.exterior_nodes_reverse[str(end)]
         self.paths_ids = self.call_find_all_paths()
         #if self.paths_ids == []:
             #print("There exists no soliton path between these exterior nodes")
@@ -230,9 +230,12 @@ class SolitonAutomata:
 if __name__ == "__main__":
 
     #my_graph = SolitonGraph('C1{1}=C{3}C1{=2}')
-    my_graph = SolitonGraph('C1=CC=CC=C1C=C{1}C=CC{2}=CC2=CC=CC=C2')
-    #automata = SolitonAutomata(my_graph, 2, 3)
-    automata = SolitonAutomata(my_graph, 1, 1)
+    #my_graph = SolitonGraph('C1=CC=CC=C1C=C{1}C=CC{2}=CC2=CC=CC=C2')
+    my_graph = SolitonGraph('C1=CC{1}=CC=CC=C1C{2}=CC=CC=CC=CC=CC=C{3}C2=C{4}C=CC=CC=C2')
+    print(my_graph.labels)
+    print(my_graph.exterior_nodes)
+    automata = SolitonAutomata(my_graph, 2, 3)
+    #automata = SolitonAutomata(my_graph, 1, 1)
     #print(automata.soliton_path.adjacency_matrices_list)
-    print(automata.paths_ids)
+    #print(automata.paths_ids)
     print(automata.paths)
