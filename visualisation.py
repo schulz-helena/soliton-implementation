@@ -38,14 +38,14 @@ class Visualisation:
         #if os.path.exists('database/graph.jpg'):
             #os.remove('database/graph.jpg')
         plt.clf() # clear plot
-        labels = nx.get_node_attributes(soliton_graph.graph, 'label')
+        #labels = nx.get_node_attributes(soliton_graph.graph, 'label')
         pos = nx.get_node_attributes(soliton_graph.graph, 'pos')
 
         plt.axis('equal')
         plot_double_edges(soliton_graph.graph, bindings, soliton_graph.double_edge_positions)
         nx.draw(soliton_graph.graph,
                 pos,
-                labels=labels,
+                labels=soliton_graph.labels,
                 with_labels=True,
                 node_color='white')
         if title != None:        
@@ -57,5 +57,5 @@ if __name__ == "__main__":
     
     my_graph = SolitonGraph('C1=CC=CC=C1C{1}=CC{2}=CC=CC2=CC=CC=C2')
     my_graph.validate_soliton_graph()
-    Visualisation.visualize_soliton_graph(my_graph, my_graph.bindings, True)
+    Visualisation.visualize_soliton_graph(my_graph, my_graph.bindings, True, None)
     
