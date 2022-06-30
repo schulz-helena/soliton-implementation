@@ -19,8 +19,8 @@ class SolitonAutomata:
         self.start = self.soliton_graph.exterior_nodes_reverse[start]
         self.end = self.soliton_graph.exterior_nodes_reverse[end]
         self.paths_ids = self.call_find_all_paths()
-        if self.paths_ids == []:
-            print("There exists no soliton path between these exterior nodes")
+        #if self.paths_ids == []:
+            #print("There exists no soliton path between these exterior nodes")
         self.paths = [] # paths with node labels instead of node ids
         self.paths_for_user = [] # representation of the path the user gets as an output
         for path_ids in self.paths_ids:
