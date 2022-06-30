@@ -247,8 +247,8 @@ class Ui_MainWindow(QMainWindow):
                 self.show_end_result.hide()
                 self.show_animation.hide()
                 for key in self.my_graph.exterior_nodes_reverse:
-                    self.node_1.addItem(str(key))
-                    self.node_2.addItem(str(key))
+                    self.node_1.addItem(key)
+                    self.node_2.addItem(key)
         except:
             self.save.hide()
             self.exterior_nodes_label.hide()
@@ -336,33 +336,52 @@ class Ui_MainWindow(QMainWindow):
         file = open("database/matrices.txt", 'w')
         file.write(f"Molecule: {self.smiles_string} \n")
         file.write(f"Soliton path: {self.automata.paths_for_user[index]} \n \n")
-        matrix_label_horizontal = " "
-        matrix_label_horizontal2 = "   "
+        # labelling of matrix depends on wether we have long node labels ("aa", "ab", ...) or short ones ("a", "b", ...)
+        if (len(self.my_graph.labels) - len(self.my_graph.exterior_nodes)) > 26:
+            matrix_label_horizontal = "    "
+            long_labels = True
+        else:
+            matrix_label_horizontal = "   "
+            long_labels = False
         for key in self.my_graph.labels:
-            matrix_label_horizontal = matrix_label_horizontal + f"  {self.my_graph.labels[key]}"
-            matrix_label_horizontal2 = matrix_label_horizontal2 + f"  {self.my_graph.labels[key]}"
+            if long_labels:
+                if self.my_graph.labels[key] in self.my_graph.exterior_nodes_reverse:
+                    matrix_label_horizontal = matrix_label_horizontal + f"{self.my_graph.labels[key]}  "
+                else:
+                    matrix_label_horizontal = matrix_label_horizontal + f"{self.my_graph.labels[key]} "
+            else:
+                matrix_label_horizontal = matrix_label_horizontal + f"{self.my_graph.labels[key]}  "
+        # for show-matrices-window the node labels are added to the matrix string and this labelled matrix is added to scroll area
+        # for matrices.txt we add everything (horizontal label and every row of matrix) line by line
         for i in range(len(desired_path.adjacency_matrices_list)):
             file.write(f"Timestep {i}: \n")
             file.write(f"{matrix_label_horizontal} \n")
-            #vbox.addWidget(QtWidgets.QLabel(f"{matrix_label_horizontal2}"))
+            matrix_labelled = ""
+            matrix_labelled = matrix_labelled + f"{matrix_label_horizontal}\n"
             matrix = str(desired_path.adjacency_matrices_list[i])
             matrix = re.sub(r"[matrix(]", "", matrix)
             matrix = re.sub(r"[)]", "", matrix)
-            #file.write(f"{matrix} \n")
+            #print(len(matrix.splitlines()))
             for j in range(len(matrix.splitlines())):
-                #vbox.addWidget(QtWidgets.QLabel(f"{self.my_graph.labels[j]}{matrix.splitlines()[j]}"))
-                file.write(f"{self.my_graph.labels[j]}")
-                file.write(f"{matrix.splitlines()[j]} \n")
+                if long_labels:
+                    if self.my_graph.labels[j] in self.my_graph.exterior_nodes_reverse:
+                        matrix_labelled = matrix_labelled + f"{self.my_graph.labels[j]} {matrix.splitlines()[j]} \n"
+                        file.write(f"{self.my_graph.labels[j]} {matrix.splitlines()[j]} \n")
+                    else:
+                        matrix_labelled = matrix_labelled + f"{self.my_graph.labels[j]}{matrix.splitlines()[j]} \n"
+                        file.write(f"{self.my_graph.labels[j]}{matrix.splitlines()[j]} \n")
+                else:
+                    matrix_labelled = matrix_labelled + f"{self.my_graph.labels[j]}{matrix.splitlines()[j]} \n"
+                    file.write(f"{self.my_graph.labels[j]}{matrix.splitlines()[j]} \n")
             file.write(f"\n")
-            #vbox.addWidget(QtWidgets.QLabel(f""))
-            label = QtWidgets.QLabel(matrix)
-            vbox.addWidget(label)
+            vbox.addWidget(QtWidgets.QLabel(matrix_labelled))
         file.close()
         widget.setLayout(vbox)
         scrollArea.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOn)
         scrollArea.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOn)
-        #scrollArea.setWidgetResizable(True)
+        scrollArea.setWidgetResizable(True)
         scrollArea.setWidget(widget)
+        scrollArea.setFont(QtGui.QFont("Courier"))
         scrollArea.setFixedSize(540, 380)
         save_button = QtWidgets.QPushButton("Save", dlg)
         save_button.setGeometry(QtCore.QRect(450, 330, 70, 30))
