@@ -128,22 +128,20 @@ class Ui_MainWindow(QMainWindow):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.display_molecule.sizePolicy().hasHeightForWidth())
         self.display_molecule.setSizePolicy(sizePolicy)
-        self.display_molecule.setMinimumSize(QtCore.QSize(540, 380))
-        self.display_molecule.setMaximumSize(QtCore.QSize(16777215, 16777215))
+        self.display_molecule.setMinimumSize(QtCore.QSize(688, 519))
+        self.display_molecule.setMaximumSize(QtCore.QSize(688, 519)) # 16777215, 16777215
         self.display_molecule.setSizeIncrement(QtCore.QSize(0, 0))
         self.display_molecule.setBaseSize(QtCore.QSize(0, 0))
-        self.display_molecule.setAutoFillBackground(False)
         self.display_molecule.setText("")
         self.display_molecule.setPixmap(QtGui.QPixmap("database/startscreen.jpg"))
         #self.display_molecule.setPixmap(QtGui.QPixmap("database/startscreen.jpg").scaled(self.display_molecule.size(), QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)) #.scaled(540 ,380, QtCore.Qt.AspectRatioMode.KeepAspectRatio)
         self.display_molecule.setScaledContents(True)
-        self.display_molecule.setAutoFillBackground(True)
+        '''self.display_molecule.setAutoFillBackground(True)
         p = self.display_molecule.palette()
         p.setColor(self.display_molecule.backgroundRole(), QtCore.Qt.red)
-        self.display_molecule.setPalette(p)
-        #self.display_molecule.setFixedSize(0,0)
+        self.display_molecule.setPalette(p)'''
         self.display_molecule.setObjectName("display_molecule")
-        self.gridLayout.addWidget(self.display_molecule, 0, 0, 2, 5, QtCore.Qt.AlignHCenter|QtCore.Qt.AlignVCenter) # !!!
+        self.gridLayout.addWidget(self.display_molecule, 0, 0, 2, 5, QtCore.Qt.AlignHCenter|QtCore.Qt.AlignVCenter)
         self.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(self)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 564, 24))
@@ -153,10 +151,10 @@ class Ui_MainWindow(QMainWindow):
         self.retranslateUi()
         QtCore.QMetaObject.connectSlotsByName(self)
 
-        self._heightForWidthFactor = 1.0 * 380 / 540
+        # What I added:
+        self._heightForWidthFactor = 1.0 * 519 / 688
         #self._resizeImage(self.centralwidget.size())
 
-        # What I added:
         self.submit_molecule.clicked.connect(self.submit_molecule_clicked)
         self.submit_exterior_nodes.clicked.connect(self.submit_exterior_nodes_clicked)
         self.show_matrices.clicked.connect(self.show_matrices_clicked)
@@ -267,12 +265,18 @@ class Ui_MainWindow(QMainWindow):
             msg.setIcon(QMessageBox.Warning)
             msg.setStandardButtons(QMessageBox.Retry)
             msg.setInformativeText("Please try again with another input string.")
-            msg.setDetailedText("Some details..") #TODO: Write a more detailed text to help user
+            details = f"Reminder - this is how you define a molecule: \n"
+            details = details + f"- Carbon atoms are marked with 'C' \n"
+            details = details + f"- Single edges are marked with '-' or no character at all \n"
+            details = details + f"- Double edges are marked with '=' \n"
+            details = details + f"- The two connecting atoms of a ring are marked with the same number (e.g. 'C1' and 'C1') \n"
+            details = details + "- Exterior nodes are marked with braces and a number (e.g. '{1}')"
+            msg.setDetailedText(details)
             x = msg.exec_()
 
     def save_clicked(self):
         option = QtWidgets.QFileDialog.Options()
-        name = QtWidgets.QFileDialog.getSaveFileName(self.centralwidget, 'Save File', 'graph.jpg', options = option)
+        name = QtWidgets.QFileDialog.getSaveFileName(self.centralwidget, 'Save File', 'graph.jpg', 'Images (*.jpg *.png *.jpeg)', options = option)
         if name != ('', ''):
             path = name[0]
             file = open('database/graph.jpg', 'rb')
@@ -316,7 +320,7 @@ class Ui_MainWindow(QMainWindow):
 
         def save_matrices():
             option = QtWidgets.QFileDialog.Options()
-            name = QtWidgets.QFileDialog.getSaveFileName(self.centralwidget, 'Save File', 'matrices.txt', options = option)
+            name = QtWidgets.QFileDialog.getSaveFileName(self.centralwidget, 'Save File', 'matrices.txt', 'Text files (*.txt)', options = option)
             if name != ('', ''): # only do the following if user clicked on save button (without this line the application closes with an error if save action is cancelled)
                 path = name[0]
                 file = open('database/matrices.txt', 'rb')
@@ -395,7 +399,7 @@ class Ui_MainWindow(QMainWindow):
 
         def save_end_result():
             option = QtWidgets.QFileDialog.Options()
-            name = QtWidgets.QFileDialog.getSaveFileName(self.centralwidget, 'Save File', 'result.jpg', options = option)
+            name = QtWidgets.QFileDialog.getSaveFileName(self.centralwidget, 'Save File', 'result.jpg', 'Images (*.jpg *.png *.jpeg)', options = option)
             if name != ('', ''):
                 path = name[0]
                 file = open('database/result.jpg', 'rb')
@@ -428,7 +432,7 @@ class Ui_MainWindow(QMainWindow):
         
         def save_animation():
             option = QtWidgets.QFileDialog.Options()
-            name = QtWidgets.QFileDialog.getSaveFileName(self.centralwidget, 'Save File', 'animation.gif', options = option)
+            name = QtWidgets.QFileDialog.getSaveFileName(self.centralwidget, 'Save File', 'animation.gif', 'Images (*.gif)',options = option)
             if name != ('', ''):
                 path = name[0]
                 file = open('database/animation.gif', 'rb')
@@ -478,20 +482,20 @@ class Ui_MainWindow(QMainWindow):
         self._resizeImage(event.size())
         #self._resizeImage(self.centralwidget.size())
     
-    '''def resizeEvent(self, event: QtGui.QResizeEvent) -> None:
+    def resizeEvent(self, event: QtGui.QResizeEvent) -> None:
         old_size = event.oldSize()
         new_size = QtCore.QSize(self.geometry().width(), self.geometry().height())
         print("old_size = {0}, new_size = {1}".format(old_size, new_size))
         QMainWindow.resizeEvent(self, event)
         width = self.centralwidget.size().width()
         height = self.heightForWidth(width)
-        self.display_molecule.setFixedSize(width, height)'''
+        self.display_molecule.setFixedSize(width, height)
 
-    def _resizeImage(self, size):
+    '''def _resizeImage(self, size):
         # Since we're keeping _heightForWidthFactor, we can code a more efficient implementation of this, too
         width = size.width()
         height = self.heightForWidth(width)
-        #self.display_molecule.setFixedSize(width, height)
+        self.display_molecule.setFixedSize(width, height)'''
 
 
 if __name__ == "__main__":
