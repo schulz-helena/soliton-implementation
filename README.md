@@ -17,4 +17,6 @@ Implementation of the soliton model
   - [x] Implement possibility to skip step by step animation and show result immediately
 
 ## Bachelorarbeit
-- [ ] Extend implementation to multiple solitons 
+- [ ] Extend implementation to multiple solitons
+- [ ] Check if soliton graph is deterministic
+- [ ] Find impervious paths
