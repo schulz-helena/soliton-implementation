@@ -54,7 +54,7 @@ class SolitonPath:
         Returns:
             list: contains matrix for each timestep
         """
-        np.set_printoptions(edgeitems=30, linewidth=100000)
+        np.set_printoptions(edgeitems=1000, linewidth=100000)
         soliton_graph_copy = copy.deepcopy(self.soliton_graph)
         adjacency_matrices_list = []
         for i in range(0, len(self.bindings_list)):
