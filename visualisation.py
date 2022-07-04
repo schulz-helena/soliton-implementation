@@ -40,6 +40,12 @@ class Visualisation:
         plt.clf() # clear plot
         #labels = nx.get_node_attributes(soliton_graph.graph, 'label')
         pos = nx.get_node_attributes(soliton_graph.graph, 'pos')
+        if (soliton_graph.graph.number_of_nodes() - len(soliton_graph.exterior_nodes)) > 26: # if node labels consist of 2 chars ("aa", ...)
+            node_size = 150
+            font_size = 9
+        else: # use default values
+            node_size = 300
+            font_size = 12
 
         plt.axis('equal')
         plot_double_edges(soliton_graph.graph, bindings, soliton_graph.double_edge_positions)
@@ -47,7 +53,9 @@ class Visualisation:
                 pos,
                 labels=soliton_graph.labels,
                 with_labels=True,
-                node_color='white')
+                node_color='white',
+                node_size = node_size,
+                font_size = font_size)
         if title != None:        
             plt.savefig(f'database/{title}.jpg', bbox_inches='tight', format='jpg', dpi=1200)
         if show == True:
