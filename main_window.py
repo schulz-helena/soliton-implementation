@@ -6,11 +6,13 @@
 #
 # WARNING! All changes made in this file will be lost!
 
+import io
 import math
 import re
 from operator import indexOf
 
 from PIL import Image
+from PIL.ImageQt import ImageQt
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QDialog, QMainWindow, QMessageBox, QScrollArea
 
@@ -18,6 +20,7 @@ from animation import Animation
 from soliton_automata import SolitonAutomata
 from soliton_graph import SolitonGraph
 from soliton_path import SolitonPath
+from startscreen import Startscreen
 from visualisation import Visualisation
 
 
@@ -133,7 +136,9 @@ class Ui_MainWindow(QMainWindow):
         self.display_molecule.setSizeIncrement(QtCore.QSize(0, 0))
         self.display_molecule.setBaseSize(QtCore.QSize(0, 0))
         self.display_molecule.setText("")
-        self.display_molecule.setPixmap(QtGui.QPixmap("database/startscreen.jpg"))
+        startscreen = Startscreen().image
+        qim = ImageQt(startscreen)
+        self.display_molecule.setPixmap(QtGui.QPixmap.fromImage(qim))
         #self.display_molecule.setPixmap(QtGui.QPixmap("database/startscreen.jpg").scaled(self.display_molecule.size(), QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)) #.scaled(540 ,380, QtCore.Qt.AspectRatioMode.KeepAspectRatio)
         self.display_molecule.setScaledContents(True)
         '''self.display_molecule.setAutoFillBackground(True)
@@ -207,8 +212,9 @@ class Ui_MainWindow(QMainWindow):
         try:
             self.my_graph = SolitonGraph(self.smiles_string)
             errors = self.my_graph.validate_soliton_graph()
-            Visualisation.visualize_soliton_graph(self.my_graph, self.my_graph.bindings, False, "graph")
-            self.display_molecule.setPixmap(QtGui.QPixmap("database/graph.jpg"))
+            self.graph_pic = Visualisation.visualize_soliton_graph(self.my_graph, self.my_graph.bindings, False, True)
+            qim = ImageQt(self.graph_pic)
+            self.display_molecule.setPixmap(QtGui.QPixmap.fromImage(qim))
             if errors != []:
                 self.save.hide()
                 self.exterior_nodes_label.hide()
@@ -279,11 +285,16 @@ class Ui_MainWindow(QMainWindow):
         name = QtWidgets.QFileDialog.getSaveFileName(self.centralwidget, 'Save File', 'graph.jpg', 'Images (*.jpg *.png *.jpeg)', options = option)
         if name != ('', ''):
             path = name[0]
-            file = open('database/graph.jpg', 'rb')
+            '''file = open('database/graph.jpg', 'rb')
             data = file.read()
-            file.close()
+            file.close()'''
+            # turn PIL Image into byte array 
+            imgByteArr = io.BytesIO()
+            self.graph_pic.save(imgByteArr, format='PNG')
+            imgByteArr = imgByteArr.getvalue()
+            # save image in specified path
             file = open(path, "wb")
-            file.write(data)
+            file.write(imgByteArr) # before: file.write(data)
             file.close()
 
     def submit_exterior_nodes_clicked(self):
@@ -323,11 +334,8 @@ class Ui_MainWindow(QMainWindow):
             name = QtWidgets.QFileDialog.getSaveFileName(self.centralwidget, 'Save File', 'matrices.txt', 'Text files (*.txt)', options = option)
             if name != ('', ''): # only do the following if user clicked on save button (without this line the application closes with an error if save action is cancelled)
                 path = name[0]
-                file = open('database/matrices.txt', 'rb')
-                data = file.read()
-                file.close()
-                file = open(path, "wb")
-                file.write(data)
+                file = open(path, "w")
+                file.write(txt_text)
                 file.close()
 
         index = self.paths.currentIndex()
@@ -337,9 +345,8 @@ class Ui_MainWindow(QMainWindow):
         scrollArea = QScrollArea(dlg)
         widget = QtWidgets.QWidget()
         vbox = QtWidgets.QVBoxLayout()
-        file = open("database/matrices.txt", 'w')
-        file.write(f"Molecule: {self.smiles_string} \n")
-        file.write(f"Soliton path: {self.automata.paths_for_user[index]} \n \n")
+        txt_text = f"Molecule: {self.smiles_string} \n"
+        txt_text = txt_text + f"Soliton path: {self.automata.paths_for_user[index]} \n \n"
         # labelling of matrix depends on wether we have long node labels ("aa", "ab", ...) or short ones ("a", "b", ...)
         if (len(self.my_graph.labels) - len(self.my_graph.exterior_nodes)) > 26:
             matrix_label_horizontal = "    "
@@ -358,28 +365,26 @@ class Ui_MainWindow(QMainWindow):
         # for show-matrices-window the node labels are added to the matrix string and this labelled matrix is added to scroll area
         # for matrices.txt we add everything (horizontal label and every row of matrix) line by line
         for i in range(len(desired_path.adjacency_matrices_list)):
-            file.write(f"Timestep {i}: \n")
-            file.write(f"{matrix_label_horizontal} \n")
+            txt_text = txt_text + f"Timestep {i}: \n"
+            txt_text = txt_text + f"{matrix_label_horizontal} \n"
             matrix_labelled = ""
             matrix_labelled = matrix_labelled + f"{matrix_label_horizontal}\n"
             matrix = str(desired_path.adjacency_matrices_list[i])
             matrix = re.sub(r"[matrix(]", "", matrix)
             matrix = re.sub(r"[)]", "", matrix)
-            #print(len(matrix.splitlines()))
             for j in range(len(matrix.splitlines())):
                 if long_labels:
                     if self.my_graph.labels[j] in self.my_graph.exterior_nodes_reverse:
                         matrix_labelled = matrix_labelled + f"{self.my_graph.labels[j]} {matrix.splitlines()[j]} \n"
-                        file.write(f"{self.my_graph.labels[j]} {matrix.splitlines()[j]} \n")
+                        txt_text = txt_text + f"{self.my_graph.labels[j]} {matrix.splitlines()[j]} \n"
                     else:
                         matrix_labelled = matrix_labelled + f"{self.my_graph.labels[j]}{matrix.splitlines()[j]} \n"
-                        file.write(f"{self.my_graph.labels[j]}{matrix.splitlines()[j]} \n")
+                        txt_text = txt_text + f"{self.my_graph.labels[j]}{matrix.splitlines()[j]} \n"
                 else:
                     matrix_labelled = matrix_labelled + f"{self.my_graph.labels[j]}{matrix.splitlines()[j]} \n"
-                    file.write(f"{self.my_graph.labels[j]}{matrix.splitlines()[j]} \n")
-            file.write(f"\n")
+                    txt_text = txt_text + f"{self.my_graph.labels[j]}{matrix.splitlines()[j]} \n"
+            txt_text = txt_text + f"\n"
             vbox.addWidget(QtWidgets.QLabel(matrix_labelled))
-        file.close()
         widget.setLayout(vbox)
         scrollArea.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOn)
         scrollArea.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOn)
@@ -402,23 +407,26 @@ class Ui_MainWindow(QMainWindow):
             name = QtWidgets.QFileDialog.getSaveFileName(self.centralwidget, 'Save File', 'result.jpg', 'Images (*.jpg *.png *.jpeg)', options = option)
             if name != ('', ''):
                 path = name[0]
-                file = open('database/result.jpg', 'rb')
+                '''file = open('database/result.jpg', 'rb')
                 data = file.read()
-                file.close()
+                file.close()'''
+                imgByteArr = io.BytesIO()
+                result_pic.save(imgByteArr, format='PNG')
+                imgByteArr = imgByteArr.getvalue()
                 file = open(path, "wb")
-                file.write(data)
+                file.write(imgByteArr)
                 file.close()
 
         index = self.paths.currentIndex()
         desired_path = SolitonPath(self.automata.paths_ids[index], self.my_graph)
         bindings_index = len(desired_path.path) - 1
-        Visualisation.visualize_soliton_graph(self.my_graph, desired_path.bindings_list[bindings_index], False, "result")
-        #Animation.graph_animation(self.my_graph, desired_path)
+        result_pic = Visualisation.visualize_soliton_graph(self.my_graph, desired_path.bindings_list[bindings_index], False, True)
+        qim = ImageQt(result_pic)
 
         dlg = QDialog()
         label = QtWidgets.QLabel(dlg)
         label.setGeometry(QtCore.QRect(0, 0, 540, 380))
-        label.setPixmap(QtGui.QPixmap("database/result.jpg"))
+        label.setPixmap(QtGui.QPixmap.fromImage(qim))
         label.setScaledContents(True)
         save_button = QtWidgets.QPushButton("Save", dlg)
         save_button.setGeometry(QtCore.QRect(470, 350, 70, 30))
@@ -445,12 +453,17 @@ class Ui_MainWindow(QMainWindow):
         if self.path_index != self.paths.currentIndex():
             self.path_index = self.paths.currentIndex()
             desired_path = SolitonPath(self.automata.paths_ids[self.path_index], self.my_graph)
-            Animation.graph_animation(self.my_graph, desired_path)
+            #ani = Animation.graph_animation(self.my_graph, desired_path)
+            #ani.save('database/animation.gif', writer='ffmpeg')
+            im = Animation.graph_animation(self.my_graph, desired_path)
+            qim = ImageQt(im)
+
 
         dlg = QDialog()
         label = QtWidgets.QLabel(dlg)
         label.setGeometry(QtCore.QRect(0, 0, 540, 380))
-        movie = QtGui.QMovie('database/animation.gif')
+        #movie = QtGui.QMovie('database/animation.gif')
+        movie = QtGui.QMovie.fromImage(qim)
         movie.setScaledSize(QtCore.QSize(540,380))
         label.setMovie(movie)
         movie.start()
@@ -482,20 +495,20 @@ class Ui_MainWindow(QMainWindow):
         self._resizeImage(event.size())
         #self._resizeImage(self.centralwidget.size())
     
-    def resizeEvent(self, event: QtGui.QResizeEvent) -> None:
+    '''def resizeEvent(self, event: QtGui.QResizeEvent) -> None:
         old_size = event.oldSize()
         new_size = QtCore.QSize(self.geometry().width(), self.geometry().height())
         print("old_size = {0}, new_size = {1}".format(old_size, new_size))
         QMainWindow.resizeEvent(self, event)
         width = self.centralwidget.size().width()
         height = self.heightForWidth(width)
-        self.display_molecule.setFixedSize(width, height)
+        self.display_molecule.setFixedSize(width, height)'''
 
-    '''def _resizeImage(self, size):
+    def _resizeImage(self, size):
         # Since we're keeping _heightForWidthFactor, we can code a more efficient implementation of this, too
         width = size.width()
         height = self.heightForWidth(width)
-        self.display_molecule.setFixedSize(width, height)'''
+        #self.display_molecule.setFixedSize(width, height)
 
 
 if __name__ == "__main__":

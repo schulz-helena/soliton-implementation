@@ -1,9 +1,11 @@
 """Visualisation of a molecule as a graph
 """
+import io
 import os
 
 import matplotlib.pyplot as plt
 import networkx as nx
+from PIL import Image
 
 from soliton_graph import SolitonGraph
 
@@ -11,7 +13,7 @@ from soliton_graph import SolitonGraph
 class Visualisation:
 
     @staticmethod
-    def visualize_soliton_graph(soliton_graph: SolitonGraph, bindings: dict, show: bool, title: str): # bindings as an extra argument so we can use this method in animation (there we have different bindings for each time step)
+    def visualize_soliton_graph(soliton_graph: SolitonGraph, bindings: dict, show: bool, to_image: bool): # bindings as an extra argument so we can use this method in animation (there we have different bindings for each time step)
         """Plot a visualisation of a soliton graph
 
         Args:
@@ -56,8 +58,16 @@ class Visualisation:
                 node_color='white',
                 node_size = node_size,
                 font_size = font_size)
-        if title != None:        
-            plt.savefig(f'database/{title}.jpg', bbox_inches='tight', format='jpg', dpi=1200)
+        if to_image == True:        
+            #plt.savefig(f'database/{title}.jpg', bbox_inches='tight', format='jpg', dpi=1200)
+            # return PIL Image instead of plot
+            buf = io.BytesIO()
+            plt.savefig(buf, bbox_inches='tight', format='jpg', dpi=1200)
+            buf.seek(0)
+            im = Image.open(buf)
+            im = im.convert("RGBA")
+            buf.close()
+            return im
         if show == True:
             plt.show()
 
