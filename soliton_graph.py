@@ -216,15 +216,27 @@ class SolitonGraph:
             dy = y_values[1] - y_values[0]
             slope = dy/dx
 
-            # 0.1 (the value that is added) is just some value for now, could be chosen better maybe 
             # TODO: compute slope for different edges and then find the perfect distance for them → find an algorithm/ formula to compute perfect distance
             # TODO: sometimes use + and sometimes - the distance (so second edge is always on outside or always on inside of circel)
+            # distance between the two edges (0.1 as default, other values for extremely small or large graphs):
+            distance = 0.1
+            if len(pos) == 2:
+                distance = 0.03
+            elif len(pos) == 3:
+                distance = 0.05
+            elif len(pos) == 4:
+                distance = 0.08
+            elif len(pos) >= 26 and len(pos) < 42:
+                distance = 0.15
+            elif len(pos) >= 42:
+                distance = 0.2
+
             if (abs(slope) >= 1):
-                x_values = [coord1[0]+0.1, coord2[0]+0.1]
+                x_values = [coord1[0]+distance, coord2[0]+distance]
                 y_values = [coord1[1], coord2[1]]
             else:
                 x_values = [coord1[0], coord2[0]]
-                y_values = [coord1[1]+0.1, coord2[1]+0.1]
+                y_values = [coord1[1]+distance, coord2[1]+distance]
 
             return x_values, y_values
 
