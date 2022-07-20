@@ -14,6 +14,7 @@ from operator import indexOf
 from PIL import Image
 from PIL.ImageQt import ImageQt
 from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtCore import QBasicTimer
 from PyQt5.QtWidgets import QDialog, QMainWindow, QMessageBox, QScrollArea
 
 from animation import Animation
@@ -189,7 +190,6 @@ class Ui_MainWindow(QMainWindow):
         self.show_end_result.hide()
         self.hide_retain_space(self.show_animation)
         self.show_animation.hide()
-
 
     def retranslateUi(self):
         _translate = QtCore.QCoreApplication.translate
@@ -440,40 +440,54 @@ class Ui_MainWindow(QMainWindow):
         
         def save_animation():
             option = QtWidgets.QFileDialog.Options()
-            name = QtWidgets.QFileDialog.getSaveFileName(self.centralwidget, 'Save File', 'animation.gif', 'Images (*.gif)',options = option)
+            name = QtWidgets.QFileDialog.getSaveFileName(self.centralwidget, 'Save File', 'animation.gif', 'Images (*.gif)', options = option)
             if name != ('', ''):
                 path = name[0]
-                file = open('database/animation.gif', 'rb')
-                data = file.read()
-                file.close()
-                file = open(path, "wb")
-                file.write(data)
-                file.close()
+                ani = self.my_animation.graph_animation()
+                ani.save(path, writer='ffmpeg')
 
         if self.path_index != self.paths.currentIndex():
             self.path_index = self.paths.currentIndex()
-            desired_path = SolitonPath(self.automata.paths_ids[self.path_index], self.my_graph)
-            #ani = Animation.graph_animation(self.my_graph, desired_path)
-            #ani.save('database/animation.gif', writer='ffmpeg')
-            im = Animation.graph_animation(self.my_graph, desired_path)
-            qim = ImageQt(im)
+            self.desired_path = SolitonPath(self.automata.paths_ids[self.path_index], self.my_graph)
+            self.my_animation = Animation(self.my_graph, self.desired_path)
+            self.pil_images = self.my_animation.list_of_pil_images()
 
 
         dlg = QDialog()
         label = QtWidgets.QLabel(dlg)
         label.setGeometry(QtCore.QRect(0, 0, 540, 380))
+
+        self.step = 0
+        self.timer = QtCore.QTimer(self)
+        self.timer.timeout.connect(lambda: self.update_image(label, self.pil_images, self.desired_path))
+        self.timer.start(800)
+        self.update_image(label, self.pil_images, self.desired_path)
         #movie = QtGui.QMovie('database/animation.gif')
-        movie = QtGui.QMovie.fromImage(qim)
-        movie.setScaledSize(QtCore.QSize(540,380))
-        label.setMovie(movie)
-        movie.start()
+        #movie.setScaledSize(QtCore.QSize(540,380))
+        #label.setMovie(movie)
+        #movie.start()
+        #label.setPixmap(QtGui.QPixmap.fromImage(qim))
+        #label.setScaledContents(True)
         save_button = QtWidgets.QPushButton("Save", dlg)
         save_button.setGeometry(QtCore.QRect(470, 350, 70, 30))
         save_button.clicked.connect(save_animation)
 
         dlg.setWindowTitle("Animation")
         dlg.setFixedSize(540, 380)
+        dlg.closeEvent = self.stop_animation
         dlg.exec_()
+    
+    def update_image(self, label: QtWidgets.QLabel, pil_images: list, desired_path: SolitonPath):
+        im = pil_images[self.step]
+        qim = ImageQt(im)
+        label.setPixmap(QtGui.QPixmap.fromImage(qim))
+        label.setScaledContents(True)
+        self.step += 1
+        if self.step == len(desired_path.path):
+            self.step = 0
+
+    def stop_animation(self, event):
+        self.timer.disconnect()
 
     def hide_retain_space(self, widget):
         retain = widget.sizePolicy()
