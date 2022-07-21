@@ -50,7 +50,7 @@ class SolitonGraph:
         while True:
             if (re.search(r"[C]", input_with_nums) is None):
                 break
-            input_with_nums = re.sub(r"[CSNOF]", str(current), input_with_nums, count = 1) # [CSNOF]
+            input_with_nums = re.sub(r"[C]", str(current), input_with_nums, count = 1) # [CSNOF]
             current += 1
         # find node ids in input_with_nums (because node id is just the atom count)
         matches_ids = re.findall(r"[{][-=]*[0-9]*[}]", input_with_nums)
@@ -63,6 +63,14 @@ class SolitonGraph:
 
         return exterior_nodes, exterior_nodes_reverse
 
+    def exterior_nodes_name_collision(self):
+        flipped = {}
+        for key, value in self.exterior_nodes.items():
+            if value not in flipped:
+                flipped[value] = [key]
+            else:
+                return True
+        return False
 
     def create_pysmiles_smiles(self, user_input: str):
         """Transform user input in smiles representation (treating exterior nodes as Cs now)
@@ -216,8 +224,6 @@ class SolitonGraph:
             dy = y_values[1] - y_values[0]
             slope = dy/dx
 
-            # TODO: compute slope for different edges and then find the perfect distance for them → find an algorithm/ formula to compute perfect distance
-            # TODO: sometimes use + and sometimes - the distance (so second edge is always on outside or always on inside of circel)
             # distance between the two edges (0.1 as default, other values for extremely small or large graphs):
             distance = 0.1
             if len(pos) == 2:

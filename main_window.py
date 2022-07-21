@@ -238,6 +238,24 @@ class Ui_MainWindow(QMainWindow):
                     details = details + error + "\n"
                 msg.setDetailedText(details)
                 x = msg.exec_() # show messagebox
+            elif self.my_graph.exterior_nodes_name_collision() == True:
+                self.save.hide()
+                self.exterior_nodes_label.hide()
+                self.exterior_nodes_label2.hide()
+                self.node_1.hide()
+                self.node_2.hide()
+                self.submit_exterior_nodes.hide()
+                self.soliton_paths_label.hide()
+                self.paths.hide()
+                self.show_matrices.hide()
+                self.show_end_result.hide()
+                self.show_animation.hide()
+                msg = QMessageBox()
+                msg.setWindowTitle("Name collision")
+                msg.setText("You specified two or more exterior nodes with the same name")
+                msg.setIcon(QMessageBox.Warning)
+                msg.setStandardButtons(QMessageBox.Retry)
+                x = msg.exec_()
             else:
                 self.save.show()
                 self.exterior_nodes_label.show()
