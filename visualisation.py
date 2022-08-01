@@ -42,7 +42,13 @@ class Visualisation:
         plt.clf() # clear plot
         #labels = nx.get_node_attributes(soliton_graph.graph, 'label')
         pos = nx.get_node_attributes(soliton_graph.graph, 'pos')
-        if (soliton_graph.graph.number_of_nodes() - len(soliton_graph.exterior_nodes)) > 26: # if node labels consist of 2 chars ("aa", ...)
+        if soliton_graph.graph.number_of_nodes() >= 60:
+            node_size = 80
+            font_size = 5
+        elif soliton_graph.graph.number_of_nodes() >= 40:
+            node_size = 100
+            font_size = 7
+        elif (soliton_graph.graph.number_of_nodes() - len(soliton_graph.exterior_nodes)) > 26: # if node labels consist of 2 chars ("aa", ...)
             node_size = 150
             font_size = 9
         else: # use default values
