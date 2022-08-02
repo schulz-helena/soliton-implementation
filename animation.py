@@ -47,7 +47,7 @@ class Animation:
             node = soliton_path.path[frame_num]
             position = pos[node]
             x = [position[0]+0.12]
-            y = [position[1]-0.05] #TODO: implement smart algorithm that computes best positons and markersize for soliton pebble
+            y = [position[1]-0.05]
     
             Visualisation.visualize_soliton_graph(soliton_graph, soliton_path.bindings_list[frame_num], False, False) # use visualisation of graph at current timestep
             plt.plot(x, y, marker="o", markersize=6, markeredgecolor="black", markerfacecolor="black") # plot soliton on top
@@ -63,7 +63,7 @@ class Animation:
     def list_of_plots_and_arrays(self):
         plots_and_arrays = []
         for frame_num in range(0, len(self.soliton_path.path)):
-            fig, ax = plt.subplots(tight_layout = True, dpi = 800) # no unwanted white spaces and high resolution
+            fig, ax = plt.subplots(tight_layout = True, dpi = 500) # no unwanted white spaces and resolution of 200
             canvas = FigureCanvas(fig) # necessary to convert into numpy array later
             ax.clear()
             ax.axis('equal') # force the x and y axes to have equal number of pixels per data unit (makes circles be round)
@@ -83,6 +83,7 @@ class Animation:
             array_image = array_image.reshape(canvas.get_width_height()[::-1] + (3,))
 
             plots_and_arrays.append((fig, array_image))
+            plt.close(fig) # otherwise all created figures are retained in memory -> causes segmentation fault
         return plots_and_arrays
 
     def list_of_pil_images(self):
@@ -133,4 +134,4 @@ if __name__ == "__main__":
     #pil_images = my_animation.list_of_pil_images()
     #for i, im in enumerate(pil_images):
         #im.save(f"database/pic{i}.jpg")
-    my_animation.graph_animation()
+    ani = my_animation.graph_animation()
