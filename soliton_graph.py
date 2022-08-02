@@ -224,14 +224,16 @@ class SolitonGraph:
             dy = y_values[1] - y_values[0]
             slope = dy/dx
 
-            # distance between the two edges (0.1 as default, other values for extremely small or large graphs):
-            distance = 0.1
+            # distance between the two edges (0.11 as default, other values for extremely small or large graphs):
+            distance = 0.11
             if len(pos) == 2:
                 distance = 0.03
             elif len(pos) == 3:
                 distance = 0.05
             elif len(pos) == 4:
                 distance = 0.08
+            elif len(pos) > 4 and len(pos) < 7:
+                distance = 0.09
             elif len(pos) >= 26 and len(pos) < 42:
                 distance = 0.15
             elif len(pos) >= 42:
