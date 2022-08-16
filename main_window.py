@@ -17,6 +17,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import QBasicTimer
 from PyQt5.QtWidgets import QDialog, QMainWindow, QMessageBox, QScrollArea
 
+import resources
 from animation import Animation
 from soliton_automata import SolitonAutomata
 from soliton_graph import SolitonGraph
@@ -265,9 +266,13 @@ class Ui_MainWindow(QMainWindow):
                 msg.setIcon(QMessageBox.Warning)
                 msg.setStandardButtons(QMessageBox.Retry)
                 msg.setInformativeText("See details for all incorrect parts of your molecule.")
+                msg.setStyleSheet(" QPushButton{ height: 32px; width: 130px;}")
                 details = ""
-                for error in errors:
-                    details = details + error + "\n"
+                for i, error in enumerate(errors):
+                    if i == len(errors) - 1:
+                        details = details + error
+                    else:
+                        details = details + error + "\n"
                 msg.setDetailedText(details)
                 x = msg.exec_() # show messagebox
             elif self.my_graph.exterior_nodes_name_collision() == True:
@@ -285,6 +290,7 @@ class Ui_MainWindow(QMainWindow):
                 msg = QMessageBox()
                 msg.setWindowTitle("Name collision")
                 msg.setText("You specified two or more exterior nodes with the same name")
+                msg.setStyleSheet(" QPushButton{ height: 32px; width: 130px}")
                 msg.setIcon(QMessageBox.Warning)
                 msg.setStandardButtons(QMessageBox.Retry)
                 x = msg.exec_()
@@ -321,6 +327,7 @@ class Ui_MainWindow(QMainWindow):
             msg.setIcon(QMessageBox.Warning)
             msg.setStandardButtons(QMessageBox.Retry)
             msg.setInformativeText("Please try again with another input string.")
+            msg.setStyleSheet(" QPushButton{ height: 32px; width: 130px}")
             details = f"Reminder - this is how you define a molecule: \n"
             details = details + f"- Carbon atoms are marked with 'C' \n"
             details = details + f"- Single edges are marked with '-' or no character at all \n"
@@ -361,10 +368,11 @@ class Ui_MainWindow(QMainWindow):
             self.show_animation.hide()
             msg = QMessageBox()
             msg.setWindowTitle("No path found")
-            msg.setText("There exists no soliton path between these exterior nodes")
+            msg.setText("There exists no soliton path between these exterior nodes.")
             msg.setIcon(QMessageBox.Information)
             msg.setStandardButtons(QMessageBox.Retry)
             msg.setInformativeText("Please try again with different exterior nodes.")
+            msg.setStyleSheet(" QPushButton{ height: 32px; width: 130px}")
             x = msg.exec_()
         else:
             self.soliton_paths_label.setText(f"Soliton paths ({len(self.automata.paths)}):")
@@ -444,7 +452,7 @@ class Ui_MainWindow(QMainWindow):
         #scrollArea.setFont(QtGui.QFont("Courier"))
         scrollArea.setFixedSize(540, 405)
         save_button = QtWidgets.QPushButton("Save", dlg)
-        save_button.setGeometry(QtCore.QRect(455, 360, 70, 30))
+        save_button.setGeometry(QtCore.QRect(454, 359, 70, 30))
         save_button.clicked.connect(save_matrices)
 
         dlg.setWindowTitle("Adjacency Matrices")
@@ -583,7 +591,7 @@ if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
     window = Ui_MainWindow()
     window.show()
-    with open('styles.qss', 'r') as f:
+    with open('styles.css', 'r') as f:
         style = f.read()
         app.setStyleSheet(style)
     sys.exit(app.exec_())
