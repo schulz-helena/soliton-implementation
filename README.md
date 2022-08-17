@@ -11,10 +11,11 @@ Implementation of the soliton model
 - [x] Computation of soliton paths
     - [x]  Make soliton choose every possible edge at each node in some case
     - [x]  Let soliton change every bond it traverses
-- [ ] Build application 
+- [ ] Write software 
   - [x] Allow user to define input molecule
-  - [ ] Write application with a GUI
+  - [X] Write a GUI
   - [x] Implement possibility to skip step by step animation and show result immediately
+  - [ ] Build application
 
 ## Bachelorarbeit
 - [ ] Extend implementation to multiple solitons
