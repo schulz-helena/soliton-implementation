@@ -1,8 +1,3 @@
-"""Class that represents a soliton graph
-
-    Attributes: exterior nodes (node id as key, node label as value and other way around), two smiles strings (for use with pysmiles and for use with rdkit), 
-                binding types (edge as key, binding type as value), nx-graph, positions for a second line for each edge 
-"""
 import re
 
 import networkx as nx
@@ -12,31 +7,50 @@ from rdkit.Chem import AllChem
 
 
 class SolitonGraph:
+    """Representation of a soliton graph.
+    """
 
     def __init__(self, user_input: str):
+        """Initializes a soliton graph object by using the input string of the user.
+        """
+        self.exterior_nodes: dict
+        """Exterior nodes (node id as key, node label as value)."""
+        self.exterior_nodes_reverse: dict
+        """Exterior nodes (node label as key, node id as value)."""
         self.exterior_nodes, self.exterior_nodes_reverse = self.find_exterior_nodes(user_input)
-        self.pysmiles_smiles = self.create_pysmiles_smiles(user_input)
-        self.rdkit_smiles = self.create_rdkit_smiles(user_input)
-        self.bindings = self.create_binding_dict()
-        self.graph = self.smiles_to_graph()
-        self.double_edge_positions = self.find_double_edge_positions()
-        self.labels = nx.get_node_attributes(self.graph, 'label')
+        self.pysmiles_smiles: str = self.create_pysmiles_smiles(user_input)
+        """Smiles string for use with pysmiles."""
+        self.rdkit_smiles: str = self.create_rdkit_smiles(user_input)
+        """Smiles string for use with rdkit."""
+        self.bindings: dict = self.create_binding_dict()
+        """Binding types (edge as key, binding type as value)."""
+        self.graph: nx.Graph = self.smiles_to_graph()
+        """Graph."""
+        self.double_edge_positions: dict = self.find_double_edge_positions()
+        """Positions for a second line (edge) for each edge."""
+        self.labels: dict = nx.get_node_attributes(self.graph, 'label')
+        """Node labels (node id as key, node label as value)."""
 
 
-    def set_bindings(self, bindings):
+    def set_bindings(self, bindings: dict):
+        """Sets the soliton graph's bindings to a new binding dictionary.
+
+        Args:
+            bindings (dict): New binding dictionary.
+        """
         self.bindings = bindings
         self.graph = self.smiles_to_graph()
 
 
     def find_exterior_nodes(self, user_input: str):
-        """Transform the users input into dictionary with exterior nodes
+        """Transforms the users input into dictionary with exterior nodes.
 
         Args:
-            user_input (str): user input
+            user_input (str): User input.
 
         Returns:
-            dict: exterior nodes with node ids as keys as node labels as values
-            dict: exterior nodes with node labels as keys as node ids as values
+            dict: Exterior nodes with node ids as keys and node labels as values.
+            dict: Exterior nodes with node labels as keys and node ids as values.
         """
         # exterior nodes are put in "{}" in user input
         exterior_nodes = {} # dictionary for exterior nodes
@@ -50,7 +64,7 @@ class SolitonGraph:
         while True:
             if (re.search(r"[C]", input_with_nums) is None):
                 break
-            input_with_nums = re.sub(r"[C]", str(current), input_with_nums, count = 1) # [CSNOF]
+            input_with_nums = re.sub(r"[C]", str(current), input_with_nums, count = 1)
             current += 1
         # find node ids in input_with_nums (because node id is just the atom count)
         matches_ids = re.findall(r"[{][-=]*[0-9]*[}]", input_with_nums)
@@ -64,66 +78,75 @@ class SolitonGraph:
         return exterior_nodes, exterior_nodes_reverse
 
     def exterior_nodes_name_collision(self):
+        """Checks for name collisions of exterior nodes.
+
+        Returns:
+            bool: True, if user used same exterior node label more than once, False otherwise.
+        """
         flipped = {}
         for key, value in self.exterior_nodes.items():
             if value not in flipped:
                 flipped[value] = [key]
             else:
                 return True
+
         return False
 
     def create_pysmiles_smiles(self, user_input: str):
-        """Transform user input in smiles representation (treating exterior nodes as Cs now)
+        """Transforms user input in smiles representation (treating exterior nodes as Cs now).
 
         Args:
-            user_input (str): user input
+            user_input (str): User input.
 
         Returns:
-            str: smiles string (used with pysmiles)
+            str: Smiles string (used with pysmiles).
         """
         pysmiles_smiles = re.sub(r"[{][0-9]*[}]", "(C)", user_input)
         pysmiles_smiles = re.sub(r"[{][-][0-9]*[}]", "(-C)", pysmiles_smiles)
         pysmiles_smiles = re.sub(r"[{][=][0-9]*[}]", "(=C)", pysmiles_smiles)
+
         return pysmiles_smiles
 
 
     def create_rdkit_smiles(self, user_input: str):
-        """Transform user input in extra smiles representation
-            because rdkit needs smiles without double edges at exterior nodes (otherwise some valence error occurs)
+        """Transforms user input in extra smiles representation
+            because rdkit needs smiles without double edges at exterior nodes (otherwise some valence error occurs).
 
         Args:
-            user_input (str): user input
+            user_input (str): User input.
 
         Returns:
-            str: modified smiles string (used with rdkit)
+            str: Modified smiles string (used with rdkit).
         """
         rdkit_smiles = re.sub(r"[{][-=]*[0-9]*[}]", "(C)", user_input)
+
         return rdkit_smiles
 
 
     def create_binding_dict(self):
-        """Build a dictionary that contains the binding type for each edge (1 for single, 2 for double binding)
+        """Builds a dictionary that contains the binding type for each edge (1 for single, 2 for double binding).
 
         Returns:
-            dict: bindings
+            dict: Bindings (where the two nodes of the edge are sorted).
         """
-        mol_pysmiles = read_smiles(self.pysmiles_smiles, reinterpret_aromatic=False) # binding information are taken from pysmiles
+        mol_pysmiles = read_smiles(self.pysmiles_smiles, reinterpret_aromatic=False) # binding information are taken from pysmiles (to ignore aromaticity)
         bindings = nx.get_edge_attributes(mol_pysmiles, 'order')
         bindings_sorted_tuples = {}
         for edge in bindings:
             val = bindings[edge]
             bindings_sorted_tuples[tuple(sorted(edge))] = val
+
         return bindings_sorted_tuples
 
 
     def next_node_label(self, node_label: str):
-        """Helping function to find the next node label for a given node label (for initialisation of grapg)
+        """Finds the next node label for a given node label (helping function for initialisation of graph in smiles_to_graph function).
 
         Args:
-            node_label (str): given node label
+            node_label (str): Given node label.
 
         Returns:
-            str: the computed (next) node label
+            str: Computed (next) node label.
         """
         if len(node_label) == 1: # e.g.: a -> b
             node_label = chr(ord(node_label)+1)
@@ -136,14 +159,15 @@ class SolitonGraph:
             node_label_list = list(node_label)
             node_label_list[1] = chr(ord(node_label[1])+1)
             node_label = "".join(node_label_list)
+
         return node_label
 
 
     def smiles_to_graph(self):
-        """Transform user input into molecule and then into nx graph
+        """Transforms user input into molecule and then into nx graph.
 
         Returns:
-            nx.Graph: graph that visualizes the molecule
+            nx.Graph: Graph that visualizes the molecule.
         """
         mol_rdkit = Chem.MolFromSmiles(self.rdkit_smiles) # atom position information are taken from rdkit
         AllChem.Compute2DCoords(mol_rdkit)
@@ -189,27 +213,28 @@ class SolitonGraph:
                     graph.edges[(bond.GetBeginAtomIdx(), bond.GetEndAtomIdx())]['weight'] = 2
                     graph.nodes[bond.GetBeginAtomIdx()]['weight'] = nx.get_node_attributes(graph, 'weight')[bond.GetBeginAtomIdx()] + 1
                     graph.nodes[bond.GetEndAtomIdx()]['weight'] = nx.get_node_attributes(graph, 'weight')[bond.GetEndAtomIdx()] + 1
+
         return graph
 
 
     def find_double_edge_positions(self):
-        """Build a dictionary that contains the positions for a second line for each edge
+        """Builds a dictionary that contains the positions for a second line for each edge.
 
         Returns:
-            dict: double edge positions
+            dict: Double edge positions.
         """
 
         def double_edge(graph: nx.Graph, node1: int, node2: int):
-            """Get x and y values for drawing a line as a second edge
+            """Gets x and y values for drawing a line as a second edge.
 
             Args:
-                graph (nx.Graph): graph the second edge should be added to
-                node1 (int): beginning node of edge
-                node2 (int): end node of edge
+                graph (nx.Graph): Graph the second edge should be added to.
+                node1 (int): Beginning node of edge.
+                node2 (int): End node of edge.
 
             Returns:
-                list: x values
-                list: y values
+                list: X values.
+                list: Y values.
             """
             pos = nx.get_node_attributes(graph, 'pos')
             coord1 = pos[node1]
@@ -252,45 +277,42 @@ class SolitonGraph:
         for edge in self.graph.edges:
             x_values, y_values = double_edge(self.graph, edge[0], edge[1])
             double_edge_positions[edge] = x_values, y_values
+
         return double_edge_positions
     
 
     def validate_soliton_graph(self):
-        """Check if graph is a soliton graph
+        """Checks if graph is a soliton graph.
+
+        Returns:
+            list: All the problems that keep the graph from being a soliton graph.
         """
         errors = []
         weights = nx.get_node_attributes(self.graph, 'weight')
-        #labels = nx.get_node_attributes(self.graph, 'label')
         # No self-loops
         selfloops = list(nx.nodes_with_selfloops(self.graph))
         if len(selfloops) > 0:
             for node in selfloops:
                 errors.append(f"Self-loop at node {self.labels[node]}")
-                #print(f"Self-loop at node {labels[node]}")
-        # Only node degress between 1 and 3 allowed
+        # Only node degrees between 1 and 3 allowed
         for (node, val) in self.graph.degree():
             if val > 3:
                 errors.append(f"Node {self.labels[node]} has too many neighbours")
-                #print(f"Node {labels[node]} has too many neighbours")
         # exterior nodes must have weight of 1 or 2 and must have degree 1
         for key in self.exterior_nodes:
             if weights[key] > 2:
                 errors.append(f"The weight of node {self.labels[key]} is too high")
-                #print(f"The weight of node {labels[key]} is too high")
             del weights[key]
             if self.graph.degree(key) > 1:
                 errors.append(f"Node {self.labels[key]} has too many neighbours")
-                #print(f"Node {labels[key]} has too many neighbours")
         # Inner nodes have exactly one double edge
         for node in weights:
             if weights[node] > self.graph.degree(node) + 1:
                 errors.append(f"The weight of node {self.labels[node]} is too high")
-                #print(f"The weight of node {labels[node]} is too high")
             elif weights[node] < self.graph.degree(node) + 1:
                 errors.append(f"The weight of node {self.labels[node]} is too low")
-                #print(f"The weight of node {labels[node]} is too low")
         # There has to be at least one exterior node
         if len(self.exterior_nodes) < 1:
             errors.append("You must have at least one exterior node")
-            #print("You must have at least one exterior node")
+
         return errors
