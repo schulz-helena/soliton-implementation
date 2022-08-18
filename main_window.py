@@ -1,25 +1,16 @@
-# -*- coding: utf-8 -*-
-
-# Form implementation generated from reading ui file 'main_window3.ui'
-#
-# Created by: PyQt5 UI code generator 5.9.2
-#
-# WARNING! All changes made in this file will be lost!
-
+"""GUI of the Mini Soliton Automata Software.
+ """
 import io
 import math
 import re
-from operator import indexOf
 
-from PIL import Image
 from PIL.ImageQt import ImageQt
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtCore import QBasicTimer
 from PyQt5.QtWidgets import QDialog, QMainWindow, QMessageBox, QScrollArea
 
 import resources
 from animation import Animation
-from soliton_automata import SolitonAutomata
+from soliton_automata import MiniSolitonAutomata
 from soliton_graph import SolitonGraph
 from soliton_path import SolitonPath
 from startscreen import Startscreen
@@ -27,18 +18,23 @@ from visualisation import Visualisation
 
 
 class Ui_MainWindow(QMainWindow):
+    """Main Window of the GUI. Inherits from class QMainWindow.
+    """
     def __init__(self):
+        """"Initializes the main window.
+        Displays a welcoming text and all necessary widgets for the user to specify and submit a molecule.
+        All other widgets are hidden for now and are revealed step by step, so user is guided through the use of the application.
+        """
         super(Ui_MainWindow, self).__init__()
         self.setObjectName("MainWindow")
-        #self.resize(564, 599)
         # move window to the top of the screen + to the center horizontally
-        qtRectangle = self.frameGeometry()
-        centerPoint = QtWidgets.QDesktopWidget().availableGeometry().center()
-        qtRectangle.moveCenter(centerPoint)
-        self.move(qtRectangle.topLeft().x(), 0)
+        qt_rectangle = self.frameGeometry()
+        center_point = QtWidgets.QDesktopWidget().availableGeometry().center()
+        qt_rectangle.moveCenter(center_point)
+        self.move(qt_rectangle.topLeft().x(), 0)
+
         self.centralwidget = QtWidgets.QWidget(self)
         self.centralwidget.setObjectName("centralwidget")
-        #self.centralwidget.setStyleSheet("background-color: rgb(255, 255, 255); color: rgb(16, 0, 155); font: 57 13pt Futura; border-radius: 15px;" "QPushButton { background-color: yellow }")
         self.gridLayout = QtWidgets.QGridLayout(self.centralwidget)
         self.gridLayout.setObjectName("gridLayout")
         self.show_animation = QtWidgets.QPushButton(self.centralwidget)
@@ -140,22 +136,6 @@ class Ui_MainWindow(QMainWindow):
         self.submit_molecule.setObjectName("submit_molecule")
         self.gridLayout.addWidget(self.submit_molecule, 3, 4, 1, 1)
 
-        '''self.white_label = QtWidgets.QLabel(self.centralwidget)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setWidthForHeight(self.white_label.sizePolicy().hasWidthForHeight())
-        self.white_label.setSizePolicy(sizePolicy)
-        self.white_label.setMinimumSize(QtCore.QSize(688, 519))
-        self.white_label.setMaximumSize(QtCore.QSize(16777215, 16777215))
-        self.white_label.setText("")
-        self.white_label.setAutoFillBackground(True)
-        p = self.white_label.palette()
-        p.setColor(self.white_label.backgroundRole(), QtCore.Qt.white)
-        self.white_label.setPalette(p)
-        self.white_label.setObjectName("white_label")
-        self.gridLayout.addWidget(self.white_label, 0, 0, 2, 5, alignment = QtCore.Qt.AlignHCenter|QtCore.Qt.AlignVCenter)'''
-
         self.display_molecule = QtWidgets.QLabel(self.centralwidget)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
         sizePolicy.setHorizontalStretch(0)
@@ -163,19 +143,12 @@ class Ui_MainWindow(QMainWindow):
         sizePolicy.setWidthForHeight(self.display_molecule.sizePolicy().hasWidthForHeight())
         self.display_molecule.setSizePolicy(sizePolicy)
         self.display_molecule.setMinimumSize(QtCore.QSize(600, 450))
-        #self.display_molecule.setMaximumSize(QtCore.QSize(688, 519)) # 16777215, 16777215
         self.display_molecule.setSizeIncrement(QtCore.QSize(0, 0))
         self.display_molecule.setBaseSize(QtCore.QSize(0, 0))
         self.display_molecule.setText("")
         startscreen = Startscreen().image
         self.qim = ImageQt(startscreen)
-        #self.display_molecule.setPixmap(QtGui.QPixmap.fromImage(self.qim))
-        self.display_molecule.setPixmap(QtGui.QPixmap.fromImage(self.qim).scaled(self.display_molecule.size(), QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)) #.scaled(540 ,380, QtCore.Qt.AspectRatioMode.KeepAspectRatio)
-        #self.display_molecule.setScaledContents(True)
-        '''self.display_molecule.setAutoFillBackground(True)
-        p = self.display_molecule.palette()
-        p.setColor(self.display_molecule.backgroundRole(), QtCore.Qt.red)
-        self.display_molecule.setPalette(p)'''
+        self.display_molecule.setPixmap(QtGui.QPixmap.fromImage(self.qim).scaled(self.display_molecule.size(), QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation))
         self.display_molecule.setObjectName("display_molecule")
         self.gridLayout.addWidget(self.display_molecule, 0, 0, 2, 5, alignment = QtCore.Qt.AlignHCenter|QtCore.Qt.AlignVCenter)
         self.setCentralWidget(self.centralwidget)
@@ -187,11 +160,8 @@ class Ui_MainWindow(QMainWindow):
         self.retranslateUi()
         QtCore.QMetaObject.connectSlotsByName(self)
 
-        # What I added:
-        self._heightForWidthFactor = 1.0 * 519 / 688
-        self._widthForHeightFactor = 1.0 * 688 / 519
-        self.count = 0
-        #self._resizeImage(self.centralwidget.size())
+        self.height_for_width_factor = 1.0 * 519 / 688
+        self.width_for_height_factor = 1.0 * 688 / 519
 
         self.submit_molecule.clicked.connect(self.submit_molecule_clicked)
         self.submit_exterior_nodes.clicked.connect(self.submit_exterior_nodes_clicked)
@@ -223,9 +193,12 @@ class Ui_MainWindow(QMainWindow):
         self.hide_retain_space(self.show_animation)
         self.show_animation.hide()
 
+
     def retranslateUi(self):
+        """Implements multi-language suppport. Is generated automatically when using PyQt5 UI code generator.
+        """
         _translate = QtCore.QCoreApplication.translate
-        self.setWindowTitle(_translate("MainWindow", "Soliton Automata"))
+        self.setWindowTitle(_translate("MainWindow", "Mini Soliton Automata Software"))
         self.show_animation.setText(_translate("MainWindow", "Show animation"))
         self.exterior_nodes_label2.setText(_translate("MainWindow", "&"))
         self.show_end_result.setText(_translate("MainWindow", "Show end result"))
@@ -237,7 +210,13 @@ class Ui_MainWindow(QMainWindow):
         self.exterior_nodes_label.setText(_translate("MainWindow", "Exterior nodes:"))
         self.submit_molecule.setText(_translate("MainWindow", "Submit"))
 
+
     def submit_molecule_clicked(self):
+        """Method that is called when user clicks button to submit the specified molecule.
+        Catches errors if user used the wrong syntax or specified a molecule that does not fulfill the requirements of a soliton graph.
+        If the user's molecule is valid it displays the graph of the molecule. It then also reveals a safe button for the graph visualisation and
+        all the necessary widgets for the user to choose a pair of exterior nodes.
+        """
         self.node_1.clear()
         self.node_2.clear()
         self.smiles_string = self.molecule_lineedit.text()
@@ -246,7 +225,6 @@ class Ui_MainWindow(QMainWindow):
             errors = self.my_graph.validate_soliton_graph()
             self.graph_pic = Visualisation.visualize_soliton_graph(self.my_graph, self.my_graph.bindings, False, True)
             self.qim = ImageQt(self.graph_pic)
-            #self.display_molecule.setPixmap(QtGui.QPixmap.fromImage(qim))
             self.display_molecule.setPixmap(QtGui.QPixmap.fromImage(self.qim).scaled(self.display_molecule.size(), QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation))
             if errors != []:
                 self.save.hide()
@@ -337,30 +315,38 @@ class Ui_MainWindow(QMainWindow):
             msg.setDetailedText(details)
             x = msg.exec_()
 
+
     def save_clicked(self):
+        """Method that is called when user clicks button to save the graph visualisation.
+        Opens a file dialog in which user can specify a path where the image should be saved.
+        Only allows .jpg, .png and .jpeg file suffixes.
+        """
         option = QtWidgets.QFileDialog.Options()
         name = QtWidgets.QFileDialog.getSaveFileName(self.centralwidget, 'Save File', 'graph.jpg', 'Images (*.jpg *.png *.jpeg)', options = option)
         if name != ('', ''):
             path = name[0]
-            '''file = open('database/graph.jpg', 'rb')
-            data = file.read()
-            file.close()'''
             # turn PIL Image into byte array 
             imgByteArr = io.BytesIO()
             self.graph_pic.save(imgByteArr, format='PNG')
             imgByteArr = imgByteArr.getvalue()
-            # save image in specified path
+            # save image at specified path
             file = open(path, "wb")
             file.write(imgByteArr) # before: file.write(data)
             file.close()
 
+
     def submit_exterior_nodes_clicked(self):
+        """Method that is called when user clicks button to submit a pair of exterior nodes.
+        Computes all possible soliton paths between the two chosen nodes.
+        Informs the user if no soliton path exists between them.
+        Otherwise all the necessary widgets for the user to choose a computed soliton path and look at different information on that path are revealed.
+        """
         self.path_index = None # we need this variable later in show_animation_clicked
         self.paths.clear()
         node1 = int(self.node_1.currentText())
         node2 = int(self.node_2.currentText())
-        self.automata = SolitonAutomata(self.my_graph, node1, node2)
-        if self.automata.paths == []:
+        self.automata = MiniSolitonAutomata(self.my_graph, node1, node2)
+        if self.automata.soliton_paths == []:
             self.soliton_paths_label.hide()
             self.paths.hide()
             self.show_matrices.hide()
@@ -375,19 +361,26 @@ class Ui_MainWindow(QMainWindow):
             msg.setStyleSheet(" QPushButton{ height: 32px; width: 130px}")
             x = msg.exec_()
         else:
-            self.soliton_paths_label.setText(f"Soliton paths ({len(self.automata.paths)}):")
+            self.soliton_paths_label.setText(f"Soliton paths ({len(self.automata.soliton_paths)}):")
             self.soliton_paths_label.show()
             self.paths.show()
             self.show_matrices.show()
             self.show_end_result.show()
             self.show_animation.show()
-            for path in self.automata.paths_for_user:
-                self.paths.addItem(str(path))
-            #print(self.automata.paths)
+            for soliton_path in self.automata.soliton_paths:
+                self.paths.addItem(str(soliton_path.path_for_user))
     
+
     def show_matrices_clicked(self):
+        """Method that is called when user clicks button to have the adjacency matrices of every timestep displayed.
+        Makes a small window pop up that shows the labelled adjacency matrices and provides a save button.
+        """
 
         def save_matrices():
+            """Opens a file dialog in which user can specify a path where a text file with all adjacency matrices should be saved.
+            Text file also contains the input string representing the molecule and the soliton path.
+            Only allows .txt file suffix.
+            """
             option = QtWidgets.QFileDialog.Options()
             name = QtWidgets.QFileDialog.getSaveFileName(self.centralwidget, 'Save File', 'matrices.txt', 'Text files (*.txt)', options = option)
             if name != ('', ''): # only do the following if user clicked on save button (without this line the application closes with an error if save action is cancelled)
@@ -397,14 +390,14 @@ class Ui_MainWindow(QMainWindow):
                 file.close()
 
         index = self.paths.currentIndex()
-        desired_path = SolitonPath(self.automata.paths_ids[index], self.my_graph)
+        desired_path = self.automata.soliton_paths[index]
     
         dlg = QDialog()
         scrollArea = QScrollArea(dlg)
         widget = QtWidgets.QWidget()
         vbox = QtWidgets.QVBoxLayout()
         txt_text = f"Molecule: {self.smiles_string} \n"
-        txt_text = txt_text + f"Soliton path: {self.automata.paths_for_user[index]} \n \n"
+        txt_text = txt_text + f"Soliton path: {desired_path.path_for_user} \n \n"
         # labelling of matrix depends on wether we have long node labels ("aa", "ab", ...) or short ones ("a", "b", ...)
         if (len(self.my_graph.labels) - len(self.my_graph.exterior_nodes)) > 26:
             matrix_label_horizontal = "    "
@@ -449,7 +442,6 @@ class Ui_MainWindow(QMainWindow):
         scrollArea.setWidgetResizable(True)
         scrollArea.setWidget(widget)
         scrollArea.setStyleSheet("font: 13pt Courier;")
-        #scrollArea.setFont(QtGui.QFont("Courier"))
         scrollArea.setFixedSize(540, 405)
         save_button = QtWidgets.QPushButton("Save", dlg)
         save_button.setGeometry(QtCore.QRect(454, 359, 70, 30))
@@ -459,16 +451,20 @@ class Ui_MainWindow(QMainWindow):
         dlg.setFixedSize(545, 410)
         dlg.exec_()
     
+
     def show_end_result_clicked(self):
+        """Method that is called when user clicks button to have the resulting graph (after soliton path is traversed) displayed.
+        Makes a small window pop up that shows the graph visualisation and provides a save button.
+        """
 
         def save_end_result():
+            """Opens a file dialog in which user can specify a path where the resulting graph should be saved.
+            Only allows .jpg, .png and .jpeg file suffixes.
+            """
             option = QtWidgets.QFileDialog.Options()
             name = QtWidgets.QFileDialog.getSaveFileName(self.centralwidget, 'Save File', 'result.jpg', 'Images (*.jpg *.png *.jpeg)', options = option)
             if name != ('', ''):
                 path = name[0]
-                '''file = open('database/result.jpg', 'rb')
-                data = file.read()
-                file.close()'''
                 imgByteArr = io.BytesIO()
                 result_pic.save(imgByteArr, format='PNG')
                 imgByteArr = imgByteArr.getvalue()
@@ -477,7 +473,7 @@ class Ui_MainWindow(QMainWindow):
                 file.close()
 
         index = self.paths.currentIndex()
-        desired_path = SolitonPath(self.automata.paths_ids[index], self.my_graph)
+        desired_path = self.automata.soliton_paths[index]
         bindings_index = len(desired_path.path) - 1
         result_pic = Visualisation.visualize_soliton_graph(self.my_graph, desired_path.bindings_list[bindings_index], False, True)
         qim = ImageQt(result_pic)
@@ -495,9 +491,17 @@ class Ui_MainWindow(QMainWindow):
         dlg.setFixedSize(545, 410)
         dlg.exec_()
 
+
     def show_animation_clicked(self):
+        """Method that is called when user clicks button to have the animation of the soliton traversing the graph displayed.
+        Makes a small window pop up that shows the animation and provides a save button.
+        Instead of displaying the gif it uses a sequence of PIL images and always shows the next image after a certain time.
+        """
         
         def save_animation():
+            """Opens a file dialog in which user can specify a path where the animation should be saved.
+            Only allows .gif file suffix.
+            """
             option = QtWidgets.QFileDialog.Options()
             name = QtWidgets.QFileDialog.getSaveFileName(self.centralwidget, 'Save File', 'animation.gif', 'Images (*.gif)', options = option)
             if name != ('', ''):
@@ -511,82 +515,106 @@ class Ui_MainWindow(QMainWindow):
         
         if self.path_index != self.paths.currentIndex():
             self.path_index = self.paths.currentIndex()
-            self.desired_path = SolitonPath(self.automata.paths_ids[self.path_index], self.my_graph)
+            self.desired_path = self.automata.soliton_paths[self.path_index]
             self.my_animation = Animation(self.my_graph, self.desired_path)
-            self.pil_images = self.my_animation.list_of_pil_images()
+            self.pil_images = self.my_animation.pil_images
 
         self.step = 0
         self.timer = QtCore.QTimer(self)
         self.timer.timeout.connect(lambda: self.update_image(label, self.pil_images, self.desired_path))
-        self.timer.start(800)
+        self.timer.start(800) # triggers event every 800 milliseconds
         self.update_image(label, self.pil_images, self.desired_path)
-        #movie = QtGui.QMovie('database/animation.gif')
-        #movie.setScaledSize(QtCore.QSize(540,380))
-        #label.setMovie(movie)
-        #movie.start()
-        #label.setPixmap(QtGui.QPixmap.fromImage(qim))
-        #label.setScaledContents(True)
         save_button = QtWidgets.QPushButton("Save", dlg)
         save_button.setGeometry(QtCore.QRect(470, 375, 70, 30))
         save_button.clicked.connect(save_animation)
 
         dlg.setWindowTitle("Animation")
         dlg.setFixedSize(545, 410)
-        dlg.closeEvent = self.stop_animation
+        dlg.closeEvent = self.stop_animation # stop timer when window is closed
         dlg.exec_()
     
+
     def update_image(self, label: QtWidgets.QLabel, pil_images: list, desired_path: SolitonPath):
+        """Displays next image of animation after a certain time (method is triggered by a timer).
+
+        Args:
+            label (QtWidgets.QLabel): Displays the animation's images.
+            pil_images (list): PIL images that should be displayed step by step.
+            desired_path (SolitonPath): Soliton path that is traversed in animation.
+        """
         im = pil_images[self.step]
         qim = ImageQt(im)
         label.setPixmap(QtGui.QPixmap.fromImage(qim))
         label.setScaledContents(True)
         self.step += 1
-        if self.step == len(desired_path.path):
+        if self.step == len(desired_path.path): # start animation all over again as soon as end is reached (endless loop)
             self.step = 0
 
+
     def stop_animation(self, event):
+        """Stops the timer that is used for the animation.
+        Without this method the application would crash if the animation window is closed.
+        Args:
+            event: Close event of the show animation window.
+        """
         self.timer.disconnect()
 
 
     def hide_retain_space(self, widget):
+        """Retains the space of a widget even when it's hidden.
+
+        Args:
+            widget (QtWidgets.QWidget ): Widget whose space should be retained.
+        """
         retain = widget.sizePolicy()
         retain.setRetainSizeWhenHidden(True)
         widget.setSizePolicy(retain)
 
-    '''def hasHeightForWidth(self):
-        # This tells the layout manager that the banner's height does depend on its width
-        return True'''
 
-    def heightForWidth(self, width):
-        # This tells the layout manager what the preferred and minimum height are, for a given width
-        return math.ceil(width * self._heightForWidthFactor)
+    def heightForWidth(self, width: float):
+        """Compute height for a given width.
+
+        Args:
+            width (float): Given width.
+
+        Returns:
+            float: Computed height.
+        """
+        return math.ceil(width * self.height_for_width_factor)
+
 
     def widthForHeight(self, height):
-        # This tells the layout manager what the preferred and minimum height are, for a given width
-        return math.ceil(height * self._widthForHeightFactor)
+        """Compute width for a given height.
+
+        Args:
+            height (float): Given height.
+
+        Returns:
+            float: Computed width.
+        """
+        return math.ceil(height * self.width_for_height_factor)
+
 
     def resizeEvent(self, event: QtGui.QResizeEvent):
-        #self.count += 1
-        #print(self.count)
-        super(Ui_MainWindow, self).resizeEvent(event)
-        #if self.count != 1:
-        self._resizeImage(event.size())
-            #self.count = 0
-        #self._resizeImage(self.centralwidget.size())
+        """Keeps the right ratio of the graph visualisation image (or welcoming screen in the beginning) when window is resized.
 
-    def _resizeImage(self, size):
-        #width = size.width()
-        #height = self.heightForWidth(width)
+        Args:
+            event (QtGui.QResizeEvent): Resize event.
+        """
+        super(Ui_MainWindow, self).resizeEvent(event)
+        size = event.size()
+        # window height minus height of all widgets below the label result in height of pixmap
         height = size.height() - self.save.height() - self.submit_molecule.height() - self.submit_exterior_nodes.height() - self.paths.height() - self.show_animation.height()
-        if self.widthForHeight(height) > size.width():
+        if self.widthForHeight(height) > size.width(): # pixmap width should be as most as big as width of whole window
             width = size.width()
         else:
             width = self.widthForHeight(height)
         self.display_molecule.setPixmap(QtGui.QPixmap.fromImage(self.qim).scaled(width, height, QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation))
-        #self.display_molecule.setFixedSize(width, height)
 
 
 if __name__ == "__main__":
+    """Initializes object of class Ui_MainWindow, sets style sheet of the window and then executes the application.
+    """
     import sys
     app = QtWidgets.QApplication(sys.argv)
     window = Ui_MainWindow()
@@ -595,4 +623,3 @@ if __name__ == "__main__":
         style = f.read()
         app.setStyleSheet(style)
     sys.exit(app.exec_())
-

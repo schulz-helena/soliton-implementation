@@ -10,17 +10,41 @@ class SolitonPath:
     """Representation of a soliton path.
     """
 
-    def __init__(self, path: list, soliton_graph: SolitonGraph):
+    def __init__(self, soliton_graph: SolitonGraph, path: list):
         """Initializes a soliton path object.
         """
-        self.path : list = path
+        self.path: list = path
         """Path consisting of node ids."""
         self.soliton_graph: SolitonGraph = soliton_graph
         """According soliton graph."""
+        self.path_labels: list
+        """Path consisiting of node labels."""
+        self.path_for_user: str
+        """Representation of the path as a readable user output."""
+        self.path_labels, self.path_for_user = self.path_representations()
         self.bindings_list: list = self.find_bindings_for_each_timestep()
         """Bindings for each timestep."""
         self.adjacency_matrices_list: list = self.find_adjacency_matrices_for_each_timestep()
         """Adjacency matrices for each timestep."""
+
+    
+    def path_representations(self):
+        """Creates two representations of a path: One with node labels and one as a string as a readable user output.
+
+        Returns:
+            dict: Path with node labels instead of node ids.
+            dict: Representation of the path the user gets as an output.
+        """
+        path_labels = []
+        path_for_user = ""
+        for i, node in enumerate(self.path):
+            path_labels.append(nx.get_node_attributes(self.soliton_graph.graph, 'label')[node])
+            if i == len(self.path) - 1:
+                path_for_user = path_for_user + f"{path_labels[i]}"
+            else:
+                path_for_user = path_for_user + f"{path_labels[i]} - "
+
+        return path_labels, path_for_user
 
 
     def find_bindings_for_each_timestep(self):

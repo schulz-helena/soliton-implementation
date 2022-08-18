@@ -140,7 +140,7 @@ class SolitonGraph:
 
 
     def next_node_label(self, node_label: str):
-        """Finds the next node label for a given node label (helping function for initialisation of graph in smiles_to_graph function).
+        """Finds the next node label for a given node label. Helping method for initialisation of graph in smiles_to_graph.
 
         Args:
             node_label (str): Given node label.
