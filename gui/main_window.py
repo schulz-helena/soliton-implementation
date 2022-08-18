@@ -4,7 +4,7 @@ import io
 import math
 import re
 
-import resources
+import resources.resources
 from animation import Animation
 from PIL.ImageQt import ImageQt
 from PyQt5 import QtCore, QtGui, QtWidgets
