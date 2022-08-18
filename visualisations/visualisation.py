@@ -3,7 +3,6 @@ import io
 import matplotlib.pyplot as plt
 import networkx as nx
 from PIL import Image
-
 from soliton_graph import SolitonGraph
 
 

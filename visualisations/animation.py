@@ -5,9 +5,9 @@ from matplotlib import animation
 from matplotlib.axes import Axes
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from PIL import Image
-
 from soliton_graph import SolitonGraph
 from soliton_path import SolitonPath
+
 from visualisation import Visualisation
 
 
