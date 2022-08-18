@@ -4,17 +4,17 @@ import io
 import math
 import re
 
+import resources
+from animation import Animation
 from PIL.ImageQt import ImageQt
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QDialog, QMainWindow, QMessageBox, QScrollArea
-
-import resources
-from animation import Animation
 from soliton_automata import MiniSolitonAutomata
 from soliton_graph import SolitonGraph
 from soliton_path import SolitonPath
-from startscreen import Startscreen
 from visualisation import Visualisation
+
+from startscreen import Startscreen
 
 
 class Ui_MainWindow(QMainWindow):
