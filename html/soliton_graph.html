@@ -1,0 +1,1213 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.10.0" />
+<title>soliton_graph API documentation</title>
+<meta name="description" content="" />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>soliton_graph</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">import re
+
+import networkx as nx
+from pysmiles import read_smiles
+from rdkit import Chem
+from rdkit.Chem import AllChem
+
+
+class SolitonGraph:
+    &#34;&#34;&#34;Representation of a soliton graph.
+    &#34;&#34;&#34;
+
+    def __init__(self, user_input: str):
+        &#34;&#34;&#34;Initializes a `SolitonGraph` object by using the input string of the user.
+        &#34;&#34;&#34;
+        self.exterior_nodes: dict
+        &#34;&#34;&#34;Exterior nodes (node id as key, node label as value).&#34;&#34;&#34;
+        self.exterior_nodes_reverse: dict
+        &#34;&#34;&#34;Exterior nodes (node label as key, node id as value).&#34;&#34;&#34;
+        self.exterior_nodes, self.exterior_nodes_reverse = self.find_exterior_nodes(user_input)
+        self.pysmiles_smiles: str = self.create_pysmiles_smiles(user_input)
+        &#34;&#34;&#34;`SMILES` string for use with `pysmiles`.&#34;&#34;&#34;
+        self.rdkit_smiles: str = self.create_rdkit_smiles(user_input)
+        &#34;&#34;&#34;`SMILES` string for use with `rdkit`.&#34;&#34;&#34;
+        self.bindings: dict = self.create_binding_dict()
+        &#34;&#34;&#34;Binding types (edge as key, binding type as value).&#34;&#34;&#34;
+        self.graph: nx.Graph = self.smiles_to_graph()
+        &#34;&#34;&#34;Graph that represents the molecule.&#34;&#34;&#34;
+        self.double_edge_positions: dict = self.find_double_edge_positions()
+        &#34;&#34;&#34;Positions for a second line (that can be plotted) for each edge.&#34;&#34;&#34;
+        self.labels: dict = nx.get_node_attributes(self.graph, &#39;label&#39;)
+        &#34;&#34;&#34;Node labels (node id as key, node label as value).&#34;&#34;&#34;
+
+
+    def set_bindings(self, bindings: dict):
+        &#34;&#34;&#34;Sets the soliton graph&#39;s bindings to a new binding dictionary.
+
+        Args:
+            bindings (dict): New binding dictionary.
+        &#34;&#34;&#34;
+        self.bindings = bindings
+        self.graph = self.smiles_to_graph()
+
+
+    def find_exterior_nodes(self, user_input: str):
+        &#34;&#34;&#34;Transforms the users input into dictionary with exterior nodes.
+
+        Args:
+            user_input (str): User input.
+
+        Returns:
+            dict: Exterior nodes with node ids as keys and node labels as values.
+            dict: Exterior nodes with node labels as keys and node ids as values.
+        &#34;&#34;&#34;
+        # exterior nodes are put in &#34;{}&#34; in user input
+        exterior_nodes = {} # dictionary for exterior nodes
+        exterior_nodes_reverse = {}
+        current = 0
+        # find node labels of exterior nodes (numbers)
+        matches_labels = re.findall(r&#34;[{][-=]*[0-9]*[}]&#34;, user_input)
+        # replace node labels with Cs, then count Cs in string and replace each C with count
+        input_with_c = re.sub(r&#34;[{][-=]*[0-9]*[}]&#34;, &#34;{C}&#34;, user_input)
+        input_with_nums = input_with_c
+        while True:
+            if (re.search(r&#34;[C]&#34;, input_with_nums) is None):
+                break
+            input_with_nums = re.sub(r&#34;[C]&#34;, str(current), input_with_nums, count = 1)
+            current += 1
+        # find node ids in input_with_nums (because node id is just the atom count)
+        matches_ids = re.findall(r&#34;[{][-=]*[0-9]*[}]&#34;, input_with_nums)
+        # put exterior nodes in dictionary (node id as key and node label as value)
+        for i in range (0, len(matches_labels)):
+            matches_ids[i] = re.sub(r&#34;[}]&#34;, &#34;&#34;, re.sub(r&#34;[{]&#34;, &#34;&#34;, matches_ids[i]))
+            matches_labels[i] = re.sub(r&#34;[}]&#34;, &#34;&#34;, re.sub(r&#34;[{][-=]*&#34;, &#34;&#34;, matches_labels[i]))
+            exterior_nodes[int(matches_ids[i])] = matches_labels[i]
+            exterior_nodes_reverse[matches_labels[i]] = int(matches_ids[i])
+
+        return exterior_nodes, exterior_nodes_reverse
+
+    def exterior_nodes_name_collision(self):
+        &#34;&#34;&#34;Checks for name collisions between exterior nodes.
+
+        Returns:
+            bool: `True`, if user used same exterior node label more than once, `False` otherwise.
+        &#34;&#34;&#34;
+        flipped = {}
+        for key, value in self.exterior_nodes.items():
+            if value not in flipped:
+                flipped[value] = [key]
+            else:
+                return True
+
+        return False
+
+    def create_pysmiles_smiles(self, user_input: str):
+        &#34;&#34;&#34;Transforms user input in `SMILES` representation (treating exterior nodes as Cs now).
+
+        Args:
+            user_input (str): User input.
+
+        Returns:
+            str: `SMILES` string (used with `pysmiles`).
+        &#34;&#34;&#34;
+        pysmiles_smiles = re.sub(r&#34;[{][0-9]*[}]&#34;, &#34;(C)&#34;, user_input)
+        pysmiles_smiles = re.sub(r&#34;[{][-][0-9]*[}]&#34;, &#34;(-C)&#34;, pysmiles_smiles)
+        pysmiles_smiles = re.sub(r&#34;[{][=][0-9]*[}]&#34;, &#34;(=C)&#34;, pysmiles_smiles)
+
+        return pysmiles_smiles
+
+
+    def create_rdkit_smiles(self, user_input: str):
+        &#34;&#34;&#34;Transforms user input in extra `SMILES` representation
+            because `rdkit` needs string without double edges at exterior nodes (otherwise some valence error occurs).
+
+        Args:
+            user_input (str): User input.
+
+        Returns:
+            str: Modified `SMILES` string (used with `rdkit`).
+        &#34;&#34;&#34;
+        rdkit_smiles = re.sub(r&#34;[{][-=]*[0-9]*[}]&#34;, &#34;(C)&#34;, user_input)
+
+        return rdkit_smiles
+
+
+    def create_binding_dict(self):
+        &#34;&#34;&#34;Builds a dictionary that contains the binding type for each edge (1 for single, 2 for double binding).
+
+        Returns:
+            dict: Bindings (where the two nodes of the edge are sorted).
+        &#34;&#34;&#34;
+        mol_pysmiles = read_smiles(self.pysmiles_smiles, reinterpret_aromatic=False) # binding information are taken from pysmiles (to ignore aromaticity)
+        bindings = nx.get_edge_attributes(mol_pysmiles, &#39;order&#39;)
+        bindings_sorted_tuples = {}
+        for edge in bindings:
+            val = bindings[edge]
+            bindings_sorted_tuples[tuple(sorted(edge))] = val
+
+        return bindings_sorted_tuples
+
+
+    def next_node_label(self, node_label: str):
+        &#34;&#34;&#34;Finds the next node label for a given node label. Used in initialisation of graph in `smiles_to_graph`.
+
+        Args:
+            node_label (str): Given node label.
+
+        Returns:
+            str: Computed (next) node label.
+        &#34;&#34;&#34;
+        if len(node_label) == 1: # e.g.: a -&gt; b
+            node_label = chr(ord(node_label)+1)
+        elif node_label[1] == &#39;z&#39;: # e.g. bz -&gt; ca
+            node_label_list = list(node_label) # convert to list so we can change chars at certain index
+            node_label_list[0] = chr(ord(node_label[0])+1)
+            node_label_list[1] = &#39;a&#39;
+            node_label = &#34;&#34;.join(node_label_list) # convert back to string
+        else: #e.g. ab -&gt; ac
+            node_label_list = list(node_label)
+            node_label_list[1] = chr(ord(node_label[1])+1)
+            node_label = &#34;&#34;.join(node_label_list)
+
+        return node_label
+
+
+    def smiles_to_graph(self):
+        &#34;&#34;&#34;Transforms user input into `rdkit` molecule and then into `networkx` graph.
+
+        Returns:
+            nx.Graph: Graph that visualizes the molecule.
+        &#34;&#34;&#34;
+        mol_rdkit = Chem.MolFromSmiles(self.rdkit_smiles) # atom position information are taken from rdkit
+        AllChem.Compute2DCoords(mol_rdkit)
+        graph = nx.Graph()
+        if (len(mol_rdkit.GetAtoms()) - len(self.exterior_nodes)) &gt; 26: # if we have more than 26 atoms then node labels a - z are not sufficient
+            node_label = &#39;aa&#39;
+        else:
+            node_label = &#39;a&#39;
+
+        for atom in mol_rdkit.GetAtoms():
+            pos = mol_rdkit.GetConformer().GetAtomPosition(atom.GetIdx())
+            x_coord = pos.x
+            y_coord = pos.y * 1.2
+            if atom.GetIdx() in self.exterior_nodes:
+                graph.add_node(atom.GetIdx(),
+                    label=self.exterior_nodes[atom.GetIdx()],
+                    pos=(x_coord, y_coord),
+                    weight = 0)
+            else:
+                graph.add_node(atom.GetIdx(),
+                    label=node_label,
+                    pos=(x_coord, y_coord),
+                    weight = 0)
+                node_label = self.next_node_label(node_label)
+
+        for bond in mol_rdkit.GetBonds():
+            graph.add_edge(bond.GetBeginAtomIdx(),
+                    bond.GetEndAtomIdx(),
+                    weight = 1)
+            # increase node weight of begin atom and end atom by 1
+            graph.nodes[bond.GetBeginAtomIdx()][&#39;weight&#39;] = nx.get_node_attributes(graph, &#39;weight&#39;)[bond.GetBeginAtomIdx()] + 1
+            graph.nodes[bond.GetEndAtomIdx()][&#39;weight&#39;] = nx.get_node_attributes(graph, &#39;weight&#39;)[bond.GetEndAtomIdx()] + 1
+            # if its a double bond increase edge and node weights
+            if ((bond.GetBeginAtomIdx(), bond.GetEndAtomIdx()) in self.bindings):
+                if (self.bindings[(bond.GetBeginAtomIdx(), bond.GetEndAtomIdx())] == 2):
+                    # put edge weight to 2
+                    graph.edges[(bond.GetBeginAtomIdx(), bond.GetEndAtomIdx())][&#39;weight&#39;] = 2
+                    # increase node weight of begin atom and end atom by 1
+                    graph.nodes[bond.GetBeginAtomIdx()][&#39;weight&#39;] = nx.get_node_attributes(graph, &#39;weight&#39;)[bond.GetBeginAtomIdx()] + 1
+                    graph.nodes[bond.GetEndAtomIdx()][&#39;weight&#39;] = nx.get_node_attributes(graph, &#39;weight&#39;)[bond.GetEndAtomIdx()] + 1
+            elif ((bond.GetEndAtomIdx(), bond.GetBeginAtomIdx()) in self.bindings):
+                if (self.bindings[(bond.GetEndAtomIdx(), bond.GetBeginAtomIdx())] == 2):
+                    graph.edges[(bond.GetBeginAtomIdx(), bond.GetEndAtomIdx())][&#39;weight&#39;] = 2
+                    graph.nodes[bond.GetBeginAtomIdx()][&#39;weight&#39;] = nx.get_node_attributes(graph, &#39;weight&#39;)[bond.GetBeginAtomIdx()] + 1
+                    graph.nodes[bond.GetEndAtomIdx()][&#39;weight&#39;] = nx.get_node_attributes(graph, &#39;weight&#39;)[bond.GetEndAtomIdx()] + 1
+
+        return graph
+
+
+    def find_double_edge_positions(self):
+        &#34;&#34;&#34;Builds a dictionary that contains the positions for a second line for each edge.
+
+        Returns:
+            dict: Double edge positions.
+        &#34;&#34;&#34;
+
+        def double_edge(graph: nx.Graph, node1: int, node2: int):
+            &#34;&#34;&#34;Gets x and y values for drawing a line as a second edge.
+
+            Args:
+                graph (nx.Graph): Graph the second edge should be added to.
+                node1 (int): Beginning node of edge.
+                node2 (int): End node of edge.
+
+            Returns:
+                list: X values.
+                list: Y values.
+            &#34;&#34;&#34;
+            pos = nx.get_node_attributes(graph, &#39;pos&#39;)
+            coord1 = pos[node1]
+            coord2 = pos[node2]
+            x_values = [coord1[0], coord2[0]]
+            y_values = [coord1[1], coord2[1]]
+
+            dx = x_values[1] - x_values[0]
+            # no division by 0 allowed
+            if (dx == 0):
+                dx = 0.001
+            dy = y_values[1] - y_values[0]
+            slope = dy/dx
+
+            # distance between the two edges (0.11 as default, other values for extremely small or large graphs):
+            distance = 0.11
+            if len(pos) == 2:
+                distance = 0.03
+            elif len(pos) == 3:
+                distance = 0.05
+            elif len(pos) == 4:
+                distance = 0.08
+            elif len(pos) &gt; 4 and len(pos) &lt; 7:
+                distance = 0.09
+            elif len(pos) &gt;= 26 and len(pos) &lt; 42:
+                distance = 0.15
+            elif len(pos) &gt;= 42:
+                distance = 0.2
+
+            if (abs(slope) &gt;= 1):
+                x_values = [coord1[0]+distance, coord2[0]+distance]
+                y_values = [coord1[1], coord2[1]]
+            else:
+                x_values = [coord1[0], coord2[0]]
+                y_values = [coord1[1]+distance, coord2[1]+distance]
+
+            return x_values, y_values
+
+        double_edge_positions = {}
+        for edge in self.graph.edges:
+            x_values, y_values = double_edge(self.graph, edge[0], edge[1])
+            double_edge_positions[edge] = x_values, y_values
+
+        return double_edge_positions
+    
+
+    def validate_soliton_graph(self):
+        &#34;&#34;&#34;Checks if graph is a soliton graph.
+
+        Returns:
+            list: All the problems that keep the graph from being a soliton graph.
+        &#34;&#34;&#34;
+        errors = []
+        weights = nx.get_node_attributes(self.graph, &#39;weight&#39;)
+        # No self-loops
+        selfloops = list(nx.nodes_with_selfloops(self.graph))
+        if len(selfloops) &gt; 0:
+            for node in selfloops:
+                errors.append(f&#34;Self-loop at node {self.labels[node]}&#34;)
+        # Only node degrees between 1 and 3 allowed
+        for (node, val) in self.graph.degree():
+            if val &gt; 3:
+                errors.append(f&#34;Node {self.labels[node]} has too many neighbours&#34;)
+        # exterior nodes must have weight of 1 or 2 and must have degree 1
+        for key in self.exterior_nodes:
+            if weights[key] &gt; 2:
+                errors.append(f&#34;The weight of node {self.labels[key]} is too high&#34;)
+            del weights[key]
+            if self.graph.degree(key) &gt; 1:
+                errors.append(f&#34;Node {self.labels[key]} has too many neighbours&#34;)
+        # Inner nodes have exactly one double edge
+        for node in weights:
+            if weights[node] &gt; self.graph.degree(node) + 1:
+                errors.append(f&#34;The weight of node {self.labels[node]} is too high&#34;)
+            elif weights[node] &lt; self.graph.degree(node) + 1:
+                errors.append(f&#34;The weight of node {self.labels[node]} is too low&#34;)
+        # There has to be at least one exterior node
+        if len(self.exterior_nodes) &lt; 1:
+            errors.append(&#34;You must have at least one exterior node&#34;)
+
+        return errors</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="soliton_graph.SolitonGraph"><code class="flex name class">
+<span>class <span class="ident">SolitonGraph</span></span>
+<span>(</span><span>user_input: str)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Representation of a soliton graph.</p>
+<p>Initializes a <code><a title="soliton_graph.SolitonGraph" href="#soliton_graph.SolitonGraph">SolitonGraph</a></code> object by using the input string of the user.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class SolitonGraph:
+    &#34;&#34;&#34;Representation of a soliton graph.
+    &#34;&#34;&#34;
+
+    def __init__(self, user_input: str):
+        &#34;&#34;&#34;Initializes a `SolitonGraph` object by using the input string of the user.
+        &#34;&#34;&#34;
+        self.exterior_nodes: dict
+        &#34;&#34;&#34;Exterior nodes (node id as key, node label as value).&#34;&#34;&#34;
+        self.exterior_nodes_reverse: dict
+        &#34;&#34;&#34;Exterior nodes (node label as key, node id as value).&#34;&#34;&#34;
+        self.exterior_nodes, self.exterior_nodes_reverse = self.find_exterior_nodes(user_input)
+        self.pysmiles_smiles: str = self.create_pysmiles_smiles(user_input)
+        &#34;&#34;&#34;`SMILES` string for use with `pysmiles`.&#34;&#34;&#34;
+        self.rdkit_smiles: str = self.create_rdkit_smiles(user_input)
+        &#34;&#34;&#34;`SMILES` string for use with `rdkit`.&#34;&#34;&#34;
+        self.bindings: dict = self.create_binding_dict()
+        &#34;&#34;&#34;Binding types (edge as key, binding type as value).&#34;&#34;&#34;
+        self.graph: nx.Graph = self.smiles_to_graph()
+        &#34;&#34;&#34;Graph that represents the molecule.&#34;&#34;&#34;
+        self.double_edge_positions: dict = self.find_double_edge_positions()
+        &#34;&#34;&#34;Positions for a second line (that can be plotted) for each edge.&#34;&#34;&#34;
+        self.labels: dict = nx.get_node_attributes(self.graph, &#39;label&#39;)
+        &#34;&#34;&#34;Node labels (node id as key, node label as value).&#34;&#34;&#34;
+
+
+    def set_bindings(self, bindings: dict):
+        &#34;&#34;&#34;Sets the soliton graph&#39;s bindings to a new binding dictionary.
+
+        Args:
+            bindings (dict): New binding dictionary.
+        &#34;&#34;&#34;
+        self.bindings = bindings
+        self.graph = self.smiles_to_graph()
+
+
+    def find_exterior_nodes(self, user_input: str):
+        &#34;&#34;&#34;Transforms the users input into dictionary with exterior nodes.
+
+        Args:
+            user_input (str): User input.
+
+        Returns:
+            dict: Exterior nodes with node ids as keys and node labels as values.
+            dict: Exterior nodes with node labels as keys and node ids as values.
+        &#34;&#34;&#34;
+        # exterior nodes are put in &#34;{}&#34; in user input
+        exterior_nodes = {} # dictionary for exterior nodes
+        exterior_nodes_reverse = {}
+        current = 0
+        # find node labels of exterior nodes (numbers)
+        matches_labels = re.findall(r&#34;[{][-=]*[0-9]*[}]&#34;, user_input)
+        # replace node labels with Cs, then count Cs in string and replace each C with count
+        input_with_c = re.sub(r&#34;[{][-=]*[0-9]*[}]&#34;, &#34;{C}&#34;, user_input)
+        input_with_nums = input_with_c
+        while True:
+            if (re.search(r&#34;[C]&#34;, input_with_nums) is None):
+                break
+            input_with_nums = re.sub(r&#34;[C]&#34;, str(current), input_with_nums, count = 1)
+            current += 1
+        # find node ids in input_with_nums (because node id is just the atom count)
+        matches_ids = re.findall(r&#34;[{][-=]*[0-9]*[}]&#34;, input_with_nums)
+        # put exterior nodes in dictionary (node id as key and node label as value)
+        for i in range (0, len(matches_labels)):
+            matches_ids[i] = re.sub(r&#34;[}]&#34;, &#34;&#34;, re.sub(r&#34;[{]&#34;, &#34;&#34;, matches_ids[i]))
+            matches_labels[i] = re.sub(r&#34;[}]&#34;, &#34;&#34;, re.sub(r&#34;[{][-=]*&#34;, &#34;&#34;, matches_labels[i]))
+            exterior_nodes[int(matches_ids[i])] = matches_labels[i]
+            exterior_nodes_reverse[matches_labels[i]] = int(matches_ids[i])
+
+        return exterior_nodes, exterior_nodes_reverse
+
+    def exterior_nodes_name_collision(self):
+        &#34;&#34;&#34;Checks for name collisions between exterior nodes.
+
+        Returns:
+            bool: `True`, if user used same exterior node label more than once, `False` otherwise.
+        &#34;&#34;&#34;
+        flipped = {}
+        for key, value in self.exterior_nodes.items():
+            if value not in flipped:
+                flipped[value] = [key]
+            else:
+                return True
+
+        return False
+
+    def create_pysmiles_smiles(self, user_input: str):
+        &#34;&#34;&#34;Transforms user input in `SMILES` representation (treating exterior nodes as Cs now).
+
+        Args:
+            user_input (str): User input.
+
+        Returns:
+            str: `SMILES` string (used with `pysmiles`).
+        &#34;&#34;&#34;
+        pysmiles_smiles = re.sub(r&#34;[{][0-9]*[}]&#34;, &#34;(C)&#34;, user_input)
+        pysmiles_smiles = re.sub(r&#34;[{][-][0-9]*[}]&#34;, &#34;(-C)&#34;, pysmiles_smiles)
+        pysmiles_smiles = re.sub(r&#34;[{][=][0-9]*[}]&#34;, &#34;(=C)&#34;, pysmiles_smiles)
+
+        return pysmiles_smiles
+
+
+    def create_rdkit_smiles(self, user_input: str):
+        &#34;&#34;&#34;Transforms user input in extra `SMILES` representation
+            because `rdkit` needs string without double edges at exterior nodes (otherwise some valence error occurs).
+
+        Args:
+            user_input (str): User input.
+
+        Returns:
+            str: Modified `SMILES` string (used with `rdkit`).
+        &#34;&#34;&#34;
+        rdkit_smiles = re.sub(r&#34;[{][-=]*[0-9]*[}]&#34;, &#34;(C)&#34;, user_input)
+
+        return rdkit_smiles
+
+
+    def create_binding_dict(self):
+        &#34;&#34;&#34;Builds a dictionary that contains the binding type for each edge (1 for single, 2 for double binding).
+
+        Returns:
+            dict: Bindings (where the two nodes of the edge are sorted).
+        &#34;&#34;&#34;
+        mol_pysmiles = read_smiles(self.pysmiles_smiles, reinterpret_aromatic=False) # binding information are taken from pysmiles (to ignore aromaticity)
+        bindings = nx.get_edge_attributes(mol_pysmiles, &#39;order&#39;)
+        bindings_sorted_tuples = {}
+        for edge in bindings:
+            val = bindings[edge]
+            bindings_sorted_tuples[tuple(sorted(edge))] = val
+
+        return bindings_sorted_tuples
+
+
+    def next_node_label(self, node_label: str):
+        &#34;&#34;&#34;Finds the next node label for a given node label. Used in initialisation of graph in `smiles_to_graph`.
+
+        Args:
+            node_label (str): Given node label.
+
+        Returns:
+            str: Computed (next) node label.
+        &#34;&#34;&#34;
+        if len(node_label) == 1: # e.g.: a -&gt; b
+            node_label = chr(ord(node_label)+1)
+        elif node_label[1] == &#39;z&#39;: # e.g. bz -&gt; ca
+            node_label_list = list(node_label) # convert to list so we can change chars at certain index
+            node_label_list[0] = chr(ord(node_label[0])+1)
+            node_label_list[1] = &#39;a&#39;
+            node_label = &#34;&#34;.join(node_label_list) # convert back to string
+        else: #e.g. ab -&gt; ac
+            node_label_list = list(node_label)
+            node_label_list[1] = chr(ord(node_label[1])+1)
+            node_label = &#34;&#34;.join(node_label_list)
+
+        return node_label
+
+
+    def smiles_to_graph(self):
+        &#34;&#34;&#34;Transforms user input into `rdkit` molecule and then into `networkx` graph.
+
+        Returns:
+            nx.Graph: Graph that visualizes the molecule.
+        &#34;&#34;&#34;
+        mol_rdkit = Chem.MolFromSmiles(self.rdkit_smiles) # atom position information are taken from rdkit
+        AllChem.Compute2DCoords(mol_rdkit)
+        graph = nx.Graph()
+        if (len(mol_rdkit.GetAtoms()) - len(self.exterior_nodes)) &gt; 26: # if we have more than 26 atoms then node labels a - z are not sufficient
+            node_label = &#39;aa&#39;
+        else:
+            node_label = &#39;a&#39;
+
+        for atom in mol_rdkit.GetAtoms():
+            pos = mol_rdkit.GetConformer().GetAtomPosition(atom.GetIdx())
+            x_coord = pos.x
+            y_coord = pos.y * 1.2
+            if atom.GetIdx() in self.exterior_nodes:
+                graph.add_node(atom.GetIdx(),
+                    label=self.exterior_nodes[atom.GetIdx()],
+                    pos=(x_coord, y_coord),
+                    weight = 0)
+            else:
+                graph.add_node(atom.GetIdx(),
+                    label=node_label,
+                    pos=(x_coord, y_coord),
+                    weight = 0)
+                node_label = self.next_node_label(node_label)
+
+        for bond in mol_rdkit.GetBonds():
+            graph.add_edge(bond.GetBeginAtomIdx(),
+                    bond.GetEndAtomIdx(),
+                    weight = 1)
+            # increase node weight of begin atom and end atom by 1
+            graph.nodes[bond.GetBeginAtomIdx()][&#39;weight&#39;] = nx.get_node_attributes(graph, &#39;weight&#39;)[bond.GetBeginAtomIdx()] + 1
+            graph.nodes[bond.GetEndAtomIdx()][&#39;weight&#39;] = nx.get_node_attributes(graph, &#39;weight&#39;)[bond.GetEndAtomIdx()] + 1
+            # if its a double bond increase edge and node weights
+            if ((bond.GetBeginAtomIdx(), bond.GetEndAtomIdx()) in self.bindings):
+                if (self.bindings[(bond.GetBeginAtomIdx(), bond.GetEndAtomIdx())] == 2):
+                    # put edge weight to 2
+                    graph.edges[(bond.GetBeginAtomIdx(), bond.GetEndAtomIdx())][&#39;weight&#39;] = 2
+                    # increase node weight of begin atom and end atom by 1
+                    graph.nodes[bond.GetBeginAtomIdx()][&#39;weight&#39;] = nx.get_node_attributes(graph, &#39;weight&#39;)[bond.GetBeginAtomIdx()] + 1
+                    graph.nodes[bond.GetEndAtomIdx()][&#39;weight&#39;] = nx.get_node_attributes(graph, &#39;weight&#39;)[bond.GetEndAtomIdx()] + 1
+            elif ((bond.GetEndAtomIdx(), bond.GetBeginAtomIdx()) in self.bindings):
+                if (self.bindings[(bond.GetEndAtomIdx(), bond.GetBeginAtomIdx())] == 2):
+                    graph.edges[(bond.GetBeginAtomIdx(), bond.GetEndAtomIdx())][&#39;weight&#39;] = 2
+                    graph.nodes[bond.GetBeginAtomIdx()][&#39;weight&#39;] = nx.get_node_attributes(graph, &#39;weight&#39;)[bond.GetBeginAtomIdx()] + 1
+                    graph.nodes[bond.GetEndAtomIdx()][&#39;weight&#39;] = nx.get_node_attributes(graph, &#39;weight&#39;)[bond.GetEndAtomIdx()] + 1
+
+        return graph
+
+
+    def find_double_edge_positions(self):
+        &#34;&#34;&#34;Builds a dictionary that contains the positions for a second line for each edge.
+
+        Returns:
+            dict: Double edge positions.
+        &#34;&#34;&#34;
+
+        def double_edge(graph: nx.Graph, node1: int, node2: int):
+            &#34;&#34;&#34;Gets x and y values for drawing a line as a second edge.
+
+            Args:
+                graph (nx.Graph): Graph the second edge should be added to.
+                node1 (int): Beginning node of edge.
+                node2 (int): End node of edge.
+
+            Returns:
+                list: X values.
+                list: Y values.
+            &#34;&#34;&#34;
+            pos = nx.get_node_attributes(graph, &#39;pos&#39;)
+            coord1 = pos[node1]
+            coord2 = pos[node2]
+            x_values = [coord1[0], coord2[0]]
+            y_values = [coord1[1], coord2[1]]
+
+            dx = x_values[1] - x_values[0]
+            # no division by 0 allowed
+            if (dx == 0):
+                dx = 0.001
+            dy = y_values[1] - y_values[0]
+            slope = dy/dx
+
+            # distance between the two edges (0.11 as default, other values for extremely small or large graphs):
+            distance = 0.11
+            if len(pos) == 2:
+                distance = 0.03
+            elif len(pos) == 3:
+                distance = 0.05
+            elif len(pos) == 4:
+                distance = 0.08
+            elif len(pos) &gt; 4 and len(pos) &lt; 7:
+                distance = 0.09
+            elif len(pos) &gt;= 26 and len(pos) &lt; 42:
+                distance = 0.15
+            elif len(pos) &gt;= 42:
+                distance = 0.2
+
+            if (abs(slope) &gt;= 1):
+                x_values = [coord1[0]+distance, coord2[0]+distance]
+                y_values = [coord1[1], coord2[1]]
+            else:
+                x_values = [coord1[0], coord2[0]]
+                y_values = [coord1[1]+distance, coord2[1]+distance]
+
+            return x_values, y_values
+
+        double_edge_positions = {}
+        for edge in self.graph.edges:
+            x_values, y_values = double_edge(self.graph, edge[0], edge[1])
+            double_edge_positions[edge] = x_values, y_values
+
+        return double_edge_positions
+    
+
+    def validate_soliton_graph(self):
+        &#34;&#34;&#34;Checks if graph is a soliton graph.
+
+        Returns:
+            list: All the problems that keep the graph from being a soliton graph.
+        &#34;&#34;&#34;
+        errors = []
+        weights = nx.get_node_attributes(self.graph, &#39;weight&#39;)
+        # No self-loops
+        selfloops = list(nx.nodes_with_selfloops(self.graph))
+        if len(selfloops) &gt; 0:
+            for node in selfloops:
+                errors.append(f&#34;Self-loop at node {self.labels[node]}&#34;)
+        # Only node degrees between 1 and 3 allowed
+        for (node, val) in self.graph.degree():
+            if val &gt; 3:
+                errors.append(f&#34;Node {self.labels[node]} has too many neighbours&#34;)
+        # exterior nodes must have weight of 1 or 2 and must have degree 1
+        for key in self.exterior_nodes:
+            if weights[key] &gt; 2:
+                errors.append(f&#34;The weight of node {self.labels[key]} is too high&#34;)
+            del weights[key]
+            if self.graph.degree(key) &gt; 1:
+                errors.append(f&#34;Node {self.labels[key]} has too many neighbours&#34;)
+        # Inner nodes have exactly one double edge
+        for node in weights:
+            if weights[node] &gt; self.graph.degree(node) + 1:
+                errors.append(f&#34;The weight of node {self.labels[node]} is too high&#34;)
+            elif weights[node] &lt; self.graph.degree(node) + 1:
+                errors.append(f&#34;The weight of node {self.labels[node]} is too low&#34;)
+        # There has to be at least one exterior node
+        if len(self.exterior_nodes) &lt; 1:
+            errors.append(&#34;You must have at least one exterior node&#34;)
+
+        return errors</code></pre>
+</details>
+<h3>Instance variables</h3>
+<dl>
+<dt id="soliton_graph.SolitonGraph.bindings"><code class="name">var <span class="ident">bindings</span></code></dt>
+<dd>
+<div class="desc"><p>Binding types (edge as key, binding type as value).</p></div>
+</dd>
+<dt id="soliton_graph.SolitonGraph.double_edge_positions"><code class="name">var <span class="ident">double_edge_positions</span></code></dt>
+<dd>
+<div class="desc"><p>Positions for a second line (that can be plotted) for each edge.</p></div>
+</dd>
+<dt id="soliton_graph.SolitonGraph.exterior_nodes"><code class="name">var <span class="ident">exterior_nodes</span></code></dt>
+<dd>
+<div class="desc"><p>Exterior nodes (node id as key, node label as value).</p></div>
+</dd>
+<dt id="soliton_graph.SolitonGraph.exterior_nodes_reverse"><code class="name">var <span class="ident">exterior_nodes_reverse</span></code></dt>
+<dd>
+<div class="desc"><p>Exterior nodes (node label as key, node id as value).</p></div>
+</dd>
+<dt id="soliton_graph.SolitonGraph.graph"><code class="name">var <span class="ident">graph</span></code></dt>
+<dd>
+<div class="desc"><p>Graph that represents the molecule.</p></div>
+</dd>
+<dt id="soliton_graph.SolitonGraph.labels"><code class="name">var <span class="ident">labels</span></code></dt>
+<dd>
+<div class="desc"><p>Node labels (node id as key, node label as value).</p></div>
+</dd>
+<dt id="soliton_graph.SolitonGraph.pysmiles_smiles"><code class="name">var <span class="ident">pysmiles_smiles</span></code></dt>
+<dd>
+<div class="desc"><p><code>SMILES</code> string for use with <code>pysmiles</code>.</p></div>
+</dd>
+<dt id="soliton_graph.SolitonGraph.rdkit_smiles"><code class="name">var <span class="ident">rdkit_smiles</span></code></dt>
+<dd>
+<div class="desc"><p><code>SMILES</code> string for use with <code>rdkit</code>.</p></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="soliton_graph.SolitonGraph.create_binding_dict"><code class="name flex">
+<span>def <span class="ident">create_binding_dict</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Builds a dictionary that contains the binding type for each edge (1 for single, 2 for double binding).</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>dict</code></dt>
+<dd>Bindings (where the two nodes of the edge are sorted).</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def create_binding_dict(self):
+    &#34;&#34;&#34;Builds a dictionary that contains the binding type for each edge (1 for single, 2 for double binding).
+
+    Returns:
+        dict: Bindings (where the two nodes of the edge are sorted).
+    &#34;&#34;&#34;
+    mol_pysmiles = read_smiles(self.pysmiles_smiles, reinterpret_aromatic=False) # binding information are taken from pysmiles (to ignore aromaticity)
+    bindings = nx.get_edge_attributes(mol_pysmiles, &#39;order&#39;)
+    bindings_sorted_tuples = {}
+    for edge in bindings:
+        val = bindings[edge]
+        bindings_sorted_tuples[tuple(sorted(edge))] = val
+
+    return bindings_sorted_tuples</code></pre>
+</details>
+</dd>
+<dt id="soliton_graph.SolitonGraph.create_pysmiles_smiles"><code class="name flex">
+<span>def <span class="ident">create_pysmiles_smiles</span></span>(<span>self, user_input: str)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Transforms user input in <code>SMILES</code> representation (treating exterior nodes as Cs now).</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>user_input</code></strong> :&ensp;<code>str</code></dt>
+<dd>User input.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>str</code></dt>
+<dd><code>SMILES</code> string (used with <code>pysmiles</code>).</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def create_pysmiles_smiles(self, user_input: str):
+    &#34;&#34;&#34;Transforms user input in `SMILES` representation (treating exterior nodes as Cs now).
+
+    Args:
+        user_input (str): User input.
+
+    Returns:
+        str: `SMILES` string (used with `pysmiles`).
+    &#34;&#34;&#34;
+    pysmiles_smiles = re.sub(r&#34;[{][0-9]*[}]&#34;, &#34;(C)&#34;, user_input)
+    pysmiles_smiles = re.sub(r&#34;[{][-][0-9]*[}]&#34;, &#34;(-C)&#34;, pysmiles_smiles)
+    pysmiles_smiles = re.sub(r&#34;[{][=][0-9]*[}]&#34;, &#34;(=C)&#34;, pysmiles_smiles)
+
+    return pysmiles_smiles</code></pre>
+</details>
+</dd>
+<dt id="soliton_graph.SolitonGraph.create_rdkit_smiles"><code class="name flex">
+<span>def <span class="ident">create_rdkit_smiles</span></span>(<span>self, user_input: str)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Transforms user input in extra <code>SMILES</code> representation
+because <code>rdkit</code> needs string without double edges at exterior nodes (otherwise some valence error occurs).</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>user_input</code></strong> :&ensp;<code>str</code></dt>
+<dd>User input.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>str</code></dt>
+<dd>Modified <code>SMILES</code> string (used with <code>rdkit</code>).</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def create_rdkit_smiles(self, user_input: str):
+    &#34;&#34;&#34;Transforms user input in extra `SMILES` representation
+        because `rdkit` needs string without double edges at exterior nodes (otherwise some valence error occurs).
+
+    Args:
+        user_input (str): User input.
+
+    Returns:
+        str: Modified `SMILES` string (used with `rdkit`).
+    &#34;&#34;&#34;
+    rdkit_smiles = re.sub(r&#34;[{][-=]*[0-9]*[}]&#34;, &#34;(C)&#34;, user_input)
+
+    return rdkit_smiles</code></pre>
+</details>
+</dd>
+<dt id="soliton_graph.SolitonGraph.exterior_nodes_name_collision"><code class="name flex">
+<span>def <span class="ident">exterior_nodes_name_collision</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Checks for name collisions between exterior nodes.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>bool</code></dt>
+<dd><code>True</code>, if user used same exterior node label more than once, <code>False</code> otherwise.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def exterior_nodes_name_collision(self):
+    &#34;&#34;&#34;Checks for name collisions between exterior nodes.
+
+    Returns:
+        bool: `True`, if user used same exterior node label more than once, `False` otherwise.
+    &#34;&#34;&#34;
+    flipped = {}
+    for key, value in self.exterior_nodes.items():
+        if value not in flipped:
+            flipped[value] = [key]
+        else:
+            return True
+
+    return False</code></pre>
+</details>
+</dd>
+<dt id="soliton_graph.SolitonGraph.find_double_edge_positions"><code class="name flex">
+<span>def <span class="ident">find_double_edge_positions</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Builds a dictionary that contains the positions for a second line for each edge.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>dict</code></dt>
+<dd>Double edge positions.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def find_double_edge_positions(self):
+    &#34;&#34;&#34;Builds a dictionary that contains the positions for a second line for each edge.
+
+    Returns:
+        dict: Double edge positions.
+    &#34;&#34;&#34;
+
+    def double_edge(graph: nx.Graph, node1: int, node2: int):
+        &#34;&#34;&#34;Gets x and y values for drawing a line as a second edge.
+
+        Args:
+            graph (nx.Graph): Graph the second edge should be added to.
+            node1 (int): Beginning node of edge.
+            node2 (int): End node of edge.
+
+        Returns:
+            list: X values.
+            list: Y values.
+        &#34;&#34;&#34;
+        pos = nx.get_node_attributes(graph, &#39;pos&#39;)
+        coord1 = pos[node1]
+        coord2 = pos[node2]
+        x_values = [coord1[0], coord2[0]]
+        y_values = [coord1[1], coord2[1]]
+
+        dx = x_values[1] - x_values[0]
+        # no division by 0 allowed
+        if (dx == 0):
+            dx = 0.001
+        dy = y_values[1] - y_values[0]
+        slope = dy/dx
+
+        # distance between the two edges (0.11 as default, other values for extremely small or large graphs):
+        distance = 0.11
+        if len(pos) == 2:
+            distance = 0.03
+        elif len(pos) == 3:
+            distance = 0.05
+        elif len(pos) == 4:
+            distance = 0.08
+        elif len(pos) &gt; 4 and len(pos) &lt; 7:
+            distance = 0.09
+        elif len(pos) &gt;= 26 and len(pos) &lt; 42:
+            distance = 0.15
+        elif len(pos) &gt;= 42:
+            distance = 0.2
+
+        if (abs(slope) &gt;= 1):
+            x_values = [coord1[0]+distance, coord2[0]+distance]
+            y_values = [coord1[1], coord2[1]]
+        else:
+            x_values = [coord1[0], coord2[0]]
+            y_values = [coord1[1]+distance, coord2[1]+distance]
+
+        return x_values, y_values
+
+    double_edge_positions = {}
+    for edge in self.graph.edges:
+        x_values, y_values = double_edge(self.graph, edge[0], edge[1])
+        double_edge_positions[edge] = x_values, y_values
+
+    return double_edge_positions</code></pre>
+</details>
+</dd>
+<dt id="soliton_graph.SolitonGraph.find_exterior_nodes"><code class="name flex">
+<span>def <span class="ident">find_exterior_nodes</span></span>(<span>self, user_input: str)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Transforms the users input into dictionary with exterior nodes.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>user_input</code></strong> :&ensp;<code>str</code></dt>
+<dd>User input.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>dict</code></dt>
+<dd>Exterior nodes with node ids as keys and node labels as values.</dd>
+<dt><code>dict</code></dt>
+<dd>Exterior nodes with node labels as keys and node ids as values.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def find_exterior_nodes(self, user_input: str):
+    &#34;&#34;&#34;Transforms the users input into dictionary with exterior nodes.
+
+    Args:
+        user_input (str): User input.
+
+    Returns:
+        dict: Exterior nodes with node ids as keys and node labels as values.
+        dict: Exterior nodes with node labels as keys and node ids as values.
+    &#34;&#34;&#34;
+    # exterior nodes are put in &#34;{}&#34; in user input
+    exterior_nodes = {} # dictionary for exterior nodes
+    exterior_nodes_reverse = {}
+    current = 0
+    # find node labels of exterior nodes (numbers)
+    matches_labels = re.findall(r&#34;[{][-=]*[0-9]*[}]&#34;, user_input)
+    # replace node labels with Cs, then count Cs in string and replace each C with count
+    input_with_c = re.sub(r&#34;[{][-=]*[0-9]*[}]&#34;, &#34;{C}&#34;, user_input)
+    input_with_nums = input_with_c
+    while True:
+        if (re.search(r&#34;[C]&#34;, input_with_nums) is None):
+            break
+        input_with_nums = re.sub(r&#34;[C]&#34;, str(current), input_with_nums, count = 1)
+        current += 1
+    # find node ids in input_with_nums (because node id is just the atom count)
+    matches_ids = re.findall(r&#34;[{][-=]*[0-9]*[}]&#34;, input_with_nums)
+    # put exterior nodes in dictionary (node id as key and node label as value)
+    for i in range (0, len(matches_labels)):
+        matches_ids[i] = re.sub(r&#34;[}]&#34;, &#34;&#34;, re.sub(r&#34;[{]&#34;, &#34;&#34;, matches_ids[i]))
+        matches_labels[i] = re.sub(r&#34;[}]&#34;, &#34;&#34;, re.sub(r&#34;[{][-=]*&#34;, &#34;&#34;, matches_labels[i]))
+        exterior_nodes[int(matches_ids[i])] = matches_labels[i]
+        exterior_nodes_reverse[matches_labels[i]] = int(matches_ids[i])
+
+    return exterior_nodes, exterior_nodes_reverse</code></pre>
+</details>
+</dd>
+<dt id="soliton_graph.SolitonGraph.next_node_label"><code class="name flex">
+<span>def <span class="ident">next_node_label</span></span>(<span>self, node_label: str)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Finds the next node label for a given node label. Used in initialisation of graph in <code>smiles_to_graph</code>.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>node_label</code></strong> :&ensp;<code>str</code></dt>
+<dd>Given node label.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>str</code></dt>
+<dd>Computed (next) node label.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def next_node_label(self, node_label: str):
+    &#34;&#34;&#34;Finds the next node label for a given node label. Used in initialisation of graph in `smiles_to_graph`.
+
+    Args:
+        node_label (str): Given node label.
+
+    Returns:
+        str: Computed (next) node label.
+    &#34;&#34;&#34;
+    if len(node_label) == 1: # e.g.: a -&gt; b
+        node_label = chr(ord(node_label)+1)
+    elif node_label[1] == &#39;z&#39;: # e.g. bz -&gt; ca
+        node_label_list = list(node_label) # convert to list so we can change chars at certain index
+        node_label_list[0] = chr(ord(node_label[0])+1)
+        node_label_list[1] = &#39;a&#39;
+        node_label = &#34;&#34;.join(node_label_list) # convert back to string
+    else: #e.g. ab -&gt; ac
+        node_label_list = list(node_label)
+        node_label_list[1] = chr(ord(node_label[1])+1)
+        node_label = &#34;&#34;.join(node_label_list)
+
+    return node_label</code></pre>
+</details>
+</dd>
+<dt id="soliton_graph.SolitonGraph.set_bindings"><code class="name flex">
+<span>def <span class="ident">set_bindings</span></span>(<span>self, bindings: dict)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Sets the soliton graph's bindings to a new binding dictionary.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>bindings</code></strong> :&ensp;<code>dict</code></dt>
+<dd>New binding dictionary.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def set_bindings(self, bindings: dict):
+    &#34;&#34;&#34;Sets the soliton graph&#39;s bindings to a new binding dictionary.
+
+    Args:
+        bindings (dict): New binding dictionary.
+    &#34;&#34;&#34;
+    self.bindings = bindings
+    self.graph = self.smiles_to_graph()</code></pre>
+</details>
+</dd>
+<dt id="soliton_graph.SolitonGraph.smiles_to_graph"><code class="name flex">
+<span>def <span class="ident">smiles_to_graph</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Transforms user input into <code>rdkit</code> molecule and then into <code>networkx</code> graph.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>nx.Graph</code></dt>
+<dd>Graph that visualizes the molecule.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def smiles_to_graph(self):
+    &#34;&#34;&#34;Transforms user input into `rdkit` molecule and then into `networkx` graph.
+
+    Returns:
+        nx.Graph: Graph that visualizes the molecule.
+    &#34;&#34;&#34;
+    mol_rdkit = Chem.MolFromSmiles(self.rdkit_smiles) # atom position information are taken from rdkit
+    AllChem.Compute2DCoords(mol_rdkit)
+    graph = nx.Graph()
+    if (len(mol_rdkit.GetAtoms()) - len(self.exterior_nodes)) &gt; 26: # if we have more than 26 atoms then node labels a - z are not sufficient
+        node_label = &#39;aa&#39;
+    else:
+        node_label = &#39;a&#39;
+
+    for atom in mol_rdkit.GetAtoms():
+        pos = mol_rdkit.GetConformer().GetAtomPosition(atom.GetIdx())
+        x_coord = pos.x
+        y_coord = pos.y * 1.2
+        if atom.GetIdx() in self.exterior_nodes:
+            graph.add_node(atom.GetIdx(),
+                label=self.exterior_nodes[atom.GetIdx()],
+                pos=(x_coord, y_coord),
+                weight = 0)
+        else:
+            graph.add_node(atom.GetIdx(),
+                label=node_label,
+                pos=(x_coord, y_coord),
+                weight = 0)
+            node_label = self.next_node_label(node_label)
+
+    for bond in mol_rdkit.GetBonds():
+        graph.add_edge(bond.GetBeginAtomIdx(),
+                bond.GetEndAtomIdx(),
+                weight = 1)
+        # increase node weight of begin atom and end atom by 1
+        graph.nodes[bond.GetBeginAtomIdx()][&#39;weight&#39;] = nx.get_node_attributes(graph, &#39;weight&#39;)[bond.GetBeginAtomIdx()] + 1
+        graph.nodes[bond.GetEndAtomIdx()][&#39;weight&#39;] = nx.get_node_attributes(graph, &#39;weight&#39;)[bond.GetEndAtomIdx()] + 1
+        # if its a double bond increase edge and node weights
+        if ((bond.GetBeginAtomIdx(), bond.GetEndAtomIdx()) in self.bindings):
+            if (self.bindings[(bond.GetBeginAtomIdx(), bond.GetEndAtomIdx())] == 2):
+                # put edge weight to 2
+                graph.edges[(bond.GetBeginAtomIdx(), bond.GetEndAtomIdx())][&#39;weight&#39;] = 2
+                # increase node weight of begin atom and end atom by 1
+                graph.nodes[bond.GetBeginAtomIdx()][&#39;weight&#39;] = nx.get_node_attributes(graph, &#39;weight&#39;)[bond.GetBeginAtomIdx()] + 1
+                graph.nodes[bond.GetEndAtomIdx()][&#39;weight&#39;] = nx.get_node_attributes(graph, &#39;weight&#39;)[bond.GetEndAtomIdx()] + 1
+        elif ((bond.GetEndAtomIdx(), bond.GetBeginAtomIdx()) in self.bindings):
+            if (self.bindings[(bond.GetEndAtomIdx(), bond.GetBeginAtomIdx())] == 2):
+                graph.edges[(bond.GetBeginAtomIdx(), bond.GetEndAtomIdx())][&#39;weight&#39;] = 2
+                graph.nodes[bond.GetBeginAtomIdx()][&#39;weight&#39;] = nx.get_node_attributes(graph, &#39;weight&#39;)[bond.GetBeginAtomIdx()] + 1
+                graph.nodes[bond.GetEndAtomIdx()][&#39;weight&#39;] = nx.get_node_attributes(graph, &#39;weight&#39;)[bond.GetEndAtomIdx()] + 1
+
+    return graph</code></pre>
+</details>
+</dd>
+<dt id="soliton_graph.SolitonGraph.validate_soliton_graph"><code class="name flex">
+<span>def <span class="ident">validate_soliton_graph</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Checks if graph is a soliton graph.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>list</code></dt>
+<dd>All the problems that keep the graph from being a soliton graph.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def validate_soliton_graph(self):
+    &#34;&#34;&#34;Checks if graph is a soliton graph.
+
+    Returns:
+        list: All the problems that keep the graph from being a soliton graph.
+    &#34;&#34;&#34;
+    errors = []
+    weights = nx.get_node_attributes(self.graph, &#39;weight&#39;)
+    # No self-loops
+    selfloops = list(nx.nodes_with_selfloops(self.graph))
+    if len(selfloops) &gt; 0:
+        for node in selfloops:
+            errors.append(f&#34;Self-loop at node {self.labels[node]}&#34;)
+    # Only node degrees between 1 and 3 allowed
+    for (node, val) in self.graph.degree():
+        if val &gt; 3:
+            errors.append(f&#34;Node {self.labels[node]} has too many neighbours&#34;)
+    # exterior nodes must have weight of 1 or 2 and must have degree 1
+    for key in self.exterior_nodes:
+        if weights[key] &gt; 2:
+            errors.append(f&#34;The weight of node {self.labels[key]} is too high&#34;)
+        del weights[key]
+        if self.graph.degree(key) &gt; 1:
+            errors.append(f&#34;Node {self.labels[key]} has too many neighbours&#34;)
+    # Inner nodes have exactly one double edge
+    for node in weights:
+        if weights[node] &gt; self.graph.degree(node) + 1:
+            errors.append(f&#34;The weight of node {self.labels[node]} is too high&#34;)
+        elif weights[node] &lt; self.graph.degree(node) + 1:
+            errors.append(f&#34;The weight of node {self.labels[node]} is too low&#34;)
+    # There has to be at least one exterior node
+    if len(self.exterior_nodes) &lt; 1:
+        errors.append(&#34;You must have at least one exterior node&#34;)
+
+    return errors</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="soliton_graph.SolitonGraph" href="#soliton_graph.SolitonGraph">SolitonGraph</a></code></h4>
+<ul class="">
+<li><code><a title="soliton_graph.SolitonGraph.bindings" href="#soliton_graph.SolitonGraph.bindings">bindings</a></code></li>
+<li><code><a title="soliton_graph.SolitonGraph.create_binding_dict" href="#soliton_graph.SolitonGraph.create_binding_dict">create_binding_dict</a></code></li>
+<li><code><a title="soliton_graph.SolitonGraph.create_pysmiles_smiles" href="#soliton_graph.SolitonGraph.create_pysmiles_smiles">create_pysmiles_smiles</a></code></li>
+<li><code><a title="soliton_graph.SolitonGraph.create_rdkit_smiles" href="#soliton_graph.SolitonGraph.create_rdkit_smiles">create_rdkit_smiles</a></code></li>
+<li><code><a title="soliton_graph.SolitonGraph.double_edge_positions" href="#soliton_graph.SolitonGraph.double_edge_positions">double_edge_positions</a></code></li>
+<li><code><a title="soliton_graph.SolitonGraph.exterior_nodes" href="#soliton_graph.SolitonGraph.exterior_nodes">exterior_nodes</a></code></li>
+<li><code><a title="soliton_graph.SolitonGraph.exterior_nodes_name_collision" href="#soliton_graph.SolitonGraph.exterior_nodes_name_collision">exterior_nodes_name_collision</a></code></li>
+<li><code><a title="soliton_graph.SolitonGraph.exterior_nodes_reverse" href="#soliton_graph.SolitonGraph.exterior_nodes_reverse">exterior_nodes_reverse</a></code></li>
+<li><code><a title="soliton_graph.SolitonGraph.find_double_edge_positions" href="#soliton_graph.SolitonGraph.find_double_edge_positions">find_double_edge_positions</a></code></li>
+<li><code><a title="soliton_graph.SolitonGraph.find_exterior_nodes" href="#soliton_graph.SolitonGraph.find_exterior_nodes">find_exterior_nodes</a></code></li>
+<li><code><a title="soliton_graph.SolitonGraph.graph" href="#soliton_graph.SolitonGraph.graph">graph</a></code></li>
+<li><code><a title="soliton_graph.SolitonGraph.labels" href="#soliton_graph.SolitonGraph.labels">labels</a></code></li>
+<li><code><a title="soliton_graph.SolitonGraph.next_node_label" href="#soliton_graph.SolitonGraph.next_node_label">next_node_label</a></code></li>
+<li><code><a title="soliton_graph.SolitonGraph.pysmiles_smiles" href="#soliton_graph.SolitonGraph.pysmiles_smiles">pysmiles_smiles</a></code></li>
+<li><code><a title="soliton_graph.SolitonGraph.rdkit_smiles" href="#soliton_graph.SolitonGraph.rdkit_smiles">rdkit_smiles</a></code></li>
+<li><code><a title="soliton_graph.SolitonGraph.set_bindings" href="#soliton_graph.SolitonGraph.set_bindings">set_bindings</a></code></li>
+<li><code><a title="soliton_graph.SolitonGraph.smiles_to_graph" href="#soliton_graph.SolitonGraph.smiles_to_graph">smiles_to_graph</a></code></li>
+<li><code><a title="soliton_graph.SolitonGraph.validate_soliton_graph" href="#soliton_graph.SolitonGraph.validate_soliton_graph">validate_soliton_graph</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.10.0</a>.</p>
+</footer>
+</body>
+</html>

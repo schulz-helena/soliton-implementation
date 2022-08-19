@@ -5,9 +5,9 @@ from matplotlib import animation
 from matplotlib.axes import Axes
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from PIL import Image
+
 from soliton_graph import SolitonGraph
 from soliton_path import SolitonPath
-
 from visualisation import Visualisation
 
 
@@ -16,19 +16,19 @@ class Animation:
     """
 
     def __init__(self, soliton_graph: SolitonGraph, soliton_path: SolitonPath):
-        """Initializes an animation object by using a soliton graph and a soliton path.
+        """Initializes an `Animation` object by using a soliton graph and a soliton path.
         """
         self.soliton_graph: SolitonGraph = soliton_graph
         """Graph that should be animated."""
         self.soliton_path: SolitonPath = soliton_path
-        """Path the soliton should traverse in the animation."""
+        """Path the soliton should traverse in animation."""
         self.plots_and_arrays: list = self.list_of_plots_and_arrays()
-        """Matplotlib plots and plots as numpy arrays for each timestep."""
+        """Plots and plots as arrays for each timestep in animation."""
         self.pil_images: list = self.list_of_pil_images()
-        """PIL images for each timestep in animation."""
+        """`PIL` images for each timestep in animation."""
 
     def graph_animation(self):
-        """Animation method that uses update function and returns animation.
+        """Animation method that uses `update` function to build all necessary plots and returns animation.
 
         Returns:
             animation.FuncAnimation: Animation.
@@ -38,7 +38,7 @@ class Animation:
             """Update function that plots graph at each timestep.
 
             Args:
-                frame_num (int): Frame number (is increased every time animation calls this function).
+                frame_num (int): Frame number (is increased every time `graph_animation` calls this function).
                 ax (Axes): Axes of the plot.
                 soliton_graph (SolitonGraph): Graph that should be animated.
                 soliton_path (SolitonPath): Path the soliton should traverse in the animation.
@@ -67,7 +67,7 @@ class Animation:
         """Builds a list of plots and plots as arrays for each timestep of soliton traversing a path.
 
         Returns:
-            list: Matplotlib plots and plots as numpy arrays for each timestep.
+            list: `Matplotlib` plots and plots as `Numpy` arrays for each timestep.
         """
         plots_and_arrays = []
         for frame_num, node in enumerate(self.soliton_path.path):
@@ -96,10 +96,10 @@ class Animation:
         return plots_and_arrays
 
     def list_of_pil_images(self):
-        """Builds a list of PIL images for each timestep of soliton traversing a path.
+        """Builds a list of `PIL` images for each timestep of soliton traversing a path.
 
         Returns:
-            list: PIL images for each timestep in animation.
+            list: `PIL` images for each timestep in animation.
         """
         pil_images = []
         for element in self.plots_and_arrays:

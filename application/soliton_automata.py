@@ -11,7 +11,7 @@ class MiniSolitonAutomata:
     """
 
     def __init__(self, soliton_graph, start, end):
-        """Initializes a mini soliton automata object by using a soliton graph and a pair of exterior nodes, represented as node labels.
+        """Initializes a `MiniSolitonAutomata` object by using a soliton graph and a pair of exterior nodes, represented as node labels.
         """
         self.soliton_graph: SolitonGraph = soliton_graph
         """Soliton graph the automata is based on."""
@@ -21,11 +21,11 @@ class MiniSolitonAutomata:
         """Second exterior node/ end node of soliton paths."""
         paths = self.call_find_all_paths()
         self.soliton_paths: list = self.build_soliton_paths(paths)
-        """All found soliton paths."""
+        """All found soliton paths between given pair of exterior nodes."""
 
 
     def build_soliton_paths(self, paths: list):
-        """Turns paths into objects of class SolitonPath.
+        """Turns paths into objects of class `SolitonPath`.
 
         Args:
             paths (list): Paths that are represented as lists of node ids.
@@ -42,7 +42,7 @@ class MiniSolitonAutomata:
 
 
     def change_bindings(self, bindings: dict, edge: tuple):
-        """Changes binding type of an edge (1 -> 2 and 2 -> 1). Helping method.
+        """Changes binding type of an edge (1 -> 2 and 2 -> 1).
 
         Args:
             bindings (dict): Current binding types of all edges in the graph.
@@ -60,7 +60,7 @@ class MiniSolitonAutomata:
 
 
     def build_copies(self, akt: int, path: list, bindings: dict, bind: int):
-        """Copies all variables that are changed during find_all_paths. Helping method.
+        """Copies all variables that are changed during `find_all_paths`.
 
         Args:
             akt (int): Node that was currently added to path.
@@ -69,10 +69,10 @@ class MiniSolitonAutomata:
             bind (int): Binding type of the last edge that was traversed.
 
         Returns:
-            int: Copy of akt.
-            list: Copy of path.
-            dict: Copy of bindings.
-            int: Copy of bind.
+            int: Copy of `akt`.
+            list: Copy of `path`.
+            dict: Copy of `bindings`.
+            int: Copy of `bind`.
         """
         akt_copy = copy.deepcopy(akt)
         path_copy = copy.deepcopy(path)
@@ -83,11 +83,11 @@ class MiniSolitonAutomata:
 
 
     def find_all_paths(self, graph: nx.Graph, bindings: dict, end: int, path: list, akt: int, bind: int, paths: list):
-        """Finds all possible soliton paths between two exterior nodes by using a recursive backtracking algorithm.
-            A path can only be a soliton path if the edges traversed by the soliton have alternating binding types (1,2,1,2,..).
+        """Finds all possible soliton paths between two given exterior nodes by using a recursive backtracking algorithm.
+            A path can only be a soliton path if the edges traversed by the soliton have alternating binding types (1,2,1,2,...).
 
         Args:
-            graph (nx.Graph): Graph the path should be found in.
+            graph (nx.Graph): Graph the paths should be found in.
             bindings (dict): Current binding types of all edges in the graph.
             end (int): End node of path.
             path (list): Current found path.
@@ -125,7 +125,7 @@ class MiniSolitonAutomata:
     
 
     def call_find_all_paths(self):
-        """Initializes some parameteres and then calls the find_all_paths method with them.
+        """Initializes some parameters and then calls `find_all_paths` with them.
 
         Returns:
             list: All found paths (returns empty list when no path is found).

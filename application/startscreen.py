@@ -15,5 +15,6 @@ class Startscreen:
         plt.savefig(buf, bbox_inches='tight', format='jpg', dpi=800)
         buf.seek(0)
         self.image = Image.open(buf)
-        self.image = self.image.convert("RGBA")
+        self.image: Image = self.image.convert("RGBA")
+        """Welcoming image."""
         buf.close()

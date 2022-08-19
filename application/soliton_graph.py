@@ -11,7 +11,7 @@ class SolitonGraph:
     """
 
     def __init__(self, user_input: str):
-        """Initializes a soliton graph object by using the input string of the user.
+        """Initializes a `SolitonGraph` object by using the input string of the user.
         """
         self.exterior_nodes: dict
         """Exterior nodes (node id as key, node label as value)."""
@@ -19,15 +19,15 @@ class SolitonGraph:
         """Exterior nodes (node label as key, node id as value)."""
         self.exterior_nodes, self.exterior_nodes_reverse = self.find_exterior_nodes(user_input)
         self.pysmiles_smiles: str = self.create_pysmiles_smiles(user_input)
-        """Smiles string for use with pysmiles."""
+        """`SMILES` string for use with `pysmiles`."""
         self.rdkit_smiles: str = self.create_rdkit_smiles(user_input)
-        """Smiles string for use with rdkit."""
+        """`SMILES` string for use with `rdkit`."""
         self.bindings: dict = self.create_binding_dict()
         """Binding types (edge as key, binding type as value)."""
         self.graph: nx.Graph = self.smiles_to_graph()
-        """Graph."""
+        """Graph that represents the molecule."""
         self.double_edge_positions: dict = self.find_double_edge_positions()
-        """Positions for a second line (edge) for each edge."""
+        """Positions for a second line (that can be plotted) for each edge."""
         self.labels: dict = nx.get_node_attributes(self.graph, 'label')
         """Node labels (node id as key, node label as value)."""
 
@@ -78,10 +78,10 @@ class SolitonGraph:
         return exterior_nodes, exterior_nodes_reverse
 
     def exterior_nodes_name_collision(self):
-        """Checks for name collisions of exterior nodes.
+        """Checks for name collisions between exterior nodes.
 
         Returns:
-            bool: True, if user used same exterior node label more than once, False otherwise.
+            bool: `True`, if user used same exterior node label more than once, `False` otherwise.
         """
         flipped = {}
         for key, value in self.exterior_nodes.items():
@@ -93,13 +93,13 @@ class SolitonGraph:
         return False
 
     def create_pysmiles_smiles(self, user_input: str):
-        """Transforms user input in smiles representation (treating exterior nodes as Cs now).
+        """Transforms user input in `SMILES` representation (treating exterior nodes as Cs now).
 
         Args:
             user_input (str): User input.
 
         Returns:
-            str: Smiles string (used with pysmiles).
+            str: `SMILES` string (used with `pysmiles`).
         """
         pysmiles_smiles = re.sub(r"[{][0-9]*[}]", "(C)", user_input)
         pysmiles_smiles = re.sub(r"[{][-][0-9]*[}]", "(-C)", pysmiles_smiles)
@@ -109,14 +109,14 @@ class SolitonGraph:
 
 
     def create_rdkit_smiles(self, user_input: str):
-        """Transforms user input in extra smiles representation
-            because rdkit needs smiles without double edges at exterior nodes (otherwise some valence error occurs).
+        """Transforms user input in extra `SMILES` representation
+            because `rdkit` needs string without double edges at exterior nodes (otherwise some valence error occurs).
 
         Args:
             user_input (str): User input.
 
         Returns:
-            str: Modified smiles string (used with rdkit).
+            str: Modified `SMILES` string (used with `rdkit`).
         """
         rdkit_smiles = re.sub(r"[{][-=]*[0-9]*[}]", "(C)", user_input)
 
@@ -140,7 +140,7 @@ class SolitonGraph:
 
 
     def next_node_label(self, node_label: str):
-        """Finds the next node label for a given node label. Helping method for initialisation of graph in smiles_to_graph.
+        """Finds the next node label for a given node label. Used in initialisation of graph in `smiles_to_graph`.
 
         Args:
             node_label (str): Given node label.
@@ -164,7 +164,7 @@ class SolitonGraph:
 
 
     def smiles_to_graph(self):
-        """Transforms user input into molecule and then into nx graph.
+        """Transforms user input into `rdkit` molecule and then into `networkx` graph.
 
         Returns:
             nx.Graph: Graph that visualizes the molecule.

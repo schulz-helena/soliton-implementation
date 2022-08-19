@@ -3,6 +3,7 @@ import io
 import matplotlib.pyplot as plt
 import networkx as nx
 from PIL import Image
+
 from soliton_graph import SolitonGraph
 
 
@@ -17,8 +18,8 @@ class Visualisation:
         Args:
             soliton_graph (SolitonGraph): Soliton graph that should be visualised.
             bindings (dict): Binding types for each edge in the graph.
-            show (bool): Whether or not the plot should be displayed (use False when using visualisation in animation, use True when using it as a stand-alone visualisation).
-            to_image (bool): Whether or not the plot should be returned as a PIL image.
+            show (bool): Whether or not the plot should be displayed (use `False` when using visualisation in animation, use `True` when using it as a stand-alone visualisation).
+            to_image (bool): Whether or not the plot should be returned as a `PIL` image.
         """
 
         def plot_double_edges(graph: nx.Graph, bindings: dict, double_edge_positions: dict):

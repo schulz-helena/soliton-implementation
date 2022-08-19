@@ -4,28 +4,28 @@ import io
 import math
 import re
 
-import resources
-from animation import Animation
 from PIL.ImageQt import ImageQt
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QDialog, QMainWindow, QMessageBox, QScrollArea
+
+import resources
+from animation import Animation
 from soliton_automata import MiniSolitonAutomata
 from soliton_graph import SolitonGraph
 from soliton_path import SolitonPath
+from startscreen import Startscreen
 from visualisation import Visualisation
 
-from startscreen import Startscreen
 
-
-class Ui_MainWindow(QMainWindow):
-    """Main Window of the GUI. Inherits from class QMainWindow.
+class MainWindow(QMainWindow):
+    """Main Window of the GUI. Inherits from class `QMainWindow`.
     """
     def __init__(self):
-        """"Initializes the main window.
+        """Initializes the main window.
         Displays a welcoming text and all necessary widgets for the user to specify and submit a molecule.
         All other widgets are hidden for now and are revealed step by step, so user is guided through the use of the application.
         """
-        super(Ui_MainWindow, self).__init__()
+        super(MainWindow, self).__init__()
         self.setObjectName("MainWindow")
         # move window to the top of the screen + to the center horizontally
         qt_rectangle = self.frameGeometry()
@@ -214,7 +214,7 @@ class Ui_MainWindow(QMainWindow):
     def submit_molecule_clicked(self):
         """Method that is called when user clicks button to submit the specified molecule.
         Catches errors if user used the wrong syntax or specified a molecule that does not fulfill the requirements of a soliton graph.
-        If the user's molecule is valid it displays the graph of the molecule. It then also reveals a safe button for the graph visualisation and
+        If the user's molecule is valid it displays the graph of the molecule. It then also reveals a save button for the graph visualisation and
         all the necessary widgets for the user to choose a pair of exterior nodes.
         """
         self.node_1.clear()
@@ -319,7 +319,7 @@ class Ui_MainWindow(QMainWindow):
     def save_clicked(self):
         """Method that is called when user clicks button to save the graph visualisation.
         Opens a file dialog in which user can specify a path where the image should be saved.
-        Only allows .jpg, .png and .jpeg file suffixes.
+        Only allows `.jpg`, `.png` and `.jpeg` file suffixes.
         """
         option = QtWidgets.QFileDialog.Options()
         name = QtWidgets.QFileDialog.getSaveFileName(self.centralwidget, 'Save File', 'graph.jpg', 'Images (*.jpg *.png *.jpeg)', options = option)
@@ -339,7 +339,7 @@ class Ui_MainWindow(QMainWindow):
         """Method that is called when user clicks button to submit a pair of exterior nodes.
         Computes all possible soliton paths between the two chosen nodes.
         Informs the user if no soliton path exists between them.
-        Otherwise all the necessary widgets for the user to choose a computed soliton path and look at different information on that path are revealed.
+        Otherwise all the necessary widgets for the user to choose a computed soliton path and look at further information on it are revealed.
         """
         self.path_index = None # we need this variable later in show_animation_clicked
         self.paths.clear()
@@ -379,7 +379,7 @@ class Ui_MainWindow(QMainWindow):
         def save_matrices():
             """Opens a file dialog in which user can specify a path where a text file with all adjacency matrices should be saved.
             Text file also contains the input string representing the molecule and the soliton path.
-            Only allows .txt file suffix.
+            Only allows `.txt` file suffix.
             """
             option = QtWidgets.QFileDialog.Options()
             name = QtWidgets.QFileDialog.getSaveFileName(self.centralwidget, 'Save File', 'matrices.txt', 'Text files (*.txt)', options = option)
@@ -459,7 +459,7 @@ class Ui_MainWindow(QMainWindow):
 
         def save_end_result():
             """Opens a file dialog in which user can specify a path where the resulting graph should be saved.
-            Only allows .jpg, .png and .jpeg file suffixes.
+            Only allows `.jpg`, `.png` and `.jpeg` file suffixes.
             """
             option = QtWidgets.QFileDialog.Options()
             name = QtWidgets.QFileDialog.getSaveFileName(self.centralwidget, 'Save File', 'result.jpg', 'Images (*.jpg *.png *.jpeg)', options = option)
@@ -495,12 +495,12 @@ class Ui_MainWindow(QMainWindow):
     def show_animation_clicked(self):
         """Method that is called when user clicks button to have the animation of the soliton traversing the graph displayed.
         Makes a small window pop up that shows the animation and provides a save button.
-        Instead of displaying the gif it uses a sequence of PIL images and always shows the next image after a certain time.
+        Instead of displaying the `gif` it uses a sequence of `PIL` images and always shows the next image after a certain time.
         """
         
         def save_animation():
             """Opens a file dialog in which user can specify a path where the animation should be saved.
-            Only allows .gif file suffix.
+            Only allows `.gif` file suffix.
             """
             option = QtWidgets.QFileDialog.Options()
             name = QtWidgets.QFileDialog.getSaveFileName(self.centralwidget, 'Save File', 'animation.gif', 'Images (*.gif)', options = option)
@@ -539,7 +539,7 @@ class Ui_MainWindow(QMainWindow):
 
         Args:
             label (QtWidgets.QLabel): Displays the animation's images.
-            pil_images (list): PIL images that should be displayed step by step.
+            pil_images (list): `PIL` images that should be displayed step by step.
             desired_path (SolitonPath): Soliton path that is traversed in animation.
         """
         im = pil_images[self.step]
@@ -553,9 +553,9 @@ class Ui_MainWindow(QMainWindow):
 
     def stop_animation(self, event):
         """Stops the timer that is used for the animation.
-        Without this method the application would crash if the animation window is closed.
+        Without this method the application would crash if the animation window would get closed.
         Args:
-            event: Close event of the show animation window.
+            event: Close event of the window that shows animation.
         """
         self.timer.disconnect()
 
@@ -572,7 +572,7 @@ class Ui_MainWindow(QMainWindow):
 
 
     def heightForWidth(self, width: float):
-        """Compute height for a given width.
+        """Computes height for a given width.
 
         Args:
             width (float): Given width.
@@ -584,7 +584,7 @@ class Ui_MainWindow(QMainWindow):
 
 
     def widthForHeight(self, height):
-        """Compute width for a given height.
+        """Computes width for a given height.
 
         Args:
             height (float): Given height.
@@ -596,12 +596,12 @@ class Ui_MainWindow(QMainWindow):
 
 
     def resizeEvent(self, event: QtGui.QResizeEvent):
-        """Keeps the right ratio of the graph visualisation image (or welcoming screen in the beginning) when window is resized.
+        """Keeps the right aspect ratio of the graph visualisation image (or welcoming screen in the beginning) when window is resized.
 
         Args:
             event (QtGui.QResizeEvent): Resize event.
         """
-        super(Ui_MainWindow, self).resizeEvent(event)
+        super(MainWindow, self).resizeEvent(event)
         size = event.size()
         # window height minus height of all widgets below the label result in height of pixmap
         height = size.height() - self.save.height() - self.submit_molecule.height() - self.submit_exterior_nodes.height() - self.paths.height() - self.show_animation.height()
@@ -613,13 +613,13 @@ class Ui_MainWindow(QMainWindow):
 
 
 if __name__ == "__main__":
-    """Initializes object of class Ui_MainWindow, sets style sheet of the window and then executes the application.
+    """Initializes object of class `Ui_MainWindow`, sets style sheet of the window and then executes the application.
     """
     import sys
     app = QtWidgets.QApplication(sys.argv)
-    window = Ui_MainWindow()
+    window = MainWindow()
     window.show()
-    with open('styles.css', 'r') as f:
+    with open('application/styles.css', 'r') as f:
         style = f.read()
         app.setStyleSheet(style)
     sys.exit(app.exec_())

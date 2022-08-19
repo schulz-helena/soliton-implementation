@@ -11,7 +11,7 @@ class SolitonPath:
     """
 
     def __init__(self, soliton_graph: SolitonGraph, path: list):
-        """Initializes a soliton path object.
+        """Initializes a `SolitonPath` object.
         """
         self.path: list = path
         """Path consisting of node ids."""
@@ -74,7 +74,7 @@ class SolitonPath:
         """Finds the adjacency matrix for each timestep of traversal of a path.
 
         Returns:
-            list: Contains matrix for each timestep.
+            list: Contains `Numpy` matrix for each timestep.
         """
         np.set_printoptions(edgeitems=1000, linewidth=100000) # make sure even large matrices are displayed without new lines inside the matrix
         soliton_graph_copy = copy.deepcopy(self.soliton_graph)
