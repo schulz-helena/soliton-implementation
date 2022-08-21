@@ -1,4 +1,4 @@
 unused.py
 .DS_Store
 *__pycache__
-framework_tests
+framework-tests
