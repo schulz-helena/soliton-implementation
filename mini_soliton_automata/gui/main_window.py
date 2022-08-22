@@ -4,17 +4,17 @@ import io
 import math
 import re
 
+import res.resources
 from PIL.ImageQt import ImageQt
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QDialog, QMainWindow, QMessageBox, QScrollArea
+from soliton_classes.soliton_automata import MiniSolitonAutomata
+from soliton_classes.soliton_graph import SolitonGraph
+from soliton_classes.soliton_path import SolitonPath
+from visualisations.animation import Animation
+from visualisations.visualisation import Visualisation
 
-import resources
-from animation import Animation
-from soliton_automata import MiniSolitonAutomata
-from soliton_graph import SolitonGraph
-from soliton_path import SolitonPath
-from startscreen import Startscreen
-from visualisation import Visualisation
+from gui.startscreen import Startscreen
 
 
 class MainWindow(QMainWindow):
@@ -610,16 +610,3 @@ class MainWindow(QMainWindow):
         else:
             width = self.widthForHeight(height)
         self.display_molecule.setPixmap(QtGui.QPixmap.fromImage(self.qim).scaled(width, height, QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation))
-
-
-if __name__ == "__main__":
-    """Initializes object of class `Ui_MainWindow`, sets style sheet of the window and then executes the application.
-    """
-    import sys
-    app = QtWidgets.QApplication(sys.argv)
-    window = MainWindow()
-    window.show()
-    with open('application/styles.css', 'r') as f:
-        style = f.read()
-        app.setStyleSheet(style)
-    sys.exit(app.exec_())

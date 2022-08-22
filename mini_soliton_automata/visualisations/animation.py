@@ -5,10 +5,10 @@ from matplotlib import animation
 from matplotlib.axes import Axes
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from PIL import Image
+from soliton_classes.soliton_graph import SolitonGraph
+from soliton_classes.soliton_path import SolitonPath
 
-from soliton_graph import SolitonGraph
-from soliton_path import SolitonPath
-from visualisation import Visualisation
+from visualisations.visualisation import Visualisation
 
 
 class Animation:

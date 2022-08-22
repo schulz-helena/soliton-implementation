@@ -2,8 +2,8 @@ import copy
 
 import networkx as nx
 
-from soliton_graph import SolitonGraph
-from soliton_path import SolitonPath
+from soliton_classes.soliton_graph import SolitonGraph
+from soliton_classes.soliton_path import SolitonPath
 
 
 class MiniSolitonAutomata:
