@@ -21,7 +21,7 @@ setup(
     packages = ['mini_soliton_automata', 'mini_soliton_automata.gui', 'mini_soliton_automata.res', 'mini_soliton_automata.soliton_classes', 'mini_soliton_automata.visualisations'],
     python_requires = '>3.9',
     install_requires = [
-        'rdkit==2021.09.5',
+        'rdkit>=2021.09.5',
         'networkx==2.7.1',
         'ffmpeg==5.0.0',
         'pysmiles==1.0.1',

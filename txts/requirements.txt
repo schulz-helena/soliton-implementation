@@ -1,4 +1,4 @@
-rdkit==2021.09.5
+rdkit>=2021.09.5
 networkx==2.7.1
 ffmpeg==5.0.0
 pysmiles==1.0.1
