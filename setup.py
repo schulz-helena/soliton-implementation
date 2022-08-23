@@ -29,6 +29,7 @@ setup(
         'numpy==1.22.0',
         'Pillow==9.0.1'
     ],
+    data_files=[('/', ['styles.css'])],
     include_package_data=True,
     entry_points = {
         'console_scripts': [
