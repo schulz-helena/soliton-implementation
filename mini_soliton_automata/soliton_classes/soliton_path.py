@@ -2,8 +2,7 @@ import copy
 
 import networkx as nx
 import numpy as np
-
-from soliton_classes.soliton_graph import SolitonGraph
+from mini_soliton_automata.soliton_classes.soliton_graph import SolitonGraph
 
 
 class SolitonPath:

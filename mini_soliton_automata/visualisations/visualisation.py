@@ -2,8 +2,8 @@ import io
 
 import matplotlib.pyplot as plt
 import networkx as nx
+from mini_soliton_automata.soliton_classes.soliton_graph import SolitonGraph
 from PIL import Image
-from soliton_classes.soliton_graph import SolitonGraph
 
 
 class Visualisation:

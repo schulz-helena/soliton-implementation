@@ -4,11 +4,10 @@ import numpy as np
 from matplotlib import animation
 from matplotlib.axes import Axes
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+from mini_soliton_automata.soliton_classes.soliton_graph import SolitonGraph
+from mini_soliton_automata.soliton_classes.soliton_path import SolitonPath
+from mini_soliton_automata.visualisations.visualisation import Visualisation
 from PIL import Image
-from soliton_classes.soliton_graph import SolitonGraph
-from soliton_classes.soliton_path import SolitonPath
-
-from visualisations.visualisation import Visualisation
 
 
 class Animation:
