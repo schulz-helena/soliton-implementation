@@ -12,7 +12,7 @@ def main():
     app = QtWidgets.QApplication(sys.argv)
     window = MainWindow()
     window.show()
-    with open(os.path.join('mini_soliton_automata', 'styles.css'), 'r') as f:
+    with open(os.path.join('styles.css'), 'r') as f:
         style = f.read()
         app.setStyleSheet(style)
     sys.exit(app.exec_())
