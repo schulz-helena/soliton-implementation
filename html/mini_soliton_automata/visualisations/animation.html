@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.10.0" />
-<title>animation API documentation</title>
-<meta name="description" content="" />
+<title>mini_soliton_automata.visualisations.animation API documentation</title>
+<meta name="description" content="Animation of a soliton traversing a graph." />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
 <link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
@@ -19,24 +19,26 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>animation</code></h1>
+<h1 class="title">Module <code>mini_soliton_automata.visualisations.animation</code></h1>
 </header>
 <section id="section-intro">
+<p>Animation of a soliton traversing a graph.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">import matplotlib.pyplot as plt
+<pre><code class="python">&#34;&#34;&#34;Animation of a soliton traversing a graph.
+&#34;&#34;&#34;
+import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
 from matplotlib import animation
 from matplotlib.axes import Axes
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+from mini_soliton_automata.soliton_classes.soliton_graph import SolitonGraph
+from mini_soliton_automata.soliton_classes.soliton_path import SolitonPath
+from mini_soliton_automata.visualisations.visualisation import Visualisation
 from PIL import Image
-
-from soliton_graph import SolitonGraph
-from soliton_path import SolitonPath
-from visualisation import Visualisation
 
 
 class Animation:
@@ -147,13 +149,13 @@ class Animation:
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
-<dt id="animation.Animation"><code class="flex name class">
+<dt id="mini_soliton_automata.visualisations.animation.Animation"><code class="flex name class">
 <span>class <span class="ident">Animation</span></span>
-<span>(</span><span>soliton_graph: soliton_graph.SolitonGraph, soliton_path: soliton_path.SolitonPath)</span>
+<span>(</span><span>soliton_graph: <a title="mini_soliton_automata.soliton_classes.soliton_graph.SolitonGraph" href="../soliton_classes/soliton_graph.html#mini_soliton_automata.soliton_classes.soliton_graph.SolitonGraph">SolitonGraph</a>, soliton_path: <a title="mini_soliton_automata.soliton_classes.soliton_path.SolitonPath" href="../soliton_classes/soliton_path.html#mini_soliton_automata.soliton_classes.soliton_path.SolitonPath">SolitonPath</a>)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Animation of a soliton (displayed as a black pebble) traversing a graph.</p>
-<p>Initializes an <code><a title="animation.Animation" href="#animation.Animation">Animation</a></code> object by using a soliton graph and a soliton path.</p></div>
+<p>Initializes an <code><a title="mini_soliton_automata.visualisations.animation.Animation" href="#mini_soliton_automata.visualisations.animation.Animation">Animation</a></code> object by using a soliton graph and a soliton path.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -258,26 +260,26 @@ class Animation:
 </details>
 <h3>Instance variables</h3>
 <dl>
-<dt id="animation.Animation.pil_images"><code class="name">var <span class="ident">pil_images</span></code></dt>
+<dt id="mini_soliton_automata.visualisations.animation.Animation.pil_images"><code class="name">var <span class="ident">pil_images</span></code></dt>
 <dd>
 <div class="desc"><p><code>PIL</code> images for each timestep in animation.</p></div>
 </dd>
-<dt id="animation.Animation.plots_and_arrays"><code class="name">var <span class="ident">plots_and_arrays</span></code></dt>
+<dt id="mini_soliton_automata.visualisations.animation.Animation.plots_and_arrays"><code class="name">var <span class="ident">plots_and_arrays</span></code></dt>
 <dd>
 <div class="desc"><p>Plots and plots as arrays for each timestep in animation.</p></div>
 </dd>
-<dt id="animation.Animation.soliton_graph"><code class="name">var <span class="ident">soliton_graph</span></code></dt>
+<dt id="mini_soliton_automata.visualisations.animation.Animation.soliton_graph"><code class="name">var <span class="ident">soliton_graph</span></code></dt>
 <dd>
 <div class="desc"><p>Graph that should be animated.</p></div>
 </dd>
-<dt id="animation.Animation.soliton_path"><code class="name">var <span class="ident">soliton_path</span></code></dt>
+<dt id="mini_soliton_automata.visualisations.animation.Animation.soliton_path"><code class="name">var <span class="ident">soliton_path</span></code></dt>
 <dd>
 <div class="desc"><p>Path the soliton should traverse in animation.</p></div>
 </dd>
 </dl>
 <h3>Methods</h3>
 <dl>
-<dt id="animation.Animation.graph_animation"><code class="name flex">
+<dt id="mini_soliton_automata.visualisations.animation.Animation.graph_animation"><code class="name flex">
 <span>def <span class="ident">graph_animation</span></span>(<span>self)</span>
 </code></dt>
 <dd>
@@ -328,7 +330,7 @@ class Animation:
     return ani</code></pre>
 </details>
 </dd>
-<dt id="animation.Animation.list_of_pil_images"><code class="name flex">
+<dt id="mini_soliton_automata.visualisations.animation.Animation.list_of_pil_images"><code class="name flex">
 <span>def <span class="ident">list_of_pil_images</span></span>(<span>self)</span>
 </code></dt>
 <dd>
@@ -357,7 +359,7 @@ class Animation:
     return pil_images</code></pre>
 </details>
 </dd>
-<dt id="animation.Animation.list_of_plots_and_arrays"><code class="name flex">
+<dt id="mini_soliton_automata.visualisations.animation.Animation.list_of_plots_and_arrays"><code class="name flex">
 <span>def <span class="ident">list_of_plots_and_arrays</span></span>(<span>self)</span>
 </code></dt>
 <dd>
@@ -415,18 +417,23 @@ class Animation:
 <ul></ul>
 </div>
 <ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="mini_soliton_automata.visualisations" href="index.html">mini_soliton_automata.visualisations</a></code></li>
+</ul>
+</li>
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
 <li>
-<h4><code><a title="animation.Animation" href="#animation.Animation">Animation</a></code></h4>
+<h4><code><a title="mini_soliton_automata.visualisations.animation.Animation" href="#mini_soliton_automata.visualisations.animation.Animation">Animation</a></code></h4>
 <ul class="">
-<li><code><a title="animation.Animation.graph_animation" href="#animation.Animation.graph_animation">graph_animation</a></code></li>
-<li><code><a title="animation.Animation.list_of_pil_images" href="#animation.Animation.list_of_pil_images">list_of_pil_images</a></code></li>
-<li><code><a title="animation.Animation.list_of_plots_and_arrays" href="#animation.Animation.list_of_plots_and_arrays">list_of_plots_and_arrays</a></code></li>
-<li><code><a title="animation.Animation.pil_images" href="#animation.Animation.pil_images">pil_images</a></code></li>
-<li><code><a title="animation.Animation.plots_and_arrays" href="#animation.Animation.plots_and_arrays">plots_and_arrays</a></code></li>
-<li><code><a title="animation.Animation.soliton_graph" href="#animation.Animation.soliton_graph">soliton_graph</a></code></li>
-<li><code><a title="animation.Animation.soliton_path" href="#animation.Animation.soliton_path">soliton_path</a></code></li>
+<li><code><a title="mini_soliton_automata.visualisations.animation.Animation.graph_animation" href="#mini_soliton_automata.visualisations.animation.Animation.graph_animation">graph_animation</a></code></li>
+<li><code><a title="mini_soliton_automata.visualisations.animation.Animation.list_of_pil_images" href="#mini_soliton_automata.visualisations.animation.Animation.list_of_pil_images">list_of_pil_images</a></code></li>
+<li><code><a title="mini_soliton_automata.visualisations.animation.Animation.list_of_plots_and_arrays" href="#mini_soliton_automata.visualisations.animation.Animation.list_of_plots_and_arrays">list_of_plots_and_arrays</a></code></li>
+<li><code><a title="mini_soliton_automata.visualisations.animation.Animation.pil_images" href="#mini_soliton_automata.visualisations.animation.Animation.pil_images">pil_images</a></code></li>
+<li><code><a title="mini_soliton_automata.visualisations.animation.Animation.plots_and_arrays" href="#mini_soliton_automata.visualisations.animation.Animation.plots_and_arrays">plots_and_arrays</a></code></li>
+<li><code><a title="mini_soliton_automata.visualisations.animation.Animation.soliton_graph" href="#mini_soliton_automata.visualisations.animation.Animation.soliton_graph">soliton_graph</a></code></li>
+<li><code><a title="mini_soliton_automata.visualisations.animation.Animation.soliton_path" href="#mini_soliton_automata.visualisations.animation.Animation.soliton_path">soliton_path</a></code></li>
 </ul>
 </li>
 </ul>

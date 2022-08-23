@@ -1,3 +1,5 @@
+"""Mini version of a soliton automata.
+"""
 import copy
 
 import networkx as nx

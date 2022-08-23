@@ -1,3 +1,5 @@
+"""Computation of startscreen.
+"""
 import io
 
 import matplotlib.pyplot as plt

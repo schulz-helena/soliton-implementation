@@ -1,3 +1,5 @@
+"""Soliton path.
+"""
 import copy
 
 import networkx as nx

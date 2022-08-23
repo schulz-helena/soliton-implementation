@@ -1,4 +1,4 @@
-"""GUI of the Mini Soliton Automata Software.
+"""GUI of the software.
  """
 import io
 import math

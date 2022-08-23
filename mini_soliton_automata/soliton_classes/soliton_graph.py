@@ -1,3 +1,5 @@
+"""Soliton graph.
+"""
 import re
 
 import networkx as nx

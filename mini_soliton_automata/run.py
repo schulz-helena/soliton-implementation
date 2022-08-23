@@ -1,3 +1,4 @@
+"""Starts the application."""
 import os
 import sys
 

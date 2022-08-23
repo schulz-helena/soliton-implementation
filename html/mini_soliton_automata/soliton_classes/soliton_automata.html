@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.10.0" />
-<title>soliton_automata API documentation</title>
-<meta name="description" content="" />
+<title>mini_soliton_automata.soliton_classes.soliton_automata API documentation</title>
+<meta name="description" content="Mini version of a soliton automata." />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
 <link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
@@ -19,19 +19,21 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>soliton_automata</code></h1>
+<h1 class="title">Module <code>mini_soliton_automata.soliton_classes.soliton_automata</code></h1>
 </header>
 <section id="section-intro">
+<p>Mini version of a soliton automata.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">import copy
+<pre><code class="python">&#34;&#34;&#34;Mini version of a soliton automata.
+&#34;&#34;&#34;
+import copy
 
 import networkx as nx
-
-from soliton_graph import SolitonGraph
-from soliton_path import SolitonPath
+from mini_soliton_automata.soliton_classes.soliton_graph import SolitonGraph
+from mini_soliton_automata.soliton_classes.soliton_path import SolitonPath
 
 
 class MiniSolitonAutomata:
@@ -179,13 +181,13 @@ class MiniSolitonAutomata:
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
-<dt id="soliton_automata.MiniSolitonAutomata"><code class="flex name class">
+<dt id="mini_soliton_automata.soliton_classes.soliton_automata.MiniSolitonAutomata"><code class="flex name class">
 <span>class <span class="ident">MiniSolitonAutomata</span></span>
 <span>(</span><span>soliton_graph, start, end)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Representation of part of a soliton automata, which finds all soliton paths for a given pair of exterior nodes.</p>
-<p>Initializes a <code><a title="soliton_automata.MiniSolitonAutomata" href="#soliton_automata.MiniSolitonAutomata">MiniSolitonAutomata</a></code> object by using a soliton graph and a pair of exterior nodes, represented as node labels.</p></div>
+<p>Initializes a <code><a title="mini_soliton_automata.soliton_classes.soliton_automata.MiniSolitonAutomata" href="#mini_soliton_automata.soliton_classes.soliton_automata.MiniSolitonAutomata">MiniSolitonAutomata</a></code> object by using a soliton graph and a pair of exterior nodes, represented as node labels.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -327,26 +329,26 @@ class MiniSolitonAutomata:
 </details>
 <h3>Instance variables</h3>
 <dl>
-<dt id="soliton_automata.MiniSolitonAutomata.end"><code class="name">var <span class="ident">end</span></code></dt>
+<dt id="mini_soliton_automata.soliton_classes.soliton_automata.MiniSolitonAutomata.end"><code class="name">var <span class="ident">end</span></code></dt>
 <dd>
 <div class="desc"><p>Second exterior node/ end node of soliton paths.</p></div>
 </dd>
-<dt id="soliton_automata.MiniSolitonAutomata.soliton_graph"><code class="name">var <span class="ident">soliton_graph</span></code></dt>
+<dt id="mini_soliton_automata.soliton_classes.soliton_automata.MiniSolitonAutomata.soliton_graph"><code class="name">var <span class="ident">soliton_graph</span></code></dt>
 <dd>
 <div class="desc"><p>Soliton graph the automata is based on.</p></div>
 </dd>
-<dt id="soliton_automata.MiniSolitonAutomata.soliton_paths"><code class="name">var <span class="ident">soliton_paths</span></code></dt>
+<dt id="mini_soliton_automata.soliton_classes.soliton_automata.MiniSolitonAutomata.soliton_paths"><code class="name">var <span class="ident">soliton_paths</span></code></dt>
 <dd>
 <div class="desc"><p>All found soliton paths between given pair of exterior nodes.</p></div>
 </dd>
-<dt id="soliton_automata.MiniSolitonAutomata.start"><code class="name">var <span class="ident">start</span></code></dt>
+<dt id="mini_soliton_automata.soliton_classes.soliton_automata.MiniSolitonAutomata.start"><code class="name">var <span class="ident">start</span></code></dt>
 <dd>
 <div class="desc"><p>First exterior node/ start node of soliton paths.</p></div>
 </dd>
 </dl>
 <h3>Methods</h3>
 <dl>
-<dt id="soliton_automata.MiniSolitonAutomata.build_copies"><code class="name flex">
+<dt id="mini_soliton_automata.soliton_classes.soliton_automata.MiniSolitonAutomata.build_copies"><code class="name flex">
 <span>def <span class="ident">build_copies</span></span>(<span>self, akt: int, path: list, bindings: dict, bind: int)</span>
 </code></dt>
 <dd>
@@ -400,7 +402,7 @@ class MiniSolitonAutomata:
     return akt_copy, path_copy, bindings_copy, bind_copy</code></pre>
 </details>
 </dd>
-<dt id="soliton_automata.MiniSolitonAutomata.build_soliton_paths"><code class="name flex">
+<dt id="mini_soliton_automata.soliton_classes.soliton_automata.MiniSolitonAutomata.build_soliton_paths"><code class="name flex">
 <span>def <span class="ident">build_soliton_paths</span></span>(<span>self, paths: list)</span>
 </code></dt>
 <dd>
@@ -436,7 +438,7 @@ class MiniSolitonAutomata:
     return soliton_paths</code></pre>
 </details>
 </dd>
-<dt id="soliton_automata.MiniSolitonAutomata.call_find_all_paths"><code class="name flex">
+<dt id="mini_soliton_automata.soliton_classes.soliton_automata.MiniSolitonAutomata.call_find_all_paths"><code class="name flex">
 <span>def <span class="ident">call_find_all_paths</span></span>(<span>self)</span>
 </code></dt>
 <dd>
@@ -468,7 +470,7 @@ class MiniSolitonAutomata:
     return res</code></pre>
 </details>
 </dd>
-<dt id="soliton_automata.MiniSolitonAutomata.change_bindings"><code class="name flex">
+<dt id="mini_soliton_automata.soliton_classes.soliton_automata.MiniSolitonAutomata.change_bindings"><code class="name flex">
 <span>def <span class="ident">change_bindings</span></span>(<span>self, bindings: dict, edge: tuple)</span>
 </code></dt>
 <dd>
@@ -507,7 +509,7 @@ class MiniSolitonAutomata:
     return bindings</code></pre>
 </details>
 </dd>
-<dt id="soliton_automata.MiniSolitonAutomata.find_all_paths"><code class="name flex">
+<dt id="mini_soliton_automata.soliton_classes.soliton_automata.MiniSolitonAutomata.find_all_paths"><code class="name flex">
 <span>def <span class="ident">find_all_paths</span></span>(<span>self, graph: networkx.classes.graph.Graph, bindings: dict, end: int, path: list, akt: int, bind: int, paths: list)</span>
 </code></dt>
 <dd>
@@ -592,20 +594,25 @@ A path can only be a soliton path if the edges traversed by the soliton have alt
 <ul></ul>
 </div>
 <ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="mini_soliton_automata.soliton_classes" href="index.html">mini_soliton_automata.soliton_classes</a></code></li>
+</ul>
+</li>
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
 <li>
-<h4><code><a title="soliton_automata.MiniSolitonAutomata" href="#soliton_automata.MiniSolitonAutomata">MiniSolitonAutomata</a></code></h4>
+<h4><code><a title="mini_soliton_automata.soliton_classes.soliton_automata.MiniSolitonAutomata" href="#mini_soliton_automata.soliton_classes.soliton_automata.MiniSolitonAutomata">MiniSolitonAutomata</a></code></h4>
 <ul class="two-column">
-<li><code><a title="soliton_automata.MiniSolitonAutomata.build_copies" href="#soliton_automata.MiniSolitonAutomata.build_copies">build_copies</a></code></li>
-<li><code><a title="soliton_automata.MiniSolitonAutomata.build_soliton_paths" href="#soliton_automata.MiniSolitonAutomata.build_soliton_paths">build_soliton_paths</a></code></li>
-<li><code><a title="soliton_automata.MiniSolitonAutomata.call_find_all_paths" href="#soliton_automata.MiniSolitonAutomata.call_find_all_paths">call_find_all_paths</a></code></li>
-<li><code><a title="soliton_automata.MiniSolitonAutomata.change_bindings" href="#soliton_automata.MiniSolitonAutomata.change_bindings">change_bindings</a></code></li>
-<li><code><a title="soliton_automata.MiniSolitonAutomata.end" href="#soliton_automata.MiniSolitonAutomata.end">end</a></code></li>
-<li><code><a title="soliton_automata.MiniSolitonAutomata.find_all_paths" href="#soliton_automata.MiniSolitonAutomata.find_all_paths">find_all_paths</a></code></li>
-<li><code><a title="soliton_automata.MiniSolitonAutomata.soliton_graph" href="#soliton_automata.MiniSolitonAutomata.soliton_graph">soliton_graph</a></code></li>
-<li><code><a title="soliton_automata.MiniSolitonAutomata.soliton_paths" href="#soliton_automata.MiniSolitonAutomata.soliton_paths">soliton_paths</a></code></li>
-<li><code><a title="soliton_automata.MiniSolitonAutomata.start" href="#soliton_automata.MiniSolitonAutomata.start">start</a></code></li>
+<li><code><a title="mini_soliton_automata.soliton_classes.soliton_automata.MiniSolitonAutomata.build_copies" href="#mini_soliton_automata.soliton_classes.soliton_automata.MiniSolitonAutomata.build_copies">build_copies</a></code></li>
+<li><code><a title="mini_soliton_automata.soliton_classes.soliton_automata.MiniSolitonAutomata.build_soliton_paths" href="#mini_soliton_automata.soliton_classes.soliton_automata.MiniSolitonAutomata.build_soliton_paths">build_soliton_paths</a></code></li>
+<li><code><a title="mini_soliton_automata.soliton_classes.soliton_automata.MiniSolitonAutomata.call_find_all_paths" href="#mini_soliton_automata.soliton_classes.soliton_automata.MiniSolitonAutomata.call_find_all_paths">call_find_all_paths</a></code></li>
+<li><code><a title="mini_soliton_automata.soliton_classes.soliton_automata.MiniSolitonAutomata.change_bindings" href="#mini_soliton_automata.soliton_classes.soliton_automata.MiniSolitonAutomata.change_bindings">change_bindings</a></code></li>
+<li><code><a title="mini_soliton_automata.soliton_classes.soliton_automata.MiniSolitonAutomata.end" href="#mini_soliton_automata.soliton_classes.soliton_automata.MiniSolitonAutomata.end">end</a></code></li>
+<li><code><a title="mini_soliton_automata.soliton_classes.soliton_automata.MiniSolitonAutomata.find_all_paths" href="#mini_soliton_automata.soliton_classes.soliton_automata.MiniSolitonAutomata.find_all_paths">find_all_paths</a></code></li>
+<li><code><a title="mini_soliton_automata.soliton_classes.soliton_automata.MiniSolitonAutomata.soliton_graph" href="#mini_soliton_automata.soliton_classes.soliton_automata.MiniSolitonAutomata.soliton_graph">soliton_graph</a></code></li>
+<li><code><a title="mini_soliton_automata.soliton_classes.soliton_automata.MiniSolitonAutomata.soliton_paths" href="#mini_soliton_automata.soliton_classes.soliton_automata.MiniSolitonAutomata.soliton_paths">soliton_paths</a></code></li>
+<li><code><a title="mini_soliton_automata.soliton_classes.soliton_automata.MiniSolitonAutomata.start" href="#mini_soliton_automata.soliton_classes.soliton_automata.MiniSolitonAutomata.start">start</a></code></li>
 </ul>
 </li>
 </ul>

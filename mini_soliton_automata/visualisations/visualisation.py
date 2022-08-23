@@ -1,3 +1,5 @@
+"""Visualisation of a soliton graph.
+"""
 import io
 
 import matplotlib.pyplot as plt
