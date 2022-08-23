@@ -1,5 +1,6 @@
 import os
 import sys
+from pathlib import Path
 
 from PyQt5 import QtWidgets
 
@@ -12,9 +13,11 @@ def main():
     app = QtWidgets.QApplication(sys.argv)
     window = MainWindow()
     window.show()
-    with open(os.path.join('styles.css'), 'r') as f:
-        style = f.read()
-        app.setStyleSheet(style)
+    #with open(os.path.join('styles.css'), 'r') as f:
+        #style = f.read()
+    this_directory = Path(__file__).parent
+    style = (this_directory / 'styles.css').read_text()
+    app.setStyleSheet(style)
     sys.exit(app.exec_())
 
 
