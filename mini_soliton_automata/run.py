@@ -3,7 +3,7 @@ import sys
 
 from PyQt5 import QtWidgets
 
-from gui.main_window import MainWindow
+from mini_soliton_automata.gui.main_window import MainWindow
 
 if __name__ == "__main__":
     """Initializes object of class `MainWindow`, sets style sheet of the window and then executes the application.
