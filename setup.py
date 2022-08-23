@@ -1,10 +1,9 @@
 """Setup script for mini-soliton-automata-software
 """
 
-import os
 from pathlib import Path
 
-from setuptools import setup
+from setuptools import find_packages, setup
 
 this_directory = Path(__file__).parent
 long_description = (this_directory / "README.md").read_text()
@@ -18,7 +17,7 @@ setup(
     author = 'Helena Schulz',
     author_email = 'schulz-helena@gmx.de',
     url = 'https://github.com/schulz-helena/soliton-implementation',
-    packages = ['mini_soliton_automata'],
+    packages = find_packages(),
     python_requires = '>3.9',
     install_requires = [
         'rdkit>=2021.09.5',
