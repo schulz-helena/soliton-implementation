@@ -23,7 +23,7 @@ setup(
     install_requires = [
         'rdkit>=2021.09.5',
         'networkx==2.7.1',
-        'ffmpeg==5.0.0',
+        'ffmpeg>=1.4',
         'pysmiles==1.0.1',
         'matplotlib==3.5.1',
         'Pyqt5==5.15.4',
