@@ -1,7 +1,6 @@
 """Setup script for mini-soliton-automata-software
 """
 
-#from pathlib import Path
 import os
 
 from setuptools import setup
@@ -9,8 +8,6 @@ from setuptools import setup
 readme_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'README.md')
 with open(readme_path, "r", encoding="utf-8") as fh:
     long_description = fh.read()
-#this_directory = Path(__file__).parent
-#long_description = (this_directory / "README.md").read_text()
 
 setup(
     name = 'mini-soliton-automata',
