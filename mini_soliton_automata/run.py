@@ -5,7 +5,8 @@ from PyQt5 import QtWidgets
 
 from mini_soliton_automata.gui.main_window import MainWindow
 
-if __name__ == "__main__":
+
+def main():
     """Initializes object of class `MainWindow`, sets style sheet of the window and then executes the application.
     """
     app = QtWidgets.QApplication(sys.argv)
@@ -15,3 +16,7 @@ if __name__ == "__main__":
         style = f.read()
         app.setStyleSheet(style)
     sys.exit(app.exec_())
+
+
+if __name__ == "__main__":
+    main()
