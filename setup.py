@@ -18,7 +18,7 @@ setup(
     author = 'Helena Schulz',
     author_email = 'schulz-helena@gmx.de',
     url = 'https://github.com/schulz-helena/soliton-implementation',
-    packages = ['mini_soliton_automata', 'mini_soliton_automata.gui', 'mini_soliton_automata.res', 'mini_soliton_automata.soliton_classes', 'mini_soliton_automata.visualisations'],
+    packages = ['mini_soliton_automata', 'gui', 'res', 'soliton_classes', 'visualisations'],
     python_requires = '>3.9',
     install_requires = [
         'rdkit>=2021.09.5',
