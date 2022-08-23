@@ -27,7 +27,7 @@ setup(
         'pysmiles==1.0.1',
         'matplotlib==3.5.1',
         'Pyqt5==5.15.4',
-        'numpy==1.21.2',
+        'numpy==1.22.0',
         'Pillow==9.0.1'
     ],
     include_package_data=True,
