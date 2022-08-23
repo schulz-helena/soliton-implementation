@@ -3,7 +3,7 @@
 
 from pathlib import Path
 
-from setuptools import find_packages, setup
+from setuptools import setup
 
 this_directory = Path(__file__).parent
 long_description = (this_directory / "README.md").read_text()
@@ -17,7 +17,7 @@ setup(
     author = 'Helena Schulz',
     author_email = 'schulz-helena@gmx.de',
     url = 'https://github.com/schulz-helena/soliton-implementation',
-    packages = find_packages(),
+    packages = ['mini_soliton_automata', 'mini_soliton_automata.gui', 'mini_soliton_automata.res', 'mini_soliton_automata.soliton_classes', 'mini_soliton_automata.visualisations'],
     python_requires = '>3.9',
     install_requires = [
         'rdkit>=2021.09.5',
