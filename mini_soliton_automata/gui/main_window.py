@@ -508,7 +508,7 @@ class MainWindow(QMainWindow):
             if name != ('', ''):
                 path = name[0]
                 ani = self.my_animation.graph_animation()
-                ani.save(path, writer='ffmpeg')
+                ani.save(path, writer='pillow', dpi = 1200)
                 print(animation.writers.list())
 
         dlg = QDialog()
