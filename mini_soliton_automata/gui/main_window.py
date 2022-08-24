@@ -407,12 +407,15 @@ class MainWindow(QMainWindow):
             long_labels = False
         for key in self.my_graph.labels:
             if long_labels:
-                if self.my_graph.labels[key] in self.my_graph.exterior_nodes_reverse:
+                if self.my_graph.labels[key] in self.my_graph.exterior_nodes_reverse and int(self.my_graph.labels[key]) < 10:
                     matrix_label_horizontal = matrix_label_horizontal + f"{self.my_graph.labels[key]}  "
                 else:
                     matrix_label_horizontal = matrix_label_horizontal + f"{self.my_graph.labels[key]} "
             else:
-                matrix_label_horizontal = matrix_label_horizontal + f"{self.my_graph.labels[key]}  "
+                if self.my_graph.labels[key] in self.my_graph.exterior_nodes_reverse and int(self.my_graph.labels[key]) >= 10:
+                    matrix_label_horizontal = matrix_label_horizontal + f"{self.my_graph.labels[key]} "
+                else:
+                    matrix_label_horizontal = matrix_label_horizontal + f"{self.my_graph.labels[key]}  "
         # for show-matrices-window the node labels are added to the matrix string and this labelled matrix is added to scroll area
         # for matrices.txt we add everything (horizontal label and every row of matrix) line by line
         for i in range(len(desired_path.adjacency_matrices_list)):
@@ -425,15 +428,19 @@ class MainWindow(QMainWindow):
             matrix = re.sub(r"[)]", "", matrix)
             for j in range(len(matrix.splitlines())):
                 if long_labels:
-                    if self.my_graph.labels[j] in self.my_graph.exterior_nodes_reverse:
+                    if self.my_graph.labels[j] in self.my_graph.exterior_nodes_reverse and int(self.my_graph.labels[j]) < 10:
                         matrix_labelled = matrix_labelled + f"{self.my_graph.labels[j]} {matrix.splitlines()[j]} \n"
                         txt_text = txt_text + f"{self.my_graph.labels[j]} {matrix.splitlines()[j]} \n"
                     else:
                         matrix_labelled = matrix_labelled + f"{self.my_graph.labels[j]}{matrix.splitlines()[j]} \n"
                         txt_text = txt_text + f"{self.my_graph.labels[j]}{matrix.splitlines()[j]} \n"
                 else:
-                    matrix_labelled = matrix_labelled + f"{self.my_graph.labels[j]}{matrix.splitlines()[j]} \n"
-                    txt_text = txt_text + f"{self.my_graph.labels[j]}{matrix.splitlines()[j]} \n"
+                    if self.my_graph.labels[j] in self.my_graph.exterior_nodes_reverse and int(self.my_graph.labels[j]) >= 10:
+                        matrix_labelled = matrix_labelled + f"{self.my_graph.labels[j]}{matrix.splitlines()[j][1:]} \n"
+                        txt_text = txt_text + f"{self.my_graph.labels[j]}{matrix.splitlines()[j][1:]} \n"
+                    else:
+                        matrix_labelled = matrix_labelled + f"{self.my_graph.labels[j]}{matrix.splitlines()[j]} \n"
+                        txt_text = txt_text + f"{self.my_graph.labels[j]}{matrix.splitlines()[j]} \n"
             txt_text = txt_text + f"\n"
             vbox.addWidget(QtWidgets.QLabel(matrix_labelled))
         widget.setLayout(vbox)
