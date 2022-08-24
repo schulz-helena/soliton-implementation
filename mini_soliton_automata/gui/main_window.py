@@ -5,6 +5,7 @@ import math
 import re
 
 import mini_soliton_automata.res.resources
+from matplotlib import animation
 from mini_soliton_automata.gui.startscreen import Startscreen
 from mini_soliton_automata.soliton_classes.soliton_automata import \
     MiniSolitonAutomata
@@ -508,6 +509,7 @@ class MainWindow(QMainWindow):
                 path = name[0]
                 ani = self.my_animation.graph_animation()
                 ani.save(path, writer='ffmpeg')
+                print(animation.writers.list())
 
         dlg = QDialog()
         label = QtWidgets.QLabel(dlg)
