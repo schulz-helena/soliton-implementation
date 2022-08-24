@@ -35,7 +35,7 @@ This SMILES representation is extended by a rule concerning the specification of
 - Carbon atoms are marked with `C`.
 - Single bonds are marked with `-` or no character at all.
 - Double bonds are marked with `=`.
-<img src="pics_input_syntax/InputSyntax1.png" width="200">
+![Atoms and bonds](pics_input_syntax/InputSyntax1.png =300x)
 - Branches are embedded in round brackets.
 ![Branch](pics_input_syntax/InputSyntax2.png)
 - The two connecting atoms of a ring are marked with the same number (e.g. `C1` and `C1`).
