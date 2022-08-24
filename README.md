@@ -1,5 +1,6 @@
 # soliton-implementation
 **Author: Helena Schulz**
+
 This repository contains an implementation of the soliton model.
 It provides the Mini Soliton Automata Software which can be used to compute all soliton paths between two exterior nodes of a soliton graph.
 
@@ -9,6 +10,7 @@ These visualisations use letters to mark inner nodes and numbers to mark exterio
 
 ## Getting started
 First, make sure that the latest version of pip is installed on your computer/ virtual environment.
+
 You can download the package containing the software via terminal by tiping in
 ```shell
 pip install git+https://github.com/schulz-helena/soliton-implementation
@@ -31,11 +33,19 @@ The syntax of the input is based on the Simplified Molecular Input Line Entry Sp
 This SMILES representation is extended by a rule concerning the specification of exterior nodes.
 
 - Carbon atoms are marked with `C`.
-- Single edges are marked with `-` or no character at all.
-- Double edges are marked with `=`.
+- Single bonds are marked with `-` or no character at all.
+- Double bonds are marked with `=`.
+![Atoms and bonds](pics_input_syntax/InputSyntax1.png)
 - Branches are embedded in round brackets.
+![Branch](pics_input_syntax/InputSyntax2.png)
 - The two connecting atoms of a ring are marked with the same number (e.g. `C1` and `C1`).
 These atoms are connected by a single bond.
-- Exterior nodes are marked with a binding and a number embedded in braces (e.g. `{=1}`).
+![Ring](pics_input_syntax/InputSyntax3.png)
+- Exterior nodes are marked with a bond and a number embedded in braces (e.g. `{=1}`).
+![Ring](pics_input_syntax/InputSyntax4.png)
 
-Bindings of atoms inside parenthesis always have to be put inside of them (not in front!).
+Bond of atoms inside parenthesis always have to be put inside of them (not in front!).
+
+### Examples of soliton graphs
+![Soliton graph 1](pics_input_syntax/SolitonGraph1.png)
+![Soliton graph 2](pics_input_syntax/SolitonGraph2.png)
