@@ -35,17 +35,21 @@ This SMILES representation is extended by a rule concerning the specification of
 - Carbon atoms are marked with `C`.
 - Single bonds are marked with `-` or no character at all.
 - Double bonds are marked with `=`.
-![Atoms and bonds](pics_input_syntax/InputSyntax1.png =300x)
+<img src="pics_input_syntax/InputSyntax1.png" alt="Atoms and bonds" width="300"/>
+
 - Branches are embedded in round brackets.
-![Branch](pics_input_syntax/InputSyntax2.png)
+<img src="pics_input_syntax/InputSyntax2.png" alt="Branch" width="300"/>
+
 - The two connecting atoms of a ring are marked with the same number (e.g. `C1` and `C1`).
 These atoms are connected by a single bond.
-![Ring](pics_input_syntax/InputSyntax3.png)
+<img src="pics_input_syntax/InputSyntax3.png" alt="Ring" width="300"/>
+
 - Exterior nodes are marked with a bond and a number embedded in braces (e.g. `{=1}`).
-![Ring](pics_input_syntax/InputSyntax4.png)
+<img src="pics_input_syntax/InputSyntax4.png" alt="Exterior node" width="300"/>
 
 Bond of atoms inside parenthesis always have to be put inside of them (not in front!).
 
 ### Examples of soliton graphs
-![Soliton graph 1](pics_input_syntax/Solitongraph1.png)
-![Soliton graph 2](pics_input_syntax/Solitongraph2.png)
+<img src="pics_input_syntax/Solitongraph1.png" alt="Soliton graph 1" width="300"/>
+
+<img src="pics_input_syntax/Solitongraph2.png" alt="Soliton graph 2" width="300"/>
