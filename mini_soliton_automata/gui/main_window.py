@@ -5,7 +5,6 @@ import math
 import re
 
 import mini_soliton_automata.res.resources
-from matplotlib import animation
 from mini_soliton_automata.gui.startscreen import Startscreen
 from mini_soliton_automata.soliton_classes.soliton_automata import \
     MiniSolitonAutomata
@@ -508,8 +507,7 @@ class MainWindow(QMainWindow):
             if name != ('', ''):
                 path = name[0]
                 ani = self.my_animation.graph_animation()
-                ani.save(path, writer='pillow', dpi = 1200)
-                print(animation.writers.list())
+                ani.save(path, writer='pillow', dpi = 600)
 
         dlg = QDialog()
         label = QtWidgets.QLabel(dlg)
