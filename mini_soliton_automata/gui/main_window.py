@@ -310,9 +310,9 @@ class MainWindow(QMainWindow):
             details = details + f"- Carbon atoms are marked with 'C' \n"
             details = details + f"- Single edges are marked with '-' or no character at all \n"
             details = details + f"- Double edges are marked with '=' \n"
-            details = details + f"- Branches are embedded in round brackets (e.g. 'C=(CC=C)C')\n"
+            details = details + f"- Branches are embedded in round brackets (e.g. 'C(=CC=C)C')\n"
             details = details + f"- The two connecting atoms of a ring are marked with the same number (e.g. 'C1' and 'C1') \n"
-            details = details + "- Exterior nodes are marked with braces and a number (e.g. '{1}')"
+            details = details + "- Exterior nodes are marked with braces and a number (e.g. '{=1}')"
             msg.setDetailedText(details)
             x = msg.exec_()
 
