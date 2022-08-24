@@ -35,7 +35,7 @@ This SMILES representation is extended by a rule concerning the specification of
 - Carbon atoms are marked with `C`.
 - Single bonds are marked with `-` or no character at all.
 - Double bonds are marked with `=`.
-![Atoms and bonds](pics_input_syntax/InputSyntax1.png)
+<img src="pics_input_syntax/InputSyntax1.png" width="200">
 - Branches are embedded in round brackets.
 ![Branch](pics_input_syntax/InputSyntax2.png)
 - The two connecting atoms of a ring are marked with the same number (e.g. `C1` and `C1`).
@@ -47,5 +47,5 @@ These atoms are connected by a single bond.
 Bond of atoms inside parenthesis always have to be put inside of them (not in front!).
 
 ### Examples of soliton graphs
-![Soliton graph 1](pics_input_syntax/SolitonGraph1.png)
-![Soliton graph 2](pics_input_syntax/SolitonGraph2.png)
+![Soliton graph 1](pics_input_syntax/Solitongraph1.png)
+![Soliton graph 2](pics_input_syntax/Solitongraph2.png)
