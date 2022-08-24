@@ -308,8 +308,8 @@ class MainWindow(QMainWindow):
             msg.setStyleSheet(" QPushButton{ height: 32px; width: 130px}")
             details = f"Reminder - this is how you define a molecule: \n"
             details = details + f"- Carbon atoms are marked with 'C' \n"
-            details = details + f"- Single edges are marked with '-' or no character at all \n"
-            details = details + f"- Double edges are marked with '=' \n"
+            details = details + f"- Single bonds are marked with '-' or no character at all \n"
+            details = details + f"- Double bonds are marked with '=' \n"
             details = details + f"- Branches are embedded in round brackets (e.g. 'C(=CC=C)C')\n"
             details = details + f"- The two connecting atoms of a ring are marked with the same number (e.g. 'C1' and 'C1') \n"
             details = details + "- Exterior nodes are marked with braces and a number (e.g. '{=1}')"
