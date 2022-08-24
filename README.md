@@ -1,23 +1,41 @@
 # soliton-implementation
-Implementation of the soliton model 
+**Author: Helena Schulz**
+This repository contains an implementation of the soliton model.
+It provides the Mini Soliton Automata Software which can be used to compute all soliton paths between two exterior nodes of a soliton graph.
 
-## Praktikum
-- [x] Visualisation
-  - [x] Find proper framework(s)
-  - [x] Visualize soliton graphs
-- [x] Check for validity of soliton graphs
-- [x] Animation
-  - [x]  Find way to animate a soliton traversing the molecule
-- [x] Computation of soliton paths
-    - [x]  Make soliton choose every possible edge at each node in some case
-    - [x]  Let soliton change every bond it traverses
-- [x] Write software 
-  - [x] Allow user to define input molecule
-  - [X] Write a GUI
-  - [x] Implement possibility to skip step by step animation and show result immediately
-  - [x] Build application
+The software's graphical interface gives the user the possibility to specify a soliton graph and a pair of exterior nodes.
+It also shows visualisations of this graph and the found soliton paths.
+These visualisations use letters to mark inner nodes and numbers to mark exterior nodes.
 
-## Bachelorarbeit
-- [ ] Extend implementation to multiple solitons
-- [ ] Check if soliton graph is deterministic
-- [ ] Find impervious paths
+## Getting started
+First, make sure that the latest version of pip is installed on your computer/ virtual environment.
+You can download the package containing the software via terminal by tiping in
+```shell
+pip install git+https://github.com/schulz-helena/soliton-implementation
+```
+
+## Usage
+To start the software use
+```shell
+mini-soliton-automata-software
+```
+First specify a molecule by using the Input Syntax described below.
+The molecule will then get converted into a soliton graph.
+Next choose a pair of exterior nodes.
+The soliton will enter the soliton graph at the first exterior node and leave it at the second exterior node.
+All possible soliton paths between these nodes will be computed and made available to choose from.
+Now you can look at the soliton graph's adjacency matrices for every timestep of traversal of the soliton path, the end result and an animation of the soliton traversing the selected path.
+
+## Input Syntax
+The syntax of the input is based on the Simplified Molecular Input Line Entry Specification (SMILES) that is used to represent molecules as strings.
+This SMILES representation is extended by a rule concerning the specification of exterior nodes.
+
+- Carbon atoms are marked with `C`.
+- Single edges are marked with `-` or no character at all.
+- Double edges are marked with `=`.
+- Branches are embedded in round brackets.
+- The two connecting atoms of a ring are marked with the same number (e.g. `C1` and `C1`).
+These atoms are connected by a single bond.
+- Exterior nodes are marked with a binding and a number embedded in braces (e.g. `{=1}`).
+
+Bindings of atoms inside parenthesis always have to be put inside of them (not in front!).
