@@ -35,17 +35,17 @@ This SMILES representation is extended by a rule concerning the specification of
 - Carbon atoms are marked with `C`.
 - Single bonds are marked with `-` or no character at all.
 - Double bonds are marked with `=`.
-<img src="pics_input_syntax/InputSyntax1.png" alt="Atoms and bonds" width="400"/>
+<img src="pics_input_syntax/InputSyntax1.png" alt="Atoms and bonds" width="350"/>
 
 - Branches are embedded in round brackets.
-<img src="pics_input_syntax/InputSyntax2.png" alt="Branch" width="400"/>
+<img src="pics_input_syntax/InputSyntax2.png" alt="Branch" width="350"/>
 
 - The two connecting atoms of a ring are marked with the same number (e.g. `C1` and `C1`).
 These atoms are connected by a single bond.
-<img src="pics_input_syntax/InputSyntax3.png" alt="Ring" width="400"/>
+<img src="pics_input_syntax/InputSyntax3.png" alt="Ring" width="350"/>
 
 - Exterior nodes are marked with a bond and a number embedded in braces.
-<img src="pics_input_syntax/InputSyntax4.png" alt="Exterior node" width="400"/>
+<img src="pics_input_syntax/InputSyntax4.png" alt="Exterior node" width="350"/>
 
 Bonds of atoms inside parenthesis always have to be put inside of them, not in front (e.g. `C(=C)` instead of `C=(C)`)!
 
