@@ -4,7 +4,7 @@ import sys
 
 from PyQt5 import QtWidgets
 
-from mini_soliton_automata.gui.main_window import MainWindow
+from gui.main_window import MainWindow
 
 
 def main():

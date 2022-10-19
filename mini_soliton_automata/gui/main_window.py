@@ -4,17 +4,17 @@ import io
 import math
 import re
 
-import mini_soliton_automata.res.resources
-from mini_soliton_automata.gui.startscreen import Startscreen
-from mini_soliton_automata.soliton_classes.soliton_automata import \
-    MiniSolitonAutomata
-from mini_soliton_automata.soliton_classes.soliton_graph import SolitonGraph
-from mini_soliton_automata.soliton_classes.soliton_path import SolitonPath
-from mini_soliton_automata.visualisations.animation import Animation
-from mini_soliton_automata.visualisations.visualisation import Visualisation
+import res.resources
 from PIL.ImageQt import ImageQt
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QDialog, QMainWindow, QMessageBox, QScrollArea
+from soliton_classes.mini_soliton_automata import MiniSolitonAutomata
+from soliton_classes.soliton_graph import SolitonGraph
+from soliton_classes.soliton_path import SolitonPath
+from visualisations.animation import Animation
+from visualisations.visualisation import Visualisation
+
+from gui.startscreen import Startscreen
 
 
 class MainWindow(QMainWindow):
@@ -524,14 +524,14 @@ class MainWindow(QMainWindow):
         if self.path_index != self.paths.currentIndex():
             self.path_index = self.paths.currentIndex()
             self.desired_path = self.automata.soliton_paths[self.path_index]
-            self.my_animation = Animation(self.my_graph, self.desired_path)
+            self.my_animation = Animation(self.my_graph, self.desired_path) # TODO: Checken, ob bis hierher kommt
             self.pil_images = self.my_animation.pil_images
 
         self.step = 0
         self.timer = QtCore.QTimer(self)
         self.timer.timeout.connect(lambda: self.update_image(label, self.pil_images, self.desired_path))
         self.timer.start(800) # triggers event every 800 milliseconds
-        self.update_image(label, self.pil_images, self.desired_path)
+        self.update_image(label, self.pil_images, self.desired_path) # TODO: Checken, ob bis hierher kommt
         save_button = QtWidgets.QPushButton("Save", dlg)
         save_button.setGeometry(QtCore.QRect(470, 375, 70, 30))
         save_button.clicked.connect(save_animation)
