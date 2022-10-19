@@ -22,7 +22,7 @@ setup(
     python_requires = '>3.9',
     install_requires = [
         'rdkit>=2021.09.5',
-        'networkx>=2.7.1',
+        'networkx>=2.6',
         'pysmiles>=1.0.1',
         'matplotlib>=3.5.1',
         'Pyqt5>=5.15.4',
