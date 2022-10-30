@@ -3,18 +3,21 @@
 import io
 import math
 import re
+from threading import Thread
+#from time import time
+import time
 
-import mini_soliton_automata.res.resources
-from mini_soliton_automata.gui.startscreen import Startscreen
-from mini_soliton_automata.soliton_classes.soliton_automata import \
-    MiniSolitonAutomata
-from mini_soliton_automata.soliton_classes.soliton_graph import SolitonGraph
-from mini_soliton_automata.soliton_classes.soliton_path import SolitonPath
-from mini_soliton_automata.visualisations.animation import Animation
-from mini_soliton_automata.visualisations.visualisation import Visualisation
+import res.resources
 from PIL.ImageQt import ImageQt
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QDialog, QMainWindow, QMessageBox, QScrollArea
+from soliton_classes.mini_soliton_automata import MiniSolitonAutomata
+from soliton_classes.soliton_graph import SolitonGraph
+from soliton_classes.soliton_path import SolitonPath
+from visualisations.animation import Animation
+from visualisations.visualisation import Visualisation
+
+from gui.startscreen import Startscreen
 
 
 class MainWindow(QMainWindow):
@@ -518,8 +521,8 @@ class MainWindow(QMainWindow):
                 ani.save(path, writer='pillow', dpi = 600)
 
         dlg = QDialog()
-        label = QtWidgets.QLabel(dlg)
-        label.setGeometry(QtCore.QRect(0, 0, 540, 405))
+        self.label = QtWidgets.QLabel(dlg)
+        self.label.setGeometry(QtCore.QRect(0, 0, 540, 405))
         
         if self.path_index != self.paths.currentIndex():
             self.path_index = self.paths.currentIndex()
@@ -527,14 +530,13 @@ class MainWindow(QMainWindow):
             self.my_animation = Animation(self.my_graph, self.desired_path)
             self.pil_images = self.my_animation.pil_images
 
-        self.step = 0
-        self.timer = QtCore.QTimer(self)
-        self.timer.timeout.connect(lambda: self.update_image(label, self.pil_images, self.desired_path))
-        self.timer.start(800) # triggers event every 800 milliseconds
-        self.update_image(label, self.pil_images, self.desired_path)
         save_button = QtWidgets.QPushButton("Save", dlg)
         save_button.setGeometry(QtCore.QRect(470, 375, 70, 30))
         save_button.clicked.connect(save_animation)
+        self.step = 0
+        self.timer = QtCore.QTimer(self)
+        self.timer.timeout.connect(self.update_image)
+        self.timer.start(800) # triggers event every 800 millisecond
 
         dlg.setWindowTitle("Animation")
         dlg.setFixedSize(545, 410)
@@ -542,7 +544,7 @@ class MainWindow(QMainWindow):
         dlg.exec_()
     
 
-    def update_image(self, label: QtWidgets.QLabel, pil_images: list, desired_path: SolitonPath):
+    def update_image(self):
         """Displays next image of animation after a certain time (method is triggered by a timer).
 
         Args:
@@ -550,12 +552,12 @@ class MainWindow(QMainWindow):
             pil_images (list): `PIL` images that should be displayed step by step.
             desired_path (SolitonPath): Soliton path that is traversed in animation.
         """
-        im = pil_images[self.step]
+        im = self.pil_images[self.step]
         qim = ImageQt(im)
-        label.setPixmap(QtGui.QPixmap.fromImage(qim))
-        label.setScaledContents(True)
+        self.label.setPixmap(QtGui.QPixmap.fromImage(qim.copy()))
+        self.label.setScaledContents(True)
         self.step += 1
-        if self.step == len(desired_path.path): # start animation all over again as soon as end is reached (endless loop)
+        if self.step == len(self.desired_path.path): # start animation all over again as soon as end is reached (endless loop)
             self.step = 0
 
 

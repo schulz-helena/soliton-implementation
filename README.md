@@ -12,7 +12,7 @@ First, make sure that the latest version of pip is installed on your computer/ v
 
 You can download the package containing the software via terminal by using the command
 ```shell
-pip install git+https://github.com/schulz-helena/soliton-implementation
+pip install git+https://github.com/schulz-helena/soliton-implementation@v1.0.0
 ```
 
 ## Usage
