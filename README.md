@@ -50,6 +50,10 @@ These atoms are connected by a single bond.
 Bonds of atoms inside parenthesis always have to be put inside of them, not in front (e.g. `C(=C)` instead of `C=(C)`)!
 
 ### Examples of soliton graphs
+C1{1}=C{2}C1{=3}
+
 <img src="pics_input_syntax/Solitongraph1.png" alt="Soliton graph 1" width="500"/>
+
+C1=CC=CC=C1C=C{1}C=CC{2}=CC2=CC=CC=C2
 
 <img src="pics_input_syntax/Solitongraph2.png" alt="Soliton graph 2" width="500"/>
