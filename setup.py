@@ -19,10 +19,10 @@ setup(
     author_email = 'schulz-helena@gmx.de',
     url = 'https://github.com/schulz-helena/soliton-implementation',
     packages = ['mini_soliton_automata', 'mini_soliton_automata.gui', 'mini_soliton_automata.res', 'mini_soliton_automata.soliton_classes', 'mini_soliton_automata.visualisations'],
-    python_requires = '>3.9',
+    python_requires = '>=3.7',
     install_requires = [
         'rdkit>=2021.09.5',
-        'networkx>=2.7.1',
+        'networkx>=2.6',
         'pysmiles>=1.0.1',
         'matplotlib>=3.5.1',
         'Pyqt5>=5.15.4',
