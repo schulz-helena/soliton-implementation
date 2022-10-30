@@ -3,21 +3,18 @@
 import io
 import math
 import re
-from threading import Thread
-#from time import time
-import time
 
-import res.resources
+import mini_soliton_automata.res.resources
 from PIL.ImageQt import ImageQt
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QDialog, QMainWindow, QMessageBox, QScrollArea
-from soliton_classes.mini_soliton_automata import MiniSolitonAutomata
-from soliton_classes.soliton_graph import SolitonGraph
-from soliton_classes.soliton_path import SolitonPath
-from visualisations.animation import Animation
-from visualisations.visualisation import Visualisation
+from mini_soliton_automata.soliton_classes.mini_soliton_automata import MiniSolitonAutomata
+from mini_soliton_automata.soliton_classes.soliton_graph import SolitonGraph
+from mini_soliton_automata.soliton_classes.soliton_path import SolitonPath
+from mini_soliton_automata.visualisations.animation import Animation
+from mini_soliton_automata.visualisations.visualisation import Visualisation
 
-from gui.startscreen import Startscreen
+from mini_soliton_automata.gui.startscreen import Startscreen
 
 
 class MainWindow(QMainWindow):
