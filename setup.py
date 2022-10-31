@@ -11,7 +11,7 @@ with open(readme_path, "r", encoding="utf-8") as fh:
 
 setup(
     name = 'mini-soliton-automata',
-    version = '1.0.0',
+    version = '1.1.0',
     description = 'Mini Soliton Automata Software that computes soliton paths for a given molecule and pair of exterior nodes',
     long_description=long_description,
     long_description_content_type="text/markdown",
