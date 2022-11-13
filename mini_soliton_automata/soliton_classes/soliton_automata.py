@@ -4,7 +4,6 @@ import copy
 
 import networkx as nx
 import numpy as np
-
 from soliton_classes.soliton_graph import SolitonGraph
 from soliton_classes.soliton_path import SolitonPath
 
@@ -18,27 +17,32 @@ class SolitonAutomata:
         """
         self.soliton_graph: SolitonGraph = soliton_graph
         """Soliton graph the automata is based on."""
-        self.soliton_paths: list
-        """All found soliton paths."""
         self.deterministic: bool
-        "Whether the soliton graph is deterministic."
+        """Whether the soliton graph is deterministic."""
         self.strongly_deterministic: bool
-        "Whether the soliton graph is strongly deterministic."
-        self.soliton_paths, self.deterministic, self.strongly_deterministic = self.all_paths_and_determinism()
+        """Whether the soliton graph is strongly deterministic."""
+        self.states_plus_soliton_paths: dict
+        """All states of the soliton graph plus all soliton paths that can be found in each state
+        (Id/ string of the states adjacency matrix as key and state and soliton paths as values)."""
+        self.deterministic, self.strongly_deterministic, self.states_plus_soliton_paths = self.all_paths_and_determinism()
+        initial_matrix_id = self.matrix_to_string(nx.to_numpy_array(self.soliton_graph.graph))
+        self.soliton_paths: list = self.states_plus_soliton_paths[initial_matrix_id][1]
+        """All found soliton paths in initial soliton graph"""
 
 
-    def build_soliton_paths(self, paths: list):
+    def build_soliton_paths(self, paths: list, soliton_graph: SolitonGraph):
         """Turns paths into objects of class `SolitonPath`.
 
         Args:
             paths (list): Paths that are represented as lists of node ids.
+            soliton_graph (SolitonGraph): Soliton graph the paths were found in.
 
         Returns:
             list: Soliton paths.
         """
         soliton_paths = []
         for path in paths:
-            soliton_path = SolitonPath(self.soliton_graph, path)
+            soliton_path = SolitonPath(soliton_graph, path)
             soliton_paths.append(soliton_path)
 
         return soliton_paths
@@ -127,56 +131,94 @@ class SolitonAutomata:
         return paths # if at some point no new node could be added, then all possible paths are found
     
 
-    def call_find_all_paths_given_nodes(self, start: int, end: int):
-        """Initializes some parameters and then calls `find_all_paths` with them.
+    def call_find_all_paths_given_nodes(self, start: int, end: int, soliton_graph: SolitonGraph):
+        """Initializes some parameters and then calls `find_all_paths_given_nodes` with them.
+
+        Args:
+            start (int): Start node of path.
+            end (int): End node of path.
+            soliton_graph (SolitonGraph): Soliton graph the paths should be found in.
 
         Returns:
             list: All found paths (returns empty list when no path is found).
         """
         paths = []
-        soliton_graph_copy = copy.deepcopy(self.soliton_graph) # working on copy of graph so no unwanted changes are made
+        soliton_graph_copy = copy.deepcopy(soliton_graph) # working on copy of graph so no unwanted changes are made
         graph = soliton_graph_copy.graph
         bindings = soliton_graph_copy.bindings
         path = [start]
         akt = start
         bind = 0
         paths = self.find_all_paths_given_nodes(graph, bindings, end, path, akt, bind, paths)
-        soliton_paths = self.build_soliton_paths(paths)
+        soliton_paths = self.build_soliton_paths(paths, soliton_graph)
         
         return soliton_paths
 
 
     def all_paths_and_determinism(self):
-        """Calls `call_find_all_paths`recursively in order to get all possible soliton paths in a soliton graph.
+        """Calls `call_find_all_paths_given_nodes` for all states of the automata and all pairs of exterior nodes in order to get all possible soliton paths in all states.
+        Checks for determinism with the help of the found states and soliton paths.
 
         Returns:
-            list: All possible soliton paths.
             bool: Whether the soliton graph is deterministic or not.
             bool: Whether the soliton graph is strongly deterministic or not.
+            dict: All states of the soliton graph plus all soliton paths that can be found in each state.
         """
         ext_nodes = []
-        all_paths = []
+        initial_matrix = nx.to_numpy_array(self.soliton_graph.graph)
+        states = [self.soliton_graph] # stores all possible states as soliton graphs, needed to iterate over states 
+        states_plus_soliton_paths = {self.matrix_to_string(initial_matrix): [self.soliton_graph, []]} # stores all states plus all soliton paths that can be found in that state
         deterministic = True
         strongly_deterministic = True
         for key in self.soliton_graph.exterior_nodes:
             ext_nodes.append(key)
-        for i in range(0, len(ext_nodes)):
-            for j in range(0, len(ext_nodes)):
-                paths = self.call_find_all_paths_given_nodes(ext_nodes[i], ext_nodes[j]) # find soliton paths with all pairs of exterior nodes
-                for path in paths:
-                    all_paths.append(path)
-                    if np.array_equal(path.adjacency_matrices_list[len(path.adjacency_matrices_list)-1], paths[0].adjacency_matrices_list[len(paths[0].adjacency_matrices_list)-1]) == False:
-                        deterministic = False # two or more different soliton graphs have emerged although the same pair of exterior nodes was used
-                if len(paths) > 1:
-                    strongly_deterministic = False # more than one soliton path was found between one pair of exterior nodes
+        for state in states: # for all states/ soliton graphs of the automata
+            state_matrix_id = self.matrix_to_string(nx.to_numpy_array(state.graph))
+            all_paths = []
+            for i in range(0, len(ext_nodes)):
+                for j in range(0, len(ext_nodes)): # loop over all pairs of exterior nodes 
+                    paths = self.call_find_all_paths_given_nodes(ext_nodes[i], ext_nodes[j], state) # find soliton paths with all pairs of exterior nodes
+                    for path in paths:
+                        all_paths.append(path)
+                        resulting_matrix = path.adjacency_matrices_list[len(path.adjacency_matrices_list)-1] # adjacency matrix of the soliton graph the path results in
+                        resulting_matrix_id = self.matrix_to_string(resulting_matrix)
+                        if resulting_matrix_id not in states_plus_soliton_paths: # if we found a new state
+                            states_plus_soliton_paths[resulting_matrix_id] = [path.resulting_soliton_graph, []] # add it to the dictionary
+                            states.append(path.resulting_soliton_graph)
+                        if np.array_equal(resulting_matrix, paths[0].adjacency_matrices_list[len(paths[0].adjacency_matrices_list)-1]) == False:
+                            deterministic = False # two or more different soliton graphs have emerged although the same pair of exterior nodes was used
+                    if len(paths) > 1:
+                        strongly_deterministic = False # more than one soliton path was found between one pair of exterior nodes
+            states_plus_soliton_paths[state_matrix_id][1] = all_paths # add all found soliton paths in this state
 
-        return all_paths, deterministic, strongly_deterministic
+        return deterministic, strongly_deterministic, states_plus_soliton_paths
+
+    def matrix_to_string(self, matrix: np.ndarray):
+        """Computes an ID for a matrix.
+
+        Args:
+            matrix (np.ndarray): Matrix whos ID should be computed.
+
+        Returns:
+            str: The computed ID which is a concatination of the matrix's elements in row-wise order.
+        """
+        matrix_id = ""
+        for row in matrix:
+            row_id = ''.join(str(int(elem)) for elem in row)
+            matrix_id = matrix_id + row_id
+        return matrix_id
 
     def find_impervious_paths(self):
+        """Finds all impervious paths of the initial soliton graph.
+
+        Returns:
+            list: The found impervious paths as readable user outputs.
+        """
         unused_edges = list(self.soliton_graph.graph.edges)
-        print(unused_edges)
+        initial_matrix_id = self.matrix_to_string(nx.to_numpy_array(self.soliton_graph.graph))
+        initial_soliton_paths = self.states_plus_soliton_paths[initial_matrix_id][1]
         # remove all edges that are traversed in any soliton path:
-        for soliton_path in self.soliton_paths:
+        for soliton_path in initial_soliton_paths:
             for i, node in enumerate(soliton_path.path):
                 if i < (len(soliton_path.path)-1):
                     if tuple(sorted((node, soliton_path.path[i+1]))) in unused_edges:
