@@ -29,7 +29,7 @@ QComboBox::drop-down {
     border-bottom-right-radius: 10px;
 }
 QComboBox::down-arrow {
-    image: url(:/icons/arrow.png);
+    image: url(:/icons/drop-down-arrow.svg);
     width: 15px;
     height: 15px;
     margin-right: 5px;

@@ -61,6 +61,7 @@ class MainWindow(QMainWindow):
         self.show_end_result.setObjectName("show_end_result")
         self.gridLayout.addWidget(self.show_end_result, 6, 2, 1, 2)
         self.save = QtWidgets.QPushButton(self.centralwidget)
+        self.save.setStyleSheet("QPushButton {background-color: rgb(191, 207, 255); image: url(:/icons/save.svg);} QPushButton::pressed {background-color : rgb(132, 145, 193);}")
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -209,7 +210,7 @@ class MainWindow(QMainWindow):
         self.show_animation.setText(_translate("MainWindow", "Show animation"))
         self.exterior_nodes_label2.setText(_translate("MainWindow", "&"))
         self.show_end_result.setText(_translate("MainWindow", "Show end result"))
-        self.save.setText(_translate("MainWindow", "Save"))
+        #self.save.setText(_translate("MainWindow", "Save"))
         self.show_matrices.setText(_translate("MainWindow", "Show matrices"))
         self.molecule_label.setText(_translate("MainWindow", "Molecule:"))
         self.soliton_paths_label.setText(_translate("MainWindow", "Soliton paths:"))
@@ -482,7 +483,8 @@ class MainWindow(QMainWindow):
         scrollArea.setWidget(widget)
         scrollArea.setStyleSheet("font: 13pt Courier;")
         scrollArea.setFixedSize(540, 405)
-        save_button = QtWidgets.QPushButton("Save", dlg)
+        save_button = QtWidgets.QPushButton(dlg)
+        save_button.setStyleSheet("QPushButton {background-color: rgb(191, 207, 255); image: url(:/icons/save.svg);} QPushButton::pressed {background-color : rgb(132, 145, 193);}")
         save_button.setGeometry(QtCore.QRect(454, 359, 70, 30))
         save_button.clicked.connect(save_matrices)
 
@@ -546,7 +548,8 @@ class MainWindow(QMainWindow):
         label.setGeometry(QtCore.QRect(0, 0, 540, 405))
         label.setPixmap(QtGui.QPixmap.fromImage(qim))
         label.setScaledContents(True)
-        save_button = QtWidgets.QPushButton("Save", dlg)
+        save_button = QtWidgets.QPushButton(dlg)
+        save_button.setStyleSheet("QPushButton {background-color: rgb(191, 207, 255); image: url(:/icons/save.svg);} QPushButton::pressed {background-color : rgb(132, 145, 193);}")
         save_button.setGeometry(QtCore.QRect(470, 375, 70, 30))
         save_button.clicked.connect(save_end_result)
         use_button = QtWidgets.QPushButton("Use", dlg)
@@ -575,6 +578,49 @@ class MainWindow(QMainWindow):
                 ani = self.my_animation.graph_animation()
                 ani.save(path, writer='pillow', dpi = 600)
 
+        def update_image():
+            """Displays next image of animation after a certain time (method is triggered by a timer).
+            """
+            self.step += 1
+            if self.step == len(self.desired_path.path): # start animation all over again as soon as end is reached (endless loop)
+                self.step = 0
+            im = self.pil_images[self.step]
+            qim = ImageQt(im)
+            self.label.setPixmap(QtGui.QPixmap.fromImage(qim.copy()))
+            self.label.setScaledContents(True)
+
+        def update_image_reverse():
+            self.step -= 1
+            if self.step == -1: # if start of animation was reached in the step before then continue at end of animation
+                self.step = len(self.desired_path.path) - 1
+            im = self.pil_images[self.step]
+            qim = ImageQt(im)
+            self.label.setPixmap(QtGui.QPixmap.fromImage(qim.copy()))
+            self.label.setScaledContents(True)
+            
+
+        def pause_animation(button: QtWidgets.QPushButton):
+            if self.timer.isActive():
+                self.timer.stop()
+                button.setStyleSheet("QPushButton {background-color: rgb(191, 207, 255); image: url(:/icons/play.svg);} QPushButton::pressed {background-color : rgb(132, 145, 193);}")
+            else:
+                update_image()
+                self.timer.start(800)
+                button.setStyleSheet("QPushButton {background-color: rgb(191, 207, 255); image: url(:/icons/pause.svg);} QPushButton::pressed {background-color : rgb(132, 145, 193);}")
+
+        def next_img(button: QtWidgets.QPushButton):
+            if self.timer.isActive():
+                self.timer.stop()
+                button.setStyleSheet("QPushButton {background-color: rgb(191, 207, 255); image: url(:/icons/play.svg);} QPushButton::pressed {background-color : rgb(132, 145, 193);}")
+            update_image()
+
+        def prev_img(button: QtWidgets.QPushButton):
+            if self.timer.isActive():
+                self.timer.stop()
+                button.setStyleSheet("QPushButton {background-color: rgb(191, 207, 255); image: url(:/icons/play.svg);} QPushButton::pressed {background-color : rgb(132, 145, 193);}")
+            update_image_reverse()
+            
+
         dlg = QDialog()
         self.label = QtWidgets.QLabel(dlg)
         self.label.setGeometry(QtCore.QRect(0, 0, 540, 405))
@@ -585,35 +631,32 @@ class MainWindow(QMainWindow):
             self.my_animation = Animation(self.my_graph, self.desired_path)
             self.pil_images = self.my_animation.pil_images
 
-        save_button = QtWidgets.QPushButton("Save", dlg)
+        save_button = QtWidgets.QPushButton(dlg)
+        save_button.setStyleSheet("QPushButton {background-color: rgb(191, 207, 255); image: url(:/icons/save.svg);} QPushButton::pressed {background-color : rgb(132, 145, 193);}")
         save_button.setGeometry(QtCore.QRect(470, 375, 70, 30))
         save_button.clicked.connect(save_animation)
-        self.step = 0
+        pause_button = QtWidgets.QPushButton(dlg)
+        pause_button.setStyleSheet("QPushButton {background-color: rgb(191, 207, 255); image: url(:/icons/pause.svg);} QPushButton::pressed {background-color : rgb(132, 145, 193);}")
+        pause_button.setGeometry(QtCore.QRect(240, 375, 30, 30))
+        pause_button.clicked.connect(lambda: pause_animation(pause_button))
+        next_button = QtWidgets.QPushButton(dlg)
+        next_button.setStyleSheet("QPushButton {background-color: rgb(191, 207, 255); image: url(:/icons/right-arrow.svg);} QPushButton::pressed {background-color : rgb(132, 145, 193);}")
+        next_button.setGeometry(QtCore.QRect(275, 375, 30, 30))
+        next_button.clicked.connect(lambda: next_img(pause_button))
+        prev_button = QtWidgets.QPushButton(dlg)
+        prev_button.setStyleSheet("QPushButton {background-color: rgb(191, 207, 255); image: url(:/icons/left-arrow.svg);} QPushButton::pressed {background-color : rgb(132, 145, 193)}")
+        prev_button.setGeometry(QtCore.QRect(205, 375, 30, 30))
+        prev_button.clicked.connect(lambda: prev_img(pause_button))
+        self.step = -1
         self.timer = QtCore.QTimer(self)
-        self.timer.timeout.connect(self.update_image)
+        self.timer.timeout.connect(update_image)
+        update_image()
         self.timer.start(800) # triggers event every 800 millisecond
 
         dlg.setWindowTitle("Animation")
         dlg.setFixedSize(545, 410)
         dlg.closeEvent = self.stop_animation # stop timer when window is closed
         dlg.exec_()
-    
-
-    def update_image(self):
-        """Displays next image of animation after a certain time (method is triggered by a timer).
-
-        Args:
-            label (QtWidgets.QLabel): Displays the animation's images.
-            pil_images (list): `PIL` images that should be displayed step by step.
-            desired_path (SolitonPath): Soliton path that is traversed in animation.
-        """
-        im = self.pil_images[self.step]
-        qim = ImageQt(im)
-        self.label.setPixmap(QtGui.QPixmap.fromImage(qim.copy()))
-        self.label.setScaledContents(True)
-        self.step += 1
-        if self.step == len(self.desired_path.path): # start animation all over again as soon as end is reached (endless loop)
-            self.step = 0
 
 
     def stop_animation(self, event):
