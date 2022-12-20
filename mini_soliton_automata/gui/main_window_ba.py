@@ -575,7 +575,7 @@ class MainWindow(QMainWindow):
             name = QtWidgets.QFileDialog.getSaveFileName(self.centralwidget, 'Save File', 'animation.gif', 'Images (*.gif)', options = option)
             if name != ('', ''):
                 path = name[0]
-                ani = self.my_animation.graph_animation()
+                ani = Animation.graph_animation(self.my_graph, self.desired_path)
                 ani.save(path, writer='pillow', dpi = 600)
 
         def update_image():
@@ -628,8 +628,8 @@ class MainWindow(QMainWindow):
         if self.path_index != self.paths.currentIndex():
             self.path_index = self.paths.currentIndex()
             self.desired_path = self.automata.soliton_paths[self.path_index]
-            self.my_animation = Animation(self.my_graph, self.desired_path)
-            self.pil_images = self.my_animation.pil_images
+            plots_and_arrays = Animation.list_of_plots_and_arrays(self.my_graph, self.desired_path)
+            self.pil_images = Animation.list_of_pil_images(plots_and_arrays)
 
         save_button = QtWidgets.QPushButton(dlg)
         save_button.setStyleSheet("QPushButton {background-color: rgb(191, 207, 255); image: url(:/icons/save.svg);} QPushButton::pressed {background-color : rgb(132, 145, 193);}")

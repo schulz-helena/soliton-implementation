@@ -3,11 +3,12 @@
 import io
 import math
 import re
-from threading import Thread
 #from time import time
 import time
+from threading import Thread
 
 import res.resources
+from gui.startscreen import Startscreen
 from PIL.ImageQt import ImageQt
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QDialog, QMainWindow, QMessageBox, QScrollArea
@@ -16,8 +17,6 @@ from soliton_classes.soliton_graph import SolitonGraph
 from soliton_classes.soliton_path import SolitonPath
 from visualisations.animation import Animation
 from visualisations.visualisation import Visualisation
-
-from gui.startscreen import Startscreen
 
 
 class MainWindow(QMainWindow):
@@ -517,7 +516,7 @@ class MainWindow(QMainWindow):
             name = QtWidgets.QFileDialog.getSaveFileName(self.centralwidget, 'Save File', 'animation.gif', 'Images (*.gif)', options = option)
             if name != ('', ''):
                 path = name[0]
-                ani = self.my_animation.graph_animation()
+                ani = Animation.graph_animation(self.my_graph, self.desired_path)
                 ani.save(path, writer='pillow', dpi = 600)
 
         dlg = QDialog()
@@ -527,8 +526,8 @@ class MainWindow(QMainWindow):
         if self.path_index != self.paths.currentIndex():
             self.path_index = self.paths.currentIndex()
             self.desired_path = self.automata.soliton_paths[self.path_index]
-            self.my_animation = Animation(self.my_graph, self.desired_path)
-            self.pil_images = self.my_animation.pil_images
+            plots_and_arrays = Animation.list_of_plots_and_arrays(self.my_graph, self.desired_path)
+            self.pil_images = Animation.list_of_pil_images(plots_and_arrays)
 
         save_button = QtWidgets.QPushButton("Save", dlg)
         save_button.setGeometry(QtCore.QRect(470, 375, 70, 30))
