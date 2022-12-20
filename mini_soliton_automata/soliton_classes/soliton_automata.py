@@ -9,7 +9,7 @@ from soliton_classes.soliton_path import SolitonPath
 
 
 class SolitonAutomata:
-    """Representation of a soliton automata, which finds all soliton paths between als pairs of exterior nodes.
+    """Representation of a soliton automata, which finds all soliton paths between all pairs of exterior nodes.
     """
 
     def __init__(self, soliton_graph):
@@ -140,7 +140,7 @@ class SolitonAutomata:
             soliton_graph (SolitonGraph): Soliton graph the paths should be found in.
 
         Returns:
-            list: All found paths (returns empty list when no path is found).
+            list: All found paths as soliton paths (returns empty list when no path is found).
         """
         paths = []
         soliton_graph_copy = copy.deepcopy(soliton_graph) # working on copy of graph so no unwanted changes are made
