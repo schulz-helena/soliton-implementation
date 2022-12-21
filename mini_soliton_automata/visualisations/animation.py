@@ -105,7 +105,7 @@ class Animation:
                     unique_positions.append((x,y))
                     soliton_positions[soliton] = (x,y)
     
-            Visualisation.visualize_soliton_graph(soliton_graph, traversal.bindings[frame_num], False, False) # use visualisation of graph at current timestep
+            Visualisation.visualize_soliton_graph(soliton_graph, traversal.bindings_list[frame_num], False, False) # use visualisation of graph at current timestep
             akt_color = 0
             for soliton in soliton_positions:
                 if soliton != 1:
