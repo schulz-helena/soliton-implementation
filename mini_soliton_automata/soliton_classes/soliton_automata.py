@@ -22,7 +22,7 @@ class SolitonAutomata:
         self.strongly_deterministic: bool
         """Whether the soliton graph is strongly deterministic."""
         self.states_plus_soliton_paths: dict
-        """All states of the soliton graph plus all soliton paths that can be found in each state
+        """All states of the soliton automata plus all soliton paths that can be found in each state
         (Id/ string of the states adjacency matrix as key and state and soliton paths as values)."""
         self.deterministic, self.strongly_deterministic, self.states_plus_soliton_paths = self.all_paths_and_determinism()
         initial_matrix_id = self.matrix_to_string(nx.to_numpy_array(self.soliton_graph.graph))
@@ -193,6 +193,7 @@ class SolitonAutomata:
 
         return deterministic, strongly_deterministic, states_plus_soliton_paths
 
+
     def matrix_to_string(self, matrix: np.ndarray):
         """Computes an ID for a matrix.
 
@@ -206,7 +207,9 @@ class SolitonAutomata:
         for row in matrix:
             row_id = ''.join(str(int(elem)) for elem in row)
             matrix_id = matrix_id + row_id
+
         return matrix_id
+
 
     def find_impervious_paths(self):
         """Finds all impervious paths of the initial soliton graph.

@@ -13,26 +13,45 @@ class MultiwaveSolitonAutomata:
     """Representation of a multiwave soliton automata, which finds all traversals for a burst.
     """
 
-    def __init__(self, soliton_graph: SolitonGraph, burst: str):
+    def __init__(self, soliton_graph: SolitonGraph, bursts: str):
         """Initializes a `MultiwaveSolitonAutomata` object by using a soliton graph and a burst.
         """
         self.soliton_graph: SolitonGraph = soliton_graph
         """Soliton graph the automata is based on."""
-        self.burst = burst
-        """The input burst."""
-        self.burst_dict = self.build_burst_dict()
-        """The burst as a dictionary (soliton number as key and a list containing exterior nodes and entry time as value)."""
-        self.traversals: list
-        """All found traversals"""
+        self.bursts = bursts
+        """The set of input burst."""
+        self.bursts_dicts: list = self.build_bursts_dicts()
+        """List of the bursts as dictionaries (soliton number as key and a list containing exterior nodes and entry time as value)."""
+        self.states_plus_traversals: dict = self.all_traversals()
+        """All states of the soliton automata plus all traversals that can be found in each state
+        (Id/ string of the states adjacency matrix as key and state and traversals as values)."""
 
 
-    def build_burst_dict(self):
+    def build_bursts_dicts(self):
+        """Builds a list of burst dictionaries.
+
+        Returns:
+            list: The computed list of burst dictionaries.
+        """
+        bursts = self.bursts.split(";")
+        bursts_dicts = []
+        for burst in bursts:
+            burst = re.sub(r"[{}]+", "", burst)
+            burst_dict = self.burst_dict(burst)
+            bursts_dicts.append(burst_dict)
+
+        return bursts_dicts
+
+    def burst_dict(self, burst: str):
         """Builds a dictionary as an internal representation of a burst.
+
+        Args:
+            burst (str): The burst string that should be turned into a dictionary.
 
         Returns:
             dict: The computed dictionary with soliton number as key and a list containing exterior nodes and entry time as value.
         """
-        burst_copy = copy.copy(self.burst)
+        burst_copy = copy.copy(burst)
         burst_dict = {}
         entry = 0 # entry time of the current soliton, is increased every time there is another soliton with a k_i
         soliton = 1 # number of the current soliton
@@ -47,8 +66,8 @@ class MultiwaveSolitonAutomata:
             soliton += 1
             burst_dict[soliton] = [self.soliton_graph.exterior_nodes_reverse[all_nums[1]], self.soliton_graph.exterior_nodes_reverse[all_nums[2]], entry] # take node ids, not node labels
             burst_copy = burst_copy[found.span()[1]:] # remove from burst
+            
         return burst_dict
-
 
 
     def build_traversals(self, travs: list, soliton_graph: SolitonGraph):
@@ -87,10 +106,12 @@ class MultiwaveSolitonAutomata:
         return bindings
 
 
-    def find_all_travs_given_burst (self, t: int, s_pos_all_timesteps: list, bindings_all_timesteps: list, binds_all_timesteps: list, travs: list):
+    def find_all_travs_given_burst (self, graph: nx.Graph, burst_dict: dict, t: int, s_pos_all_timesteps: list, bindings_all_timesteps: list, binds_all_timesteps: list, travs: list):
         """Finds all possible traversals for a given burst by using a recursive backtracking algorithm.
 
         Args:
+            graph (nx.Graph): Graph the traversals should be found in.
+            burst_dict (dict): The burst that is used. 
             t (int): Current timestep.
             s_pos_all_timesteps (list): Current soliton positions for each timestep.
             bindings_all_timesteps (list): Current binding types of all edges in the graph.
@@ -107,7 +128,7 @@ class MultiwaveSolitonAutomata:
 
         finished = True
         for soliton in akt_positions:
-            if akt_positions[soliton] != self.burst_dict[soliton][1] and akt_positions[soliton] != -2: # if not all solitons reached their end node or already left the graph
+            if akt_positions[soliton] != burst_dict[soliton][1] and akt_positions[soliton] != -2: # if not all solitons reached their end node or already left the graph
                 finished = False
                 break
         # base case: if all solitons traversed the graph successfully
@@ -123,26 +144,26 @@ class MultiwaveSolitonAutomata:
         # in this timestep find possible edges for each soliton individually
         possible_edges = {} # possible edges for each soliton in this timestep
         possible_nodes = {} # possible nodes for each soliton in this timestep
-        for soliton in self.burst_dict:
-            end = self.burst_dict[soliton][1] # end node for this soliton
+        for soliton in burst_dict:
+            end = burst_dict[soliton][1] # end node for this soliton
             akt_pos = akt_positions[soliton] # current position of this soliton
             possible_edges[soliton] = []
             possible_nodes[soliton] = []
             if akt_pos == -2 or akt_pos == end: # if soliton already traversed the graph successfully
                 possible_edges[soliton].append(-2)
                 possible_nodes[soliton].append(-2)
-            elif self.burst_dict[soliton][2] > t: # if soliton's entry time has not come yet
+            elif burst_dict[soliton][2] > t: # if soliton's entry time has not come yet
                 possible_edges[soliton].append(-1)
                 possible_nodes[soliton].append(-1)
-            elif self.burst_dict[soliton][2] == t: # if soliton enters the graph now (place it at its starting node)
-                possible_edges[soliton].append(self.burst_dict[soliton][0])
-                possible_nodes[soliton].append(self.burst_dict[soliton][0])
-            elif end in list(nx.neighbors(self.soliton_graph.graph, akt_pos)) and akt_bindings[tuple(sorted((akt_pos, end)))] != akt_binds[soliton] and end != s_pos_all_timesteps[t-2][soliton]: # if end node is reachable
+            elif burst_dict[soliton][2] == t: # if soliton enters the graph now (place it at its starting node)
+                possible_edges[soliton].append(burst_dict[soliton][0])
+                possible_nodes[soliton].append(burst_dict[soliton][0])
+            elif end in list(nx.neighbors(graph, akt_pos)) and akt_bindings[tuple(sorted((akt_pos, end)))] != akt_binds[soliton] and end != s_pos_all_timesteps[t-2][soliton]: # if end node is reachable
                 possible_edges[soliton].append(tuple(sorted((akt_pos, end))))
                 possible_nodes[soliton].append(end)
             else:
-                for node in list(nx.neighbors(self.soliton_graph.graph, akt_pos)): # iterate over all nodes that are adjacent to current position
-                    # soliton is not allowed to make a direct turnaround and edge to next node has to have the right binding type
+                for node in list(nx.neighbors(graph, akt_pos)): # iterate over all nodes that are adjacent to current position
+                    # soliton can not go to an exterior node that is not the end node, soliton is not allowed to make a direct turnaround and edge to next node has to have the right binding type
                     if node not in self.soliton_graph.exterior_nodes and node != s_pos_all_timesteps[t-2][soliton] and akt_bindings[tuple(sorted((akt_pos, node)))] != akt_binds[soliton]:
                         possible_edges[soliton].append(tuple(sorted((akt_pos, node))))
                         possible_nodes[soliton].append(node)
@@ -150,6 +171,9 @@ class MultiwaveSolitonAutomata:
         edges_combs = []
         nodes_combs = []
         for soliton in possible_edges:
+            if possible_edges[soliton] == []: # if for one soliton there are no possible next edges, no combinations are possible
+                edges_combs.clear()
+                nodes_combs.clear()
             if soliton != 1 and edges_combs == []: # if no possible edge combination exists anymore, terminate the loop
                 break
             for i, edge in enumerate(possible_edges[soliton]): # for all possible edges for this soliton
@@ -187,7 +211,7 @@ class MultiwaveSolitonAutomata:
             bindings_all_timesteps.append(bindings)
             binds_all_timesteps.append(binds)
             # call function recursively: if eventually all solitons reach their end node if we go further with the decision we just made then travs is changed (new traversal added)
-            travs = self.find_all_travs_given_burst(t, s_pos_all_timesteps, bindings_all_timesteps, binds_all_timesteps, travs)
+            travs = self.find_all_travs_given_burst(graph, burst_dict, t, s_pos_all_timesteps, bindings_all_timesteps, binds_all_timesteps, travs)
             # try different decisions next, so we need variables in the state before the last decision
             s_pos_all_timesteps.pop()
             bindings_all_timesteps.pop()
@@ -196,23 +220,26 @@ class MultiwaveSolitonAutomata:
         return travs # if at some point no other traversal could be added, then all possible traversals are found
 
 
-    def call_find_all_travs_given_burst (self, soliton_graph: SolitonGraph):
+    def call_find_all_travs_given_burst (self, burst_dict: dict, soliton_graph: SolitonGraph):
         """Initializes some parameters and then calls `find_all_travs_given_burst` with them.
 
         Args:
+            burst_dict (dict): The burst that is used. 
             soliton_graph (SolitonGraph): Soliton graph the traversals should be found in.
 
         Returns:
             list: All found travs as traversals (returns empty list when no traversal is found).
         """
+        soliton_graph_copy = copy.deepcopy(soliton_graph) # working on copy of graph so no unwanted changes are made
+        graph = soliton_graph_copy.graph
         t = 0
-        bindings_all_timesteps = [self.soliton_graph.bindings] # already add bindings for timestep 0
+        bindings_all_timesteps = [soliton_graph_copy.bindings] # already add bindings for timestep 0
         soliton_positions = {}
         binds = {}
-        for soliton in self.burst_dict:
+        for soliton in burst_dict:
             binds[soliton] = 0
-            if self.burst_dict[soliton][2] == 0: # if soliton enters the graph at timestep 0
-                soliton_positions[soliton] = self.burst_dict[soliton][0] # starts at its start node
+            if burst_dict[soliton][2] == 0: # if soliton enters the graph at timestep 0
+                soliton_positions[soliton] = burst_dict[soliton][0] # starts at its start node
             else:
                 soliton_positions[soliton] = -1 # soliton is not in graph at timestep 0
         # already add positions and binds for timestep 0
@@ -220,10 +247,37 @@ class MultiwaveSolitonAutomata:
         binds_all_timesteps = [binds]
         travs = []
 
-        travs = self.find_all_travs_given_burst(t, s_pos_all_timesteps, bindings_all_timesteps, binds_all_timesteps, travs)
+        travs = self.find_all_travs_given_burst(graph, burst_dict, t, s_pos_all_timesteps, bindings_all_timesteps, binds_all_timesteps, travs)
         traversals = self.build_traversals(travs, soliton_graph)
 
         return traversals
+
+
+    def all_traversals (self):
+        """Calls `call_find_all_travs_given_burst` for all states of the automata and all bursts in order to get all possible traversals in all states.
+
+        Returns:
+            dict: All states of the soliton graph plus all traversals that can be found in each state.
+        """
+        initial_matrix = nx.to_numpy_array(self.soliton_graph.graph)
+        states = [self.soliton_graph] # stores all possible states as soliton graphs, needed to iterate over states 
+        states_plus_traversals = {self.matrix_to_string(initial_matrix): [self.soliton_graph, []]} # stores all states plus all traversals that can be found in that state
+
+        for state in states: # for all states/ soliton graphs of the automata
+            state_matrix_id = self.matrix_to_string(nx.to_numpy_array(state.graph))
+            all_traversals = []
+            for burst_dict in self.bursts_dicts: # loop over all bursts
+                traversals = self.call_find_all_travs_given_burst(burst_dict, state) # find soliton paths with all bursts
+                for traversal in traversals:
+                    all_traversals.append(traversal)
+                    resulting_matrix = traversal.adjacency_matrices_list[len(traversal.adjacency_matrices_list)-1] # adjacency matrix of the soliton graph the traversal results in
+                    resulting_matrix_id = self.matrix_to_string(resulting_matrix)
+                    if resulting_matrix_id not in states_plus_traversals: # if we found a new state
+                        states_plus_traversals[resulting_matrix_id] = [traversal.resulting_soliton_graph, []] # add it to the dictionary
+                        states.append(traversal.resulting_soliton_graph)
+            states_plus_traversals[state_matrix_id][1] = all_traversals # add all found traversals in this state
+
+        return states_plus_traversals
 
         
     def matrix_to_string(self, matrix: np.ndarray):
@@ -239,4 +293,5 @@ class MultiwaveSolitonAutomata:
         for row in matrix:
             row_id = ''.join(str(int(elem)) for elem in row)
             matrix_id = matrix_id + row_id
+
         return matrix_id
