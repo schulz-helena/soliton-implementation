@@ -163,8 +163,69 @@ class Animation:
 
 
     @staticmethod
+    def list_of_plots_and_arrays_multiwave(soliton_graph: SolitonGraph, traversal: Traversal):
+        """Builds a list of plots and plots as arrays for each timestep of solitons traversing the graph.
+
+        Returns:
+            list: `Matplotlib` plots and plots as `Numpy` arrays for each timestep.
+        """
+        plots_and_arrays = []
+        color_margin = 360 / (traversal.soliton_num - 1)
+        for frame_num, node in enumerate(traversal.pos):
+            fig, ax = plt.subplots(tight_layout = True, dpi = 500) # no unwanted white spaces and resolution of 500 (higher resolution can cause segmentation fault)
+            canvas = FigureCanvas(fig) # necessary to convert into numpy array later
+            ax.clear()
+            ax.axis('equal')
+
+            # create plot
+            pos = nx.get_node_attributes(soliton_graph.graph, 'pos')
+            soliton_positions = {}
+            unique_positions = []
+            positions = traversal.pos[frame_num]
+            for soliton in positions:
+                node = positions[soliton]
+                if node == -1 or node == -2: # at this timestep the soliton is not in the graph
+                    soliton_positions[soliton] = 0
+                else:
+                    position = pos[node]
+                    if (position[0]+0.12, position[1]-0.05) not in unique_positions:
+                        # put in bottom right corner of node
+                        x = position[0]+0.12
+                        y = position[1]-0.05
+                    else: # if there already is a soliton at this node, put soliton pebble in bottom left corner
+                        x = position[0]-0.12
+                        y = position[1]-0.05
+                    unique_positions.append((x,y))
+                    soliton_positions[soliton] = (x,y)
+    
+            Visualisation.visualize_soliton_graph(soliton_graph, traversal.bindings_list[frame_num], False, False) # use visualisation of graph at current timestep
+            akt_color = 0
+            for soliton in soliton_positions:
+                if soliton != 1:
+                    akt_color += color_margin
+                if soliton_positions[soliton] != 0: # if soliton is in the graph at this timestep
+                    x = soliton_positions[soliton][0]
+                    y = soliton_positions[soliton][1]
+                    if soliton == 1:
+                        plt.plot(x, y, marker="o", markersize=6, markeredgecolor="black", markerfacecolor="black")
+                    else:
+                        rgb = hsv_to_rgb((akt_color/360, 1, 0.9))
+                        plt.plot(x, y, marker="o", markersize=6, markeredgecolor=rgb, markerfacecolor=rgb)
+
+            # convert plot into numpy array
+            canvas.draw()
+            array_image = np.frombuffer(canvas.tostring_rgb(), dtype="uint8")
+            array_image = array_image.reshape(canvas.get_width_height()[::-1] + (3,))
+
+            plots_and_arrays.append((fig, array_image))
+            plt.close(fig) # otherwise all created figures are retained in memory -> causes segmentation fault
+            
+        return plots_and_arrays
+
+
+    @staticmethod
     def list_of_pil_images(plots_and_arrays: list):
-        """Builds a list of `PIL` images for each timestep of soliton traversing a path.
+        """Builds a list of `PIL` images for each timestep of soliton traversing a path/ solitons traversing the graph.
 
         Returns:
             list: `PIL` images for each timestep in animation.
