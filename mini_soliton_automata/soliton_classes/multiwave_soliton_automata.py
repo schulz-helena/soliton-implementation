@@ -128,7 +128,7 @@ class MultiwaveSolitonAutomata:
 
         finished = True
         for soliton in akt_positions:
-            if akt_positions[soliton] != burst_dict[soliton][1] and akt_positions[soliton] != -2: # if not all solitons reached their end node or already left the graph
+            if (akt_positions[soliton] != burst_dict[soliton][1] and akt_positions[soliton] != -2) or s_pos_all_timesteps[t-2][soliton] == -1 or t < 2: # if not all solitons reached their end node or already left the graph
                 finished = False
                 break
         # base case: if all solitons traversed the graph successfully
@@ -149,7 +149,7 @@ class MultiwaveSolitonAutomata:
             akt_pos = akt_positions[soliton] # current position of this soliton
             possible_edges[soliton] = []
             possible_nodes[soliton] = []
-            if akt_pos == -2 or akt_pos == end: # if soliton already traversed the graph successfully
+            if akt_pos == -2 or (akt_pos == end and s_pos_all_timesteps[t-2][soliton] != -1 and t > 1): # if soliton already traversed the graph successfully
                 possible_edges[soliton].append(-2)
                 possible_nodes[soliton].append(-2)
             elif burst_dict[soliton][2] > t: # if soliton's entry time has not come yet
