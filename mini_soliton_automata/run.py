@@ -15,10 +15,6 @@ def main():
     app = QtWidgets.QApplication(sys.argv)
     window = MainWindow()
     window.show()
-    readme_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'styles.css')
-    with open(readme_path, "r", encoding="utf-8") as fh:
-        style = fh.read()
-    app.setStyleSheet(style)
     sys.exit(app.exec_())
 
 

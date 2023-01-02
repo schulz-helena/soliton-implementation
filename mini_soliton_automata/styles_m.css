@@ -1,22 +1,22 @@
 QWidget {
     background-color: rgb(255, 255, 255);
     color: black;
-    font: 57 15pt Futura; /*font: 57 15pt "Century Gothic", Futura, Arial;*/
+    font: 57 15pt Futura;
     border-radius: 15px;
 }
 QPushButton {
-    background-color: rgb(191, 207, 255);
+    background-color: rgb(149, 221, 185);
 }
 QPushButton::pressed {
-    background-color : rgb(132, 145, 193);
+    background-color : rgb(90, 159, 123);
 }
 QLineEdit {
-    border: 2px solid rgb(191, 207, 255);
+    border: 2px solid rgb(149, 221, 185);
     border-radius: 10px;
     padding: 0 8px;
 }
 QComboBox {
-    border: 1px solid rgb(191, 207, 255);
+    border: 1px solid rgb(149, 221, 185);
     border-radius: 10px;
     padding: 0 8px;
 }
@@ -35,14 +35,14 @@ QComboBox::down-arrow {
     margin-right: 5px;
 }
 QScrollBar::handle:horizontal {
-    background: rgb(191, 207, 255);
+    background: rgb(149, 221, 185);
 }
 QScrollBar::handle:vertical {
-    background: rgb(191, 207, 255);
+    background: rgb(149, 221, 185);
 }
 QSlider::groove:horizontal {
-    border: 1px solid rgb(191, 207, 255);
-    background: rgb(191, 207, 255);
+    border: 1px solid rgb(149, 221, 185);
+    background: rgb(149, 221, 185);
     height: 20px;
     width: 40px;
     border-radius: 11px;
