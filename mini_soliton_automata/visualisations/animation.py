@@ -11,6 +11,7 @@ from PIL import Image
 from soliton_classes.soliton_graph import SolitonGraph
 from soliton_classes.soliton_path import SolitonPath
 from soliton_classes.traversal import Traversal
+
 from visualisations.visualisation import Visualisation
 
 
@@ -122,7 +123,9 @@ class Animation:
 
         fig, ax = plt.subplots()
         frames = len(traversal.pos)
-        color_margin = 360 / (traversal.soliton_num - 1)
+        if traversal.soliton_num != 1:
+            color_margin = 360 / (traversal.soliton_num - 1)
+        else: color_margin = 0
         ani = animation.FuncAnimation(fig, update, interval = 800, frames=frames, fargs=(ax, soliton_graph, traversal, color_margin))
 
         return ani
@@ -170,7 +173,9 @@ class Animation:
             list: `Matplotlib` plots and plots as `Numpy` arrays for each timestep.
         """
         plots_and_arrays = []
-        color_margin = 360 / (traversal.soliton_num - 1)
+        if traversal.soliton_num != 1:
+            color_margin = 360 / (traversal.soliton_num - 1)
+        else: color_margin = 0
         for frame_num, node in enumerate(traversal.pos):
             fig, ax = plt.subplots(tight_layout = True, dpi = 500) # no unwanted white spaces and resolution of 500 (higher resolution can cause segmentation fault)
             canvas = FigureCanvas(fig) # necessary to convert into numpy array later
