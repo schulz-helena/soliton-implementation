@@ -59,15 +59,15 @@ class Traversal:
         """
         representations = []
         for i in range (1, self.soliton_num+1):
-            representations.append(f"{i}: ") # mark path with number of the soliton
+            representations.append(f"S{i}: ") # mark path with number of the soliton
         for j, positions in enumerate(self.pos):
             for soliton in positions:
                 if positions[soliton] == -2 or positions[soliton] == -1:
-                    representations[soliton-1] += "-" # currently not in graph
+                    representations[soliton-1] += "." # currently not in graph
                 else:
                     representations[soliton-1] += self.soliton_graph.labels[positions[soliton]] # add node label
                 if j != len(self.pos)-1:
-                    representations[soliton-1] += ", "
+                    representations[soliton-1] += " - "
 
         return representations
 
