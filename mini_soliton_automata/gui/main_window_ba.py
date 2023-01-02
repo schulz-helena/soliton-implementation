@@ -3,16 +3,20 @@
 import copy
 import io
 import math
+import os
 import re
 import time
 from threading import Thread
 
+import networkx as nx
 import res.resources
 from gui.startscreen import Startscreen
 from PIL.ImageQt import ImageQt
 from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QDialog, QMainWindow, QMessageBox, QScrollArea
 from soliton_classes.mini_soliton_automata import MiniSolitonAutomata
+from soliton_classes.multiwave_soliton_automata import MultiwaveSolitonAutomata
 from soliton_classes.soliton_graph import SolitonGraph
 from soliton_classes.soliton_path import SolitonPath
 from visualisations.animation import Animation
@@ -29,194 +33,353 @@ class MainWindow(QMainWindow):
         """
         super(MainWindow, self).__init__()
         self.setObjectName("MainWindow")
+        # central widget is a stacked layout (so user can switch between the two different windows)
+        self.central_wid = QtWidgets.QWidget()
+        self.layout_for_wids = QtWidgets.QStackedLayout()
+        self.central_wid.setStyleSheet("""background: white;""")
         # move window to the top of the screen + to the center horizontally
         qt_rectangle = self.frameGeometry()
         center_point = QtWidgets.QDesktopWidget().availableGeometry().center()
         qt_rectangle.moveCenter(center_point)
         self.move(qt_rectangle.topLeft().x(), 0)
 
-        self.centralwidget = QtWidgets.QWidget(self)
-        self.centralwidget.setObjectName("centralwidget")
-        self.gridLayout = QtWidgets.QGridLayout(self.centralwidget)
-        self.gridLayout.setObjectName("gridLayout")
-        self.show_animation = QtWidgets.QPushButton(self.centralwidget)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.show_animation.sizePolicy().hasHeightForWidth())
-        self.show_animation.setSizePolicy(sizePolicy)
-        self.show_animation.setMinimumSize(QtCore.QSize(0, 32))
-        self.show_animation.setObjectName("show_animation")
-        self.gridLayout.addWidget(self.show_animation, 6, 4, 1, 1)
-        self.exterior_nodes_label2 = QtWidgets.QLabel(self.centralwidget)
-        self.exterior_nodes_label2.setObjectName("exterior_nodes_label2")
-        self.gridLayout.addWidget(self.exterior_nodes_label2, 4, 2, 1, 1)
-        self.show_end_result = QtWidgets.QPushButton(self.centralwidget)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.show_end_result.sizePolicy().hasHeightForWidth())
-        self.show_end_result.setSizePolicy(sizePolicy)
-        self.show_end_result.setMinimumSize(QtCore.QSize(0, 32))
-        self.show_end_result.setObjectName("show_end_result")
-        self.gridLayout.addWidget(self.show_end_result, 6, 2, 1, 2)
-        self.save = QtWidgets.QPushButton(self.centralwidget)
-        self.save.setStyleSheet("QPushButton {background-color: rgb(191, 207, 255); image: url(:/icons/save.svg);} QPushButton::pressed {background-color : rgb(132, 145, 193);}")
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.save.sizePolicy().hasHeightForWidth())
-        self.save.setSizePolicy(sizePolicy)
-        self.save.setMaximumSize(QtCore.QSize(16777215, 32))
-        self.save.setMinimumSize(QtCore.QSize(0, 32))
-        self.save.setObjectName("save")
-        self.gridLayout.addWidget(self.save, 2, 4, 1, 1)
-        self.traversal_mode = QtWidgets.QCheckBox("Traversal Mode")
-        self.traversal_mode.setObjectName("traversal_mode")
-        self.traversal_mode.setChecked(False)
-        self.traversal_mode.stateChanged.connect(lambda:self.change_mode(self.traversal_mode))
-        self.gridLayout.addWidget(self.traversal_mode, 2, 0, 1, 1)
-        self.molecule_lineedit = QtWidgets.QLineEdit(self.centralwidget)
-        self.molecule_lineedit.setObjectName("molecule_lineedit")
-        self.gridLayout.addWidget(self.molecule_lineedit, 3, 1, 1, 3)
-        self.show_matrices = QtWidgets.QPushButton(self.centralwidget)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.show_matrices.sizePolicy().hasHeightForWidth())
-        self.show_matrices.setSizePolicy(sizePolicy)
-        self.show_matrices.setMinimumSize(QtCore.QSize(0, 32))
-        self.show_matrices.setObjectName("show_matrices")
-        self.gridLayout.addWidget(self.show_matrices, 6, 1, 1, 1)
-        self.molecule_label = QtWidgets.QLabel(self.centralwidget)
-        font = QtGui.QFont()
-        font.setPointSize(14)
-        self.molecule_label.setFont(font)
-        self.molecule_label.setObjectName("molecule_label")
-        self.gridLayout.addWidget(self.molecule_label, 3, 0, 1, 1)
-        self.node_2 = QtWidgets.QComboBox(self.centralwidget)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.node_2.sizePolicy().hasHeightForWidth())
-        self.node_2.setSizePolicy(sizePolicy)
-        self.node_2.setObjectName("node_2")
-        self.gridLayout.addWidget(self.node_2, 4, 3, 1, 1)
-        self.soliton_paths_label = QtWidgets.QLabel(self.centralwidget)
-        font = QtGui.QFont()
-        font.setPointSize(14)
-        self.soliton_paths_label.setFont(font)
-        self.soliton_paths_label.setObjectName("soliton_paths_label")
-        self.gridLayout.addWidget(self.soliton_paths_label, 5, 0, 1, 1)
-        self.paths = QtWidgets.QComboBox(self.centralwidget)
-        self.paths.setObjectName("paths")
-        self.gridLayout.addWidget(self.paths, 5, 1, 1, 4)
-        self.submit_exterior_nodes = QtWidgets.QPushButton(self.centralwidget)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.submit_exterior_nodes.sizePolicy().hasHeightForWidth())
-        self.submit_exterior_nodes.setSizePolicy(sizePolicy)
-        self.submit_exterior_nodes.setMinimumSize(QtCore.QSize(0, 32))
-        self.submit_exterior_nodes.setObjectName("submit_exterior_nodes")
-        self.gridLayout.addWidget(self.submit_exterior_nodes, 4, 4, 1, 1)
-        self.node_1 = QtWidgets.QComboBox(self.centralwidget)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.node_1.sizePolicy().hasHeightForWidth())
-        self.node_1.setSizePolicy(sizePolicy)
-        self.node_1.setObjectName("node_1")
-        self.gridLayout.addWidget(self.node_1, 4, 1, 1, 1)
-        self.exterior_nodes_label = QtWidgets.QLabel(self.centralwidget)
-        font = QtGui.QFont()
-        font.setPointSize(14)
-        self.exterior_nodes_label.setFont(font)
-        self.exterior_nodes_label.setObjectName("exterior_nodes_label")
-        self.gridLayout.addWidget(self.exterior_nodes_label, 4, 0, 1, 1)
-        self.submit_molecule = QtWidgets.QPushButton(self.centralwidget)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.submit_molecule.sizePolicy().hasHeightForWidth())
-        self.submit_molecule.setSizePolicy(sizePolicy)
-        self.submit_molecule.setMinimumSize(QtCore.QSize(0, 32))
-        self.submit_molecule.setObjectName("submit_molecule")
-        self.gridLayout.addWidget(self.submit_molecule, 3, 4, 1, 1)
 
-        self.display_molecule = QtWidgets.QLabel(self.centralwidget)
+        # SOLITON AUTOMATA WIDGET
+        self.wid_single = QtWidgets.QWidget()
+        self.gridLayout = QtWidgets.QGridLayout(self.wid_single)
+        # Row 0:
+        # Rectangle that displays the molecule
+        self.display_molecule = QtWidgets.QLabel(self.wid_single)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setWidthForHeight(self.display_molecule.sizePolicy().hasWidthForHeight())
         self.display_molecule.setSizePolicy(sizePolicy)
         self.display_molecule.setMinimumSize(QtCore.QSize(600, 450))
-        self.display_molecule.setSizeIncrement(QtCore.QSize(0, 0))
-        self.display_molecule.setBaseSize(QtCore.QSize(0, 0))
-        self.display_molecule.setText("")
         startscreen = Startscreen().image
         self.qim = ImageQt(startscreen)
         self.display_molecule.setPixmap(QtGui.QPixmap.fromImage(self.qim).scaled(self.display_molecule.size(), QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation))
-        self.display_molecule.setObjectName("display_molecule")
         self.gridLayout.addWidget(self.display_molecule, 0, 0, 2, 5, alignment = QtCore.Qt.AlignHCenter|QtCore.Qt.AlignVCenter)
-        self.setCentralWidget(self.centralwidget)
+        # Slider/ toggle button that changes between the two windows
+        self.slider = QtWidgets.QSlider(Qt.Horizontal)
+        self.slider.setMinimum(0)
+        self.slider.setMaximum(1)
+        self.slider.setValue(0)
+        self.slider.setTickInterval(2)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+        self.slider.setSizePolicy(sizePolicy)
+        self.gridLayout.addWidget(self.slider, 0, 3, 1, 1)
+        # Row 1: -
+        # Row 2:
+        # "Traversal Mode" Checkbox
+        self.traversal_mode = QtWidgets.QCheckBox("Traversal Mode")
+        self.traversal_mode.setChecked(False)
+        self.gridLayout.addWidget(self.traversal_mode, 2, 0, 1, 1)
+        # Groupbox containg last two elements of row 2
+        self.row2 = QtWidgets.QGroupBox()
+        self.minigrid2 = QtWidgets.QGridLayout(self.row2)
+        self.minigrid2.setContentsMargins(0, 0, 0, 0)
+        self.gridLayout.addWidget(self.row2, 2, 3, 1, 1)
+        # Info button
+        self.mol_info = QtWidgets.QPushButton(self.wid_single)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Fixed)
+        self.mol_info.setSizePolicy(sizePolicy)
+        self.mol_info.setMinimumSize(QtCore.QSize(0, 32))
+        self.minigrid2.addWidget(self.mol_info, 2, 0, 1, 1)
+        # Save button for the molecule
+        self.save = QtWidgets.QPushButton(self.wid_single)
+        self.save.setStyleSheet("QPushButton {background-color: rgb(191, 207, 255); image: url(:/icons/save.svg);} QPushButton::pressed {background-color : rgb(132, 145, 193);}")
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Fixed)
+        self.save.setSizePolicy(sizePolicy)
+        self.save.setMaximumSize(QtCore.QSize(16777215, 32))
+        self.save.setMinimumSize(QtCore.QSize(0, 32))
+        self.minigrid2.addWidget(self.save, 2, 1, 1, 1)
+        # Row 3:
+        # "Molecule" label
+        self.molecule_label = QtWidgets.QLabel(self.wid_single)
+        self.gridLayout.addWidget(self.molecule_label, 3, 0, 1, 1)
+        # Text field for molecule
+        self.molecule_lineedit = QtWidgets.QLineEdit(self.wid_single)
+        self.gridLayout.addWidget(self.molecule_lineedit, 3, 1, 1, 2)
+        # Submit button for molecule
+        self.submit_molecule = QtWidgets.QPushButton(self.wid_single)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Fixed)
+        self.submit_molecule.setSizePolicy(sizePolicy)
+        self.submit_molecule.setMinimumSize(QtCore.QSize(0, 32))
+        self.gridLayout.addWidget(self.submit_molecule, 3, 3, 1, 1)
+        # Row 4: 
+        # "Exterior nodes" label
+        self.exterior_nodes_label = QtWidgets.QLabel(self.wid_single)
+        self.gridLayout.addWidget(self.exterior_nodes_label, 4, 0, 1, 1)
+        # Groupbox containg middle elements of row 4
+        self.row4 = QtWidgets.QGroupBox()
+        self.minigrid4 = QtWidgets.QGridLayout(self.row4)
+        self.minigrid4.setContentsMargins(0, 0, 0, 0)
+        self.gridLayout.addWidget(self.row4, 4, 1, 1, 2)
+        # "All" Checkbox
+        self.all_exterior_nodes = QtWidgets.QCheckBox("All")
+        self.all_exterior_nodes.setChecked(False)
+        self.minigrid4.addWidget(self.all_exterior_nodes, 4, 0, 1, 1)
+        # Combobox to choose first exterior node
+        self.node_1 = QtWidgets.QComboBox(self.row4)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+        self.node_1.setSizePolicy(sizePolicy)
+        self.minigrid4.addWidget(self.node_1, 4, 1, 1, 1)
+        # "&" label
+        self.exterior_nodes_label2 = QtWidgets.QLabel(self.row4)
+        self.minigrid4.addWidget(self.exterior_nodes_label2, 4, 2, 1, 1)
+        # Combobox to choose second exterior node
+        self.node_2 = QtWidgets.QComboBox(self.row4)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+        self.node_2.setSizePolicy(sizePolicy)
+        self.minigrid4.addWidget(self.node_2, 4, 3, 1, 1)
+        # Submit button for exterior nodes
+        self.submit_exterior_nodes = QtWidgets.QPushButton(self.wid_single)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Fixed)
+        self.submit_exterior_nodes.setSizePolicy(sizePolicy)
+        self.submit_exterior_nodes.setMinimumSize(QtCore.QSize(0, 32))
+        self.gridLayout.addWidget(self.submit_exterior_nodes, 4, 3, 1, 1)
+        # Row 5:
+        # "Soliton paths" label
+        self.soliton_paths_label = QtWidgets.QLabel(self.wid_single)
+        self.gridLayout.addWidget(self.soliton_paths_label, 5, 0, 1, 1)
+        # Combobox to choose a soliton path
+        self.paths = QtWidgets.QComboBox(self.wid_single)
+        self.gridLayout.addWidget(self.paths, 5, 1, 1, 3)
+        # Row 6:
+        # "Show matrices" button
+        self.show_matrices = QtWidgets.QPushButton(self.wid_single)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+        self.show_matrices.setSizePolicy(sizePolicy)
+        self.show_matrices.setMinimumSize(QtCore.QSize(0, 32))
+        self.gridLayout.addWidget(self.show_matrices, 6, 1, 1, 1)
+        # "Show end result" button
+        self.show_end_result = QtWidgets.QPushButton(self.wid_single)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+        self.show_end_result.setSizePolicy(sizePolicy)
+        self.show_end_result.setMinimumSize(QtCore.QSize(0, 32))
+        self.gridLayout.addWidget(self.show_end_result, 6, 2, 1, 1)
+        # "Show animation" button
+        self.show_animation = QtWidgets.QPushButton(self.wid_single)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+        self.show_animation.setSizePolicy(sizePolicy)
+        self.show_animation.setMinimumSize(QtCore.QSize(0, 32))
+        self.gridLayout.addWidget(self.show_animation, 6, 3, 1, 1)
+        # Menubar:
         self.menubar = QtWidgets.QMenuBar(self)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 564, 24))
-        self.menubar.setObjectName("menubar")
         self.setMenuBar(self.menubar)
 
-        self.retranslateUi()
-        QtCore.QMetaObject.connectSlotsByName(self)
-
-        self.height_for_width_factor = 1.0 * 519 / 688
-        self.width_for_height_factor = 1.0 * 688 / 519
-
+        # Function connections of different widgets:
+        self.slider.valueChanged.connect(self.change_window)
+        self.traversal_mode.stateChanged.connect(lambda:self.change_mode(self.traversal_mode))
+        self.save.clicked.connect(self.save_clicked)
         self.submit_molecule.clicked.connect(self.submit_molecule_clicked)
         self.submit_exterior_nodes.clicked.connect(self.submit_exterior_nodes_clicked)
         self.show_matrices.clicked.connect(self.show_matrices_clicked)
         self.show_end_result.clicked.connect(self.show_end_result_clicked)
-        self.show_animation.clicked.connect(self.show_animation_clicked)
-        self.save.clicked.connect(self.save_clicked)
+        self.show_animation.clicked.connect(lambda:self.show_animation_clicked(self.show_animation))
+        # Hide most widgets at the beginning (while retaining space) 
+        self.hide_retain_space([self.traversal_mode, self.row2, self.exterior_nodes_label, self.row4, self.submit_exterior_nodes, self.soliton_paths_label, self.paths, self.show_matrices, self.show_end_result, self.show_animation])
+        self.hide_multiple([self.traversal_mode, self.row2, self.exterior_nodes_label, self.row4, self.submit_exterior_nodes, self.soliton_paths_label, self.paths, self.show_matrices, self.show_end_result, self.show_animation])
+        # Stylesheet:
+        readme_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../styles.css')
+        with open(readme_path, "r", encoding="utf-8") as fh:
+            self.style = fh.read()
+        self.wid_single.setStyleSheet(self.style)
 
-        self.hide_retain_space(self.save)
-        self.save.hide()
-        self.hide_retain_space(self.exterior_nodes_label)
-        self.exterior_nodes_label.hide()
-        self.hide_retain_space(self.exterior_nodes_label2)
-        self.exterior_nodes_label2.hide()
-        self.hide_retain_space(self.node_1)
-        self.node_1.hide()
-        self.hide_retain_space(self.node_2)
-        self.node_2.hide()
-        self.hide_retain_space(self.submit_exterior_nodes)
-        self.submit_exterior_nodes.hide()
-        self.hide_retain_space(self.soliton_paths_label)
-        self.soliton_paths_label.hide()
-        self.hide_retain_space(self.paths)
-        self.paths.hide()
-        self.hide_retain_space(self.show_matrices)
-        self.show_matrices.hide()
-        self.hide_retain_space(self.show_end_result)
-        self.show_end_result.hide()
-        self.hide_retain_space(self.show_animation)
-        self.show_animation.hide()
+
+        # MULTI-WAVE SOLITON AUTOMATA WIDGET
+        self.wid_mult = QtWidgets.QWidget()
+        self.gridLayout_m = QtWidgets.QGridLayout(self.wid_mult)
+        # Row 0:
+        # Rectangle that displays the molecule
+        self.display_molecule_m = QtWidgets.QLabel(self.wid_mult)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
+        self.display_molecule_m.setSizePolicy(sizePolicy)
+        self.display_molecule_m.setMinimumSize(QtCore.QSize(600, 450))
+        startscreen_m = Startscreen().image
+        self.qim_m = ImageQt(startscreen_m)
+        self.display_molecule_m.setPixmap(QtGui.QPixmap.fromImage(self.qim_m).scaled(self.display_molecule_m.size(), QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation))
+        self.gridLayout_m.addWidget(self.display_molecule_m, 0, 0, 2, 5, alignment = QtCore.Qt.AlignHCenter|QtCore.Qt.AlignVCenter)
+        # Slider/ toggle button that changes between the two windows
+        self.slider_m = QtWidgets.QSlider(Qt.Horizontal)
+        self.slider_m.setMinimum(0)
+        self.slider_m.setMaximum(1)
+        self.slider_m.setValue(1)
+        self.slider_m.setTickInterval(2)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+        self.slider_m.setSizePolicy(sizePolicy)
+        self.gridLayout_m.addWidget(self.slider_m, 0, 3, 1, 1)
+        # Row 1: -
+        # Row 2:
+        # "Traversal Mode" Checkbox
+        self.traversal_mode_m = QtWidgets.QCheckBox("Traversal Mode")
+        self.traversal_mode_m.setChecked(False)
+        self.gridLayout_m.addWidget(self.traversal_mode_m, 2, 0, 1, 1)
+        # Groupbox containg last two elements of row 2
+        self.row2_m = QtWidgets.QGroupBox()
+        self.minigrid2_m = QtWidgets.QGridLayout(self.row2_m)
+        self.minigrid2_m.setContentsMargins(0, 0, 0, 0)
+        self.gridLayout_m.addWidget(self.row2_m, 2, 3, 1, 1)
+        # Info button
+        self.mol_info_m = QtWidgets.QPushButton(self.row2_m)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Fixed)
+        self.mol_info_m.setSizePolicy(sizePolicy)
+        self.mol_info_m.setMinimumSize(QtCore.QSize(0, 32))
+        self.minigrid2_m.addWidget(self.mol_info_m, 2, 0, 1, 1)
+        # Save button for the molecule
+        self.save_m = QtWidgets.QPushButton(self.row2_m)
+        self.save_m.setStyleSheet("QPushButton {background-color: rgb(149, 221, 185); image: url(:/icons/save.svg);} QPushButton::pressed {background-color : rgb(90, 159, 123);}")
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Fixed)
+        self.save_m.setSizePolicy(sizePolicy)
+        self.save_m.setMaximumSize(QtCore.QSize(16777215, 32))
+        self.save_m.setMinimumSize(QtCore.QSize(0, 32))
+        self.minigrid2_m.addWidget(self.save_m, 2, 1, 1, 1)
+        # Row 3:
+        # "Molecule" label
+        self.molecule_label_m = QtWidgets.QLabel(self.wid_mult)
+        self.gridLayout_m.addWidget(self.molecule_label_m, 3, 0, 1, 1)
+        # Text field for molecule
+        self.molecule_lineedit_m = QtWidgets.QLineEdit(self.wid_mult)
+        self.gridLayout_m.addWidget(self.molecule_lineedit_m, 3, 1, 1, 2)
+        # Submit button for molecule
+        self.submit_molecule_m = QtWidgets.QPushButton(self.wid_mult)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Fixed)
+        self.submit_molecule_m.setSizePolicy(sizePolicy)
+        self.submit_molecule_m.setMinimumSize(QtCore.QSize(0, 32))
+        self.gridLayout_m.addWidget(self.submit_molecule_m, 3, 3, 1, 1)
+        # Row 4: 
+        # "Set of bursts" label
+        self.set_of_bursts_label = QtWidgets.QLabel(self.wid_mult)
+        self.gridLayout_m.addWidget(self.set_of_bursts_label, 4, 0, 1, 1)
+        # Text field for set of bursts
+        self.set_of_bursts_lineedit = QtWidgets.QLineEdit(self.wid_mult)
+        self.gridLayout_m.addWidget(self.set_of_bursts_lineedit, 4, 1, 1, 2)
+        # Submit button for set of bursts
+        self.submit_set_of_bursts = QtWidgets.QPushButton(self.wid_mult)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Fixed)
+        self.submit_set_of_bursts.setSizePolicy(sizePolicy)
+        self.submit_set_of_bursts.setMinimumSize(QtCore.QSize(0, 32))
+        self.gridLayout_m.addWidget(self.submit_set_of_bursts, 4, 3, 1, 1)
+        # Row 5:
+        # "Bursts" label
+        self.bursts_label = QtWidgets.QLabel(self.wid_mult)
+        self.gridLayout_m.addWidget(self.bursts_label, 5, 0, 1, 1)
+        # Groupbox containg middle elements of row 5
+        self.row5_m = QtWidgets.QGroupBox()
+        self.minigrid4_m = QtWidgets.QGridLayout(self.row5_m)
+        self.minigrid4_m.setContentsMargins(0, 0, 0, 0)
+        self.gridLayout_m.addWidget(self.row5_m, 5, 1, 1, 2)
+        # "All" Checkbox
+        self.all_bursts = QtWidgets.QCheckBox("All")
+        self.all_bursts.setChecked(False)
+        self.minigrid4_m.addWidget(self.all_bursts, 5, 0, 1, 1)
+        # Combobox to choose burst
+        self.burst = QtWidgets.QComboBox(self.row5_m)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+        self.burst.setSizePolicy(sizePolicy)
+        self.minigrid4_m.addWidget(self.burst, 5, 1, 1, 1)
+        # Submit button for burst
+        self.submit_burst = QtWidgets.QPushButton(self.wid_mult)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Fixed)
+        self.submit_burst.setSizePolicy(sizePolicy)
+        self.submit_burst.setMinimumSize(QtCore.QSize(0, 32))
+        self.gridLayout_m.addWidget(self.submit_burst, 5, 3, 1, 1)
+        # Row 6:
+        # "Traversals" label
+        self.traversals_label = QtWidgets.QLabel(self.wid_mult)
+        self.gridLayout_m.addWidget(self.traversals_label, 6, 0, 1, 1)
+        # Combobox to choose a traversal
+        self.traversals = QtWidgets.QComboBox(self.wid_mult)
+        self.gridLayout_m.addWidget(self.traversals, 6, 1, 1, 3)
+        # Row 7:
+        # "Show matrices" button
+        self.show_matrices_m = QtWidgets.QPushButton(self.wid_mult)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+        self.show_matrices_m.setSizePolicy(sizePolicy)
+        self.show_matrices_m.setMinimumSize(QtCore.QSize(0, 32))
+        self.gridLayout_m.addWidget(self.show_matrices_m, 7, 1, 1, 1)
+        # "Show end result" button
+        self.show_end_result_m = QtWidgets.QPushButton(self.wid_mult)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+        self.show_end_result_m.setSizePolicy(sizePolicy)
+        self.show_end_result_m.setMinimumSize(QtCore.QSize(0, 32))
+        self.gridLayout_m.addWidget(self.show_end_result_m, 7, 2, 1, 1)
+        # "Show animation" button
+        self.show_animation_m = QtWidgets.QPushButton(self.wid_mult)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+        self.show_animation_m.setSizePolicy(sizePolicy)
+        self.show_animation_m.setMinimumSize(QtCore.QSize(0, 32))
+        self.gridLayout_m.addWidget(self.show_animation_m, 7, 3, 1, 1)
+
+        # Function connections of different widgets:
+        self.slider_m.valueChanged.connect(self.change_window)
+        self.traversal_mode_m.stateChanged.connect(lambda:self.change_mode_m(self.traversal_mode_m))
+        self.save_m.clicked.connect(self.save_clicked_m)
+        self.all_bursts.stateChanged.connect(self.all_bursts_statechanged)
+        self.submit_molecule_m.clicked.connect(self.submit_molecule_clicked_m)
+        self.submit_set_of_bursts.clicked.connect(self.submit_set_of_bursts_clicked)
+        self.submit_burst.clicked.connect(self.submit_burst_clicked)
+        self.show_matrices_m.clicked.connect(self.show_matrices_clicked_m)
+        self.show_end_result_m.clicked.connect(self.show_end_result_clicked_m)
+        self.show_animation_m.clicked.connect(lambda:self.show_animation_clicked(self.show_animation_m))
+        # Hide most widgets at the beginning (while retaining space)
+        self.hide_retain_space([self.traversal_mode_m, self.row2_m, self.set_of_bursts_label, self.set_of_bursts_lineedit, self.submit_set_of_bursts, self.bursts_label, self.row5_m, self.submit_burst, self.traversals_label, self.traversals, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
+        self.hide_multiple([self.traversal_mode_m, self.row2_m, self.set_of_bursts_label, self.set_of_bursts_lineedit, self.submit_set_of_bursts, self.bursts_label, self.row5_m, self.submit_burst, self.traversals_label, self.traversals, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
+        # Stylesheet:
+        readme_path_m = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../styles_m.css')
+        with open(readme_path_m, "r", encoding="utf-8") as fh_m:
+            self.style_m = fh_m.read()
+        self.wid_mult.setStyleSheet(self.style_m)
+
+
+        # Add both widgets to stacked layout
+        self.layout_for_wids.addWidget(self.wid_single)
+        self.layout_for_wids.addWidget(self.wid_mult)
+        self.central_wid.setLayout(self.layout_for_wids)
+        self.setCentralWidget(self.central_wid)
+        self.front_wid = 1
+        self.retranslateUi()
+        QtCore.QMetaObject.connectSlotsByName(self)
 
 
     def retranslateUi(self):
         """Implements multi-language suppport. Is generated automatically when using PyQt5 UI code generator.
         """
         _translate = QtCore.QCoreApplication.translate
-        self.setWindowTitle(_translate("MainWindow", "Mini Soliton Automata Software"))
-        self.show_animation.setText(_translate("MainWindow", "Show animation"))
-        self.exterior_nodes_label2.setText(_translate("MainWindow", "&"))
-        self.show_end_result.setText(_translate("MainWindow", "Show end result"))
-        #self.save.setText(_translate("MainWindow", "Save"))
-        self.show_matrices.setText(_translate("MainWindow", "Show matrices"))
+        self.setWindowTitle(_translate("MainWindow", "Soliton Automata Software"))
+        self.mol_info.setText(_translate("MainWindow", "Info"))
         self.molecule_label.setText(_translate("MainWindow", "Molecule:"))
-        self.soliton_paths_label.setText(_translate("MainWindow", "Soliton paths:"))
-        self.submit_exterior_nodes.setText(_translate("MainWindow", "Submit"))
-        self.exterior_nodes_label.setText(_translate("MainWindow", "Exterior nodes:"))
         self.submit_molecule.setText(_translate("MainWindow", "Submit"))
+        self.exterior_nodes_label.setText(_translate("MainWindow", "Exterior nodes:"))
+        self.exterior_nodes_label2.setText(_translate("MainWindow", "&"))
+        self.submit_exterior_nodes.setText(_translate("MainWindow", "Submit"))
+        self.soliton_paths_label.setText(_translate("MainWindow", "Soliton paths:"))
+        self.show_matrices.setText(_translate("MainWindow", "Show matrices"))
+        self.show_end_result.setText(_translate("MainWindow", "Show end result"))
+        self.show_animation.setText(_translate("MainWindow", "Show animation"))
+
+        self.mol_info_m.setText(_translate("MainWindow", "Info"))
+        self.molecule_label_m.setText(_translate("MainWindow", "Molecule:"))
+        self.submit_molecule_m.setText(_translate("MainWindow", "Submit"))
+        self.set_of_bursts_label.setText(_translate("MainWindow", "Set of bursts:"))
+        self.submit_set_of_bursts.setText(_translate("MainWindow", "Submit"))
+        self.bursts_label.setText(_translate("MainWindow", "Bursts:"))
+        self.submit_burst.setText(_translate("MainWindow", "Submit"))
+        self.traversals_label.setText(_translate("MainWindow", "Traversals:"))
+        self.show_matrices_m.setText(_translate("MainWindow", "Show matrices"))
+        self.show_end_result_m.setText(_translate("MainWindow", "Show end result"))
+        self.show_animation_m.setText(_translate("MainWindow", "Show animation"))
+
+
+    def change_window(self):
+        if self.front_wid == 1:
+            self.layout_for_wids.setCurrentIndex(1)
+            self.slider_m.setValue(1)
+            self.front_wid = 2
+        else:
+            self.layout_for_wids.setCurrentIndex(0)
+            self.slider.setValue(0)
+            self.front_wid = 1
+
 
     def change_mode(self, checkbox: QtWidgets.QCheckBox):
         """Realizes the change between being in traversal mode and not being in traversal mode.
@@ -232,12 +395,46 @@ class MainWindow(QMainWindow):
             self.submit_molecule.setStyleSheet("QPushButton {background-color: rgb(230, 230, 230);}")
             self.molecule_lineedit.setReadOnly(True)
             self.molecule_lineedit.setStyleSheet("QLineEdit {border: 2px solid rgb(230, 230, 230);border-radius: 10px;padding: 0 8px;}")
+            self.molecule_label.setText("Original molecule:")
         else:
             self.submit_molecule.clicked.connect(self.submit_molecule_clicked)
             self.submit_molecule.setStyleSheet("QPushButton {background-color: rgb(191, 207, 255);} QPushButton::pressed {background-color : rgb(132, 145, 193);}")
             self.molecule_lineedit.setReadOnly(False)
             self.molecule_lineedit.setStyleSheet("QLineEdit {border: 2px solid rgb(191, 207, 255);border-radius: 10px;padding: 0 8px;}")
+            self.molecule_label.setText("Molecule:")
             self.submit_molecule_clicked()
+
+    
+    def change_mode_m(self, checkbox: QtWidgets.QCheckBox):
+        """Realizes the change between being in traversal mode and not being in traversal mode.
+        In traversal mode, a soliton automata can be traversed by using an end result as the new soliton graph.
+        When in traversal mode, the input molecule can't be edited.
+
+        Args:
+            checkbox (QtWidgets.QCheckBox): The checkbox that changes the mode.
+        """
+        if checkbox.isChecked() == True:
+            # make text field uneditable and button unclickable, turn both objects grey to make those properties visually recognizable
+            self.submit_molecule_m.clicked.disconnect()
+            self.submit_molecule_m.setStyleSheet("QPushButton {background-color: rgb(230, 230, 230);}")
+            self.molecule_lineedit_m.setReadOnly(True)
+            self.molecule_lineedit_m.setStyleSheet("QLineEdit {border: 2px solid rgb(230, 230, 230);border-radius: 10px;padding: 0 8px;}")
+            self.molecule_label_m.setText("Original molecule:")
+            self.submit_set_of_bursts.clicked.disconnect()
+            self.submit_set_of_bursts.setStyleSheet("QPushButton {background-color: rgb(230, 230, 230);}")
+            self.set_of_bursts_lineedit.setReadOnly(True)
+            self.set_of_bursts_lineedit.setStyleSheet("QLineEdit {border: 2px solid rgb(230, 230, 230);border-radius: 10px;padding: 0 8px;}")
+        else:
+            self.submit_molecule_m.clicked.connect(self.submit_molecule_clicked_m)
+            self.submit_molecule_m.setStyleSheet("QPushButton {background-color: rgb(149, 221, 185);} QPushButton::pressed {background-color : rgb(90, 159, 123);}")
+            self.molecule_lineedit_m.setReadOnly(False)
+            self.molecule_lineedit_m.setStyleSheet("QLineEdit {border: 2px solid rgb(149, 221, 185);border-radius: 10px;padding: 0 8px;}")
+            self.molecule_label_m.setText("Molecule:")
+            self.submit_molecule_clicked_m()
+            self.submit_set_of_bursts.clicked.connect(self.submit_set_of_bursts_clicked)
+            self.submit_set_of_bursts.setStyleSheet("QPushButton {background-color: rgb(149, 221, 185);} QPushButton::pressed {background-color : rgb(90, 159, 123);}")
+            self.set_of_bursts_lineedit.setReadOnly(False)
+            self.set_of_bursts_lineedit.setStyleSheet("QLineEdit {border: 2px solid rgb(149, 221, 185);border-radius: 10px;padding: 0 8px;}")
 
 
     def submit_molecule_clicked(self):
@@ -256,85 +453,46 @@ class MainWindow(QMainWindow):
             self.qim = ImageQt(self.graph_pic)
             self.display_molecule.setPixmap(QtGui.QPixmap.fromImage(self.qim).scaled(self.display_molecule.size(), QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation))
             if errors != []:
-                self.save.hide()
-                self.exterior_nodes_label.hide()
-                self.exterior_nodes_label2.hide()
-                self.node_1.hide()
-                self.node_2.hide()
-                self.submit_exterior_nodes.hide()
-                self.soliton_paths_label.hide()
-                self.paths.hide()
-                self.show_matrices.hide()
-                self.show_end_result.hide()
-                self.show_animation.hide()
-                msg = QMessageBox()
+                self.hide_multiple([self.traversal_mode, self.row2, self.exterior_nodes_label, self.row4, self.submit_exterior_nodes, self.soliton_paths_label, self.paths, self.show_matrices, self.show_end_result, self.show_animation])
+                msg = QMessageBox(self.wid_single)
+                msg.setStyleSheet(" QPushButton{ height: 32px; width: 130px;}")
                 msg.setWindowTitle("No soliton graph")
-                msg.setText("You specified a molecule that does not fulfill the requirements of a soliton graph")
+                msg.setText("You specified a molecule that does not fulfill the requirements of a soliton graph.")
                 msg.setIcon(QMessageBox.Warning)
                 msg.setStandardButtons(QMessageBox.Retry)
                 msg.setInformativeText("See details for all incorrect parts of your molecule.")
-                msg.setStyleSheet(" QPushButton{ height: 32px; width: 130px;}")
                 details = ""
                 for i, error in enumerate(errors):
                     if i == len(errors) - 1:
-                        details = details + error
+                        details = details + f"- {error}"
                     else:
-                        details = details + error + "\n"
+                        details = details + f"- {error}" + "\n"
                 msg.setDetailedText(details)
                 x = msg.exec_() # show messagebox
             elif self.my_graph.exterior_nodes_name_collision() == True:
-                self.save.hide()
-                self.exterior_nodes_label.hide()
-                self.exterior_nodes_label2.hide()
-                self.node_1.hide()
-                self.node_2.hide()
-                self.submit_exterior_nodes.hide()
-                self.soliton_paths_label.hide()
-                self.paths.hide()
-                self.show_matrices.hide()
-                self.show_end_result.hide()
-                self.show_animation.hide()
-                msg = QMessageBox()
-                msg.setWindowTitle("Name collision")
-                msg.setText("You specified two or more exterior nodes with the same name")
+                self.hide_multiple([self.traversal_mode, self.row2, self.exterior_nodes_label, self.row4, self.submit_exterior_nodes, self.soliton_paths_label, self.paths, self.show_matrices, self.show_end_result, self.show_animation])
+                msg = QMessageBox(self.wid_single)
                 msg.setStyleSheet(" QPushButton{ height: 32px; width: 130px}")
+                msg.setWindowTitle("Name collision")
+                msg.setText("You specified two or more exterior nodes with the same name.")
                 msg.setIcon(QMessageBox.Warning)
                 msg.setStandardButtons(QMessageBox.Retry)
                 x = msg.exec_()
             else:
-                self.save.show()
-                self.exterior_nodes_label.show()
-                self.exterior_nodes_label2.show()
-                self.node_1.show()
-                self.node_2.show()
-                self.submit_exterior_nodes.show()
-                self.soliton_paths_label.hide()
-                self.paths.hide()
-                self.show_matrices.hide()
-                self.show_end_result.hide()
-                self.show_animation.hide()
+                self.show_multiple([self.traversal_mode, self.row2, self.exterior_nodes_label, self.row4, self.submit_exterior_nodes])
+                self.hide_multiple([self.soliton_paths_label, self.paths, self.show_matrices, self.show_end_result, self.show_animation])
                 for key in self.my_graph.exterior_nodes_reverse:
                     self.node_1.addItem(key)
                     self.node_2.addItem(key)
         except:
-            self.save.hide()
-            self.exterior_nodes_label.hide()
-            self.exterior_nodes_label2.hide()
-            self.node_1.hide()
-            self.node_2.hide()
-            self.submit_exterior_nodes.hide()
-            self.soliton_paths_label.hide()
-            self.paths.hide()
-            self.show_matrices.hide()
-            self.show_end_result.hide()
-            self.show_animation.hide()
-            msg = QMessageBox()
+            self.hide_multiple([self.traversal_mode, self.row2, self.exterior_nodes_label, self.row4, self.submit_exterior_nodes, self.soliton_paths_label, self.paths, self.show_matrices, self.show_end_result, self.show_animation])
+            msg = QMessageBox(self.wid_single)
+            msg.setStyleSheet(" QPushButton{ height: 32px; width: 130px}")
             msg.setWindowTitle("Incorrect input")
-            msg.setText("The syntax of your input is not correct")
+            msg.setText("The syntax of your input is not correct.")
             msg.setIcon(QMessageBox.Warning)
             msg.setStandardButtons(QMessageBox.Retry)
             msg.setInformativeText("Please try again with another input string.")
-            msg.setStyleSheet(" QPushButton{ height: 32px; width: 130px}")
             details = f"Reminder - this is how you define a molecule: \n"
             details = details + f"- Carbon atoms are marked with 'C' \n"
             details = details + f"- Single bonds are marked with '-' or no character at all \n"
@@ -346,13 +504,110 @@ class MainWindow(QMainWindow):
             x = msg.exec_()
 
 
+    def submit_molecule_clicked_m(self):
+    
+        smiles_string = self.molecule_lineedit_m.text()
+        try:
+            self.my_graph_m = SolitonGraph(smiles_string)
+            errors = self.my_graph_m.validate_soliton_graph()
+            self.graph_pic_m = Visualisation.visualize_soliton_graph(self.my_graph_m, self.my_graph_m.bindings, False, True)
+            self.qim_m = ImageQt(self.graph_pic_m)
+            self.display_molecule_m.setPixmap(QtGui.QPixmap.fromImage(self.qim_m).scaled(self.display_molecule_m.size(), QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation))
+            self.set_of_bursts_lineedit.clear()
+            if errors != []:
+                self.hide_multiple([self.traversal_mode_m, self.row2_m, self.set_of_bursts_label, self.set_of_bursts_lineedit, self.submit_set_of_bursts, self.bursts_label, self.row5_m, self.submit_burst, self.traversals_label, self.traversals, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
+                msg = QMessageBox(self.wid_mult)
+                msg.setStyleSheet(" QPushButton{ height: 32px; width: 130px}")
+                msg.setWindowTitle("No soliton graph")
+                msg.setText("You specified a molecule that does not fulfill the requirements of a soliton graph.")
+                msg.setIcon(QMessageBox.Warning)
+                msg.setStandardButtons(QMessageBox.Retry)
+                msg.setInformativeText("See details for all incorrect parts of your molecule.")
+                details = ""
+                for i, error in enumerate(errors):
+                    if i == len(errors) - 1:
+                        details = details + f"- {error}"
+                    else:
+                        details = details + f"- {error}" + "\n"
+                msg.setDetailedText(details)
+                x = msg.exec_() # show messagebox
+            elif self.my_graph_m.exterior_nodes_name_collision() == True:
+                self.hide_multiple([self.traversal_mode_m, self.row2_m, self.set_of_bursts_label, self.set_of_bursts_lineedit, self.submit_set_of_bursts, self.bursts_label, self.row5_m, self.submit_burst, self.traversals_label, self.traversals, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
+                msg = QMessageBox(self.wid_mult)
+                msg.setStyleSheet(" QPushButton{ height: 32px; width: 130px}")
+                msg.setWindowTitle("Name collision")
+                msg.setText("You specified two or more exterior nodes with the same name.")
+                msg.setIcon(QMessageBox.Warning)
+                msg.setStandardButtons(QMessageBox.Retry)
+                x = msg.exec_()
+            else:
+                self.show_multiple([self.traversal_mode_m, self.row2_m, self.set_of_bursts_label, self.set_of_bursts_lineedit, self.submit_set_of_bursts])
+                self.hide_multiple([self.bursts_label, self.row5_m, self.submit_burst, self.traversals_label, self.traversals, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
+        except:
+            self.hide_multiple([self.traversal_mode_m, self.row2_m, self.set_of_bursts_label, self.set_of_bursts_lineedit, self.submit_set_of_bursts, self.bursts_label, self.row5_m, self.submit_burst, self.traversals_label, self.traversals, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
+            msg = QMessageBox(self.wid_mult)
+            msg.setStyleSheet(" QPushButton{ height: 32px; width: 130px}")
+            msg.setWindowTitle("Incorrect input")
+            msg.setText("The syntax of your input is not correct.")
+            msg.setIcon(QMessageBox.Warning)
+            msg.setStandardButtons(QMessageBox.Retry)
+            msg.setInformativeText("Please try again with another input string.")
+            details = f"Reminder - this is how you define a molecule: \n"
+            details = details + f"- Carbon atoms are marked with 'C' \n"
+            details = details + f"- Single bonds are marked with '-' or no character at all \n"
+            details = details + f"- Double bonds are marked with '=' \n"
+            details = details + f"- Branches are embedded in round brackets (e.g. 'C(=CC=C)C')\n"
+            details = details + f"- The two connecting atoms of a ring are marked with the same number (e.g. 'C1' and 'C1') \n"
+            details = details + "- Exterior nodes are marked with braces and a number (e.g. '{=1}')"
+            msg.setDetailedText(details)
+            x = msg.exec_()
+
+    
+    def submit_set_of_bursts_clicked(self):
+    
+        bursts = self.set_of_bursts_lineedit.text()
+        self.burst.clear()
+        try:
+            self.multi_automata = MultiwaveSolitonAutomata(self.my_graph_m, bursts)
+            bursts = bursts.split(";")
+            for burst in bursts:
+                burst = re.sub(r"[{}]+", "", burst)
+                self.burst.addItem(burst)
+            self.show_multiple([self.bursts_label, self.row5_m, self.submit_burst])
+            self.hide_multiple([self.traversals_label, self.traversals, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
+        except:
+            self.hide_multiple([self.bursts_label, self.row5_m, self.submit_burst, self.traversals_label, self.traversals, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
+            msg = QMessageBox(self.wid_mult)
+            msg.setStyleSheet(" QPushButton{ height: 32px; width: 130px;}")
+            msg.setWindowTitle("Incorrect input")
+            msg.setText("The syntax of your input is not correct.")
+            msg.setIcon(QMessageBox.Warning)
+            msg.setStandardButtons(QMessageBox.Retry)
+            msg.setInformativeText("Please try again with another input string.")
+            details = f"Reminder - this is how you define a set of bursts: \n"
+            details = details + f"- Starting and end node of a soliton are embedded in round brackets (e.g. (3, 2))\n"
+            details = details + f"- Solitons are seperated by '||'\n"
+            details = details + f"- The number in front of a soliton's pair of exterior nodes defines how many timesteps later than the previous soliton this soliton enters the graph\n"
+            details = details + f"- A set of bursts is embedded in braces, where individual bursts are seperated by ';'\n"
+            details = details + "- Example: " + "{(3,1)||1(1,2); (3,2)||2(1,1)}\n"
+            msg.setDetailedText(details)
+            x = msg.exec_()
+
+
+    def all_bursts_statechanged(self):
+        if self.all_bursts.isChecked():
+            self.hide_retain_space([self.burst])
+            self.burst.hide()
+        else: self.burst.show()
+
+
     def save_clicked(self):
         """Method that is called when user clicks button to save the graph visualisation.
         Opens a file dialog in which user can specify a path where the image should be saved.
         Only allows `.jpg`, `.png` and `.jpeg` file suffixes.
         """
         option = QtWidgets.QFileDialog.Options()
-        name = QtWidgets.QFileDialog.getSaveFileName(self.centralwidget, 'Save File', 'graph.jpg', 'Images (*.jpg *.png *.jpeg)', options = option)
+        name = QtWidgets.QFileDialog.getSaveFileName(self.wid_single, 'Save File', 'graph.jpg', 'Images (*.jpg *.png *.jpeg)', options = option)
         if name != ('', ''):
             path = name[0]
             # turn PIL Image into byte array 
@@ -362,6 +617,20 @@ class MainWindow(QMainWindow):
             # save image at specified path
             file = open(path, "wb")
             file.write(imgByteArr) # before: file.write(data)
+            file.close()
+
+    def save_clicked_m(self):
+        option = QtWidgets.QFileDialog.Options()
+        name = QtWidgets.QFileDialog.getSaveFileName(self.wid_mult, 'Save File', 'graph.jpg', 'Images (*.jpg *.png *.jpeg)', options = option)
+        if name != ('', ''):
+            path = name[0]
+            # turn PIL Image into byte array 
+            imgByteArr = io.BytesIO()
+            self.graph_pic_m.save(imgByteArr, format='PNG')
+            imgByteArr = imgByteArr.getvalue()
+            # save image at specified path
+            file = open(path, "wb")
+            file.write(imgByteArr)
             file.close()
 
 
@@ -377,28 +646,54 @@ class MainWindow(QMainWindow):
         node2 = int(self.node_2.currentText())
         self.automata = MiniSolitonAutomata(self.my_graph, node1, node2)
         if self.automata.soliton_paths == []:
-            self.soliton_paths_label.hide()
-            self.paths.hide()
-            self.show_matrices.hide()
-            self.show_end_result.hide()
-            self.show_animation.hide()
-            msg = QMessageBox()
+            self.hide_multiple([self.soliton_paths_label, self.paths, self.show_matrices, self.show_end_result, self.show_animation])
+            msg = QMessageBox(self.wid_single)
+            msg.setStyleSheet(" QPushButton{ height: 32px; width: 130px;}")
             msg.setWindowTitle("No path found")
             msg.setText("There exists no soliton path between these exterior nodes.")
             msg.setIcon(QMessageBox.Information)
             msg.setStandardButtons(QMessageBox.Retry)
             msg.setInformativeText("Please try again with different exterior nodes.")
-            msg.setStyleSheet(" QPushButton{ height: 32px; width: 130px}")
             x = msg.exec_()
         else:
             self.soliton_paths_label.setText(f"Soliton paths ({len(self.automata.soliton_paths)}):")
-            self.soliton_paths_label.show()
-            self.paths.show()
-            self.show_matrices.show()
-            self.show_end_result.show()
-            self.show_animation.show()
+            self.show_multiple([self.soliton_paths_label, self.paths, self.show_matrices, self.show_end_result, self.show_animation])
             for soliton_path in self.automata.soliton_paths:
                 self.paths.addItem(str(soliton_path.path_for_user))
+
+    
+    def submit_burst_clicked(self):
+
+        self.traversal_index = None # we need this variable later in show_animation_clicked
+        self.traversals.clear()
+        if self.all_bursts.isChecked():
+            key = self.multi_automata.matrix_to_string(nx.to_numpy_array(self.my_graph_m.graph))
+            self.found_traversals = self.multi_automata.states_plus_traversals[key][1]
+        else:
+            burst_index = int(self.burst.currentIndex())
+            self.found_traversals = self.multi_automata.call_find_all_travs_given_burst(self.multi_automata.bursts_dicts[burst_index], self.my_graph_m)
+        if self.found_traversals == []:
+            self.hide_multiple([self.traversals_label, self.traversals, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
+            msg = QMessageBox(self.wid_mult)
+            msg.setStyleSheet(" QPushButton{ height: 32px; width: 130px;}")
+            msg.setWindowTitle("No soliton paths found")
+            msg.setText("With this burst(s), not all solitons can traverse the soliton graph successfully.")
+            msg.setIcon(QMessageBox.Information)
+            msg.setStandardButtons(QMessageBox.Retry)
+            msg.setInformativeText("Please try again with different bursts.")
+            x = msg.exec_()
+        else:
+            self.traversals_label.setText(f"Traversals ({len(self.found_traversals)}):")
+            self.show_multiple([self.traversals_label, self.traversals, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
+            for traversal in self.found_traversals:
+                this_traversal = ""
+                #self.traversals.addItem(str(traversal.traversal_for_user))
+                for i, path in enumerate(traversal.traversal_for_user):
+                    this_traversal = this_traversal + path
+                    if i != len(traversal.traversal_for_user)-1:
+                        this_traversal = this_traversal + ", "
+                self.traversals.addItem(this_traversal)
+
     
 
     def show_matrices_clicked(self):
@@ -412,7 +707,7 @@ class MainWindow(QMainWindow):
             Only allows `.txt` file suffix.
             """
             option = QtWidgets.QFileDialog.Options()
-            name = QtWidgets.QFileDialog.getSaveFileName(self.centralwidget, 'Save File', 'matrices.txt', 'Text files (*.txt)', options = option)
+            name = QtWidgets.QFileDialog.getSaveFileName(self.wid_single, 'Save File', 'matrices.txt', 'Text files (*.txt)', options = option)
             if name != ('', ''): # only do the following if user clicked on save button (without this line the application closes with an error if save action is cancelled)
                 path = name[0]
                 file = open(path, "w")
@@ -422,8 +717,9 @@ class MainWindow(QMainWindow):
         index = self.paths.currentIndex()
         desired_path = self.automata.soliton_paths[index]
     
-        dlg = QDialog()
+        dlg = QDialog(self.wid_single)
         scrollArea = QScrollArea(dlg)
+        scrollArea.setStyleSheet("font: 13pt Courier;")
         widget = QtWidgets.QWidget()
         vbox = QtWidgets.QVBoxLayout()
         if re.search(',', self.my_graph.way) is not None:
@@ -481,10 +777,94 @@ class MainWindow(QMainWindow):
         scrollArea.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOn)
         scrollArea.setWidgetResizable(True)
         scrollArea.setWidget(widget)
-        scrollArea.setStyleSheet("font: 13pt Courier;")
         scrollArea.setFixedSize(540, 405)
         save_button = QtWidgets.QPushButton(dlg)
         save_button.setStyleSheet("QPushButton {background-color: rgb(191, 207, 255); image: url(:/icons/save.svg);} QPushButton::pressed {background-color : rgb(132, 145, 193);}")
+        save_button.setGeometry(QtCore.QRect(454, 359, 70, 30))
+        save_button.clicked.connect(save_matrices)
+
+        dlg.setWindowTitle("Adjacency Matrices")
+        dlg.setFixedSize(545, 410)
+        dlg.exec_()
+
+
+    def show_matrices_clicked_m(self):
+
+        def save_matrices():
+            option = QtWidgets.QFileDialog.Options()
+            name = QtWidgets.QFileDialog.getSaveFileName(self.wid_mult, 'Save File', 'matrices.txt', 'Text files (*.txt)', options = option)
+            if name != ('', ''): # only do the following if user clicked on save button (without this line the application closes with an error if save action is cancelled)
+                path = name[0]
+                file = open(path, "w")
+                file.write(txt_text)
+                file.close()
+
+        index = self.traversals.currentIndex()
+        desired_traversal = self.found_traversals[index]
+    
+        dlg = QDialog(self.wid_mult)
+        scrollArea = QScrollArea(dlg)
+        scrollArea.setStyleSheet("font: 13pt Courier;")
+        widget = QtWidgets.QWidget()
+        vbox = QtWidgets.QVBoxLayout()
+        if re.search(',', self.my_graph_m.way) is not None:
+            txt_text = f"Way to soliton graph: {self.my_graph_m.way} \n"
+        else:
+            txt_text = f"Soliton graph: {self.my_graph_m.way} \n"
+        txt_text = txt_text + f"Traversal: {desired_traversal.traversal_for_user} \n \n"
+        # labelling of matrix depends on wether we have long node labels ("aa", "ab", ...) or short ones ("a", "b", ...)
+        if (len(self.my_graph_m.labels) - len(self.my_graph_m.exterior_nodes)) > 26:
+            matrix_label_horizontal = "    "
+            long_labels = True
+        else:
+            matrix_label_horizontal = "   "
+            long_labels = False
+        for key in self.my_graph_m.labels:
+            if long_labels:
+                if self.my_graph_m.labels[key] in self.my_graph_m.exterior_nodes_reverse and int(self.my_graph_m.labels[key]) < 10:
+                    matrix_label_horizontal = matrix_label_horizontal + f"{self.my_graph_m.labels[key]}  "
+                else:
+                    matrix_label_horizontal = matrix_label_horizontal + f"{self.my_graph_m.labels[key]} "
+            else:
+                if self.my_graph_m.labels[key] in self.my_graph_m.exterior_nodes_reverse and int(self.my_graph_m.labels[key]) >= 10:
+                    matrix_label_horizontal = matrix_label_horizontal + f"{self.my_graph_m.labels[key]} "
+                else:
+                    matrix_label_horizontal = matrix_label_horizontal + f"{self.my_graph_m.labels[key]}  "
+        # for show-matrices-window the node labels are added to the matrix string and this labelled matrix is added to scroll area
+        # for matrices.txt we add everything (horizontal label and every row of matrix) line by line
+        for i in range(len(desired_traversal.adjacency_matrices_list)):
+            txt_text = txt_text + f"Timestep {i}: \n"
+            txt_text = txt_text + f"{matrix_label_horizontal} \n"
+            matrix_labelled = ""
+            matrix_labelled = matrix_labelled + f"{matrix_label_horizontal}\n"
+            matrix = str(desired_traversal.adjacency_matrices_list[i])
+            matrix = re.sub(r"[matrix(]", "", matrix)
+            matrix = re.sub(r"[)]", "", matrix)
+            for j in range(len(matrix.splitlines())):
+                if long_labels:
+                    if self.my_graph_m.labels[j] in self.my_graph_m.exterior_nodes_reverse and int(self.my_graph_m.labels[j]) < 10:
+                        matrix_labelled = matrix_labelled + f"{self.my_graph_m.labels[j]} {matrix.splitlines()[j]} \n"
+                        txt_text = txt_text + f"{self.my_graph_m.labels[j]} {matrix.splitlines()[j]} \n"
+                    else:
+                        matrix_labelled = matrix_labelled + f"{self.my_graph_m.labels[j]}{matrix.splitlines()[j]} \n"
+                        txt_text = txt_text + f"{self.my_graph_m.labels[j]}{matrix.splitlines()[j]} \n"
+                else:
+                    if self.my_graph_m.labels[j] in self.my_graph_m.exterior_nodes_reverse and int(self.my_graph_m.labels[j]) >= 10:
+                        matrix_labelled = matrix_labelled + f"{self.my_graph_m.labels[j]}{matrix.splitlines()[j][1:]} \n"
+                        txt_text = txt_text + f"{self.my_graph_m.labels[j]}{matrix.splitlines()[j][1:]} \n"
+                    else:
+                        matrix_labelled = matrix_labelled + f"{self.my_graph_m.labels[j]}{matrix.splitlines()[j]} \n"
+                        txt_text = txt_text + f"{self.my_graph_m.labels[j]}{matrix.splitlines()[j]} \n"
+            txt_text = txt_text + f"\n"
+            vbox.addWidget(QtWidgets.QLabel(matrix_labelled))
+        widget.setLayout(vbox)
+        scrollArea.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOn)
+        scrollArea.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOn)
+        scrollArea.setWidgetResizable(True)
+        scrollArea.setWidget(widget)
+        scrollArea.setFixedSize(540, 405)
+        save_button = QtWidgets.QPushButton(dlg)
+        save_button.setStyleSheet("QPushButton {background-color: rgb(149, 221, 185); image: url(:/icons/save.svg);} QPushButton::pressed {background-color : rgb(90, 159, 123);}")
         save_button.setGeometry(QtCore.QRect(454, 359, 70, 30))
         save_button.clicked.connect(save_matrices)
 
@@ -503,7 +883,7 @@ class MainWindow(QMainWindow):
             Only allows `.jpg`, `.png` and `.jpeg` file suffixes.
             """
             option = QtWidgets.QFileDialog.Options()
-            name = QtWidgets.QFileDialog.getSaveFileName(self.centralwidget, 'Save File', 'result.jpg', 'Images (*.jpg *.png *.jpeg)', options = option)
+            name = QtWidgets.QFileDialog.getSaveFileName(self.wid_single, 'Save File', 'result.jpg', 'Images (*.jpg *.png *.jpeg)', options = option)
             if name != ('', ''):
                 path = name[0]
                 imgByteArr = io.BytesIO()
@@ -528,11 +908,7 @@ class MainWindow(QMainWindow):
             self.display_molecule.setPixmap(QtGui.QPixmap.fromImage(self.qim).scaled(self.display_molecule.size(), QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation))
 
             self.traversal_mode.setChecked(True)
-            self.soliton_paths_label.hide()
-            self.paths.hide()
-            self.show_matrices.hide()
-            self.show_end_result.hide()
-            self.show_animation.hide()
+            self.hide_multiple([self.soliton_paths_label, self.paths, self.show_matrices, self.show_end_result, self.show_animation])
             self.node_1.setCurrentIndex(0)
             self.node_2.setCurrentIndex(0)
             dlg.close()
@@ -543,7 +919,7 @@ class MainWindow(QMainWindow):
         result_pic = Visualisation.visualize_soliton_graph(self.my_graph, self.desired_path.bindings_list[bindings_index], False, True)
         qim = ImageQt(result_pic)
 
-        dlg = QDialog()
+        dlg = QDialog(self.wid_single)
         label = QtWidgets.QLabel(dlg)
         label.setGeometry(QtCore.QRect(0, 0, 540, 405))
         label.setPixmap(QtGui.QPixmap.fromImage(qim))
@@ -560,30 +936,89 @@ class MainWindow(QMainWindow):
         dlg.setFixedSize(545, 410)
         dlg.exec_()
 
+    
+    def show_end_result_clicked_m(self):
 
-    def show_animation_clicked(self):
+        def save_end_result():
+
+            option = QtWidgets.QFileDialog.Options()
+            name = QtWidgets.QFileDialog.getSaveFileName(self.wid_mult, 'Save File', 'result.jpg', 'Images (*.jpg *.png *.jpeg)', options = option)
+            if name != ('', ''):
+                path = name[0]
+                imgByteArr = io.BytesIO()
+                result_pic.save(imgByteArr, format='PNG')
+                imgByteArr = imgByteArr.getvalue()
+                file = open(path, "wb")
+                file.write(imgByteArr)
+                file.close()
+
+        def use_as_new_soliton_graph(dlg: QDialog):
+            
+            current_way = self.my_graph_m.way
+            new_soliton_graph = copy.deepcopy(self.desired_traversal.resulting_soliton_graph)
+            self.my_graph_m = new_soliton_graph
+            self.my_graph_m.way = f"{current_way}, {self.desired_traversal.traversal_for_user}"
+            self.graph_pic = Visualisation.visualize_soliton_graph(self.my_graph_m, self.my_graph_m.bindings, False, True)
+            self.qim_m = ImageQt(self.graph_pic)
+            self.display_molecule_m.setPixmap(QtGui.QPixmap.fromImage(self.qim_m).scaled(self.display_molecule_m.size(), QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation))
+
+            self.traversal_mode_m.setChecked(True)
+            self.hide_multiple([self.traversals_label, self.traversals, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
+            self.burst.setCurrentIndex(0)
+            dlg.close()
+
+        index = self.traversals.currentIndex()
+        self.desired_traversal = self.found_traversals[index]
+        result_pic = Visualisation.visualize_soliton_graph(self.desired_traversal.resulting_soliton_graph, self.desired_traversal.resulting_soliton_graph.bindings, False, True)
+        qim = ImageQt(result_pic)
+
+        dlg = QDialog(self.wid_mult)
+        label = QtWidgets.QLabel(dlg)
+        label.setGeometry(QtCore.QRect(0, 0, 540, 405))
+        label.setPixmap(QtGui.QPixmap.fromImage(qim))
+        label.setScaledContents(True)
+        save_button = QtWidgets.QPushButton(dlg)
+        save_button.setStyleSheet("QPushButton {background-color: rgb(149, 221, 185); image: url(:/icons/save.svg);} QPushButton::pressed {background-color : rgb(90, 159, 123);}")
+        save_button.setGeometry(QtCore.QRect(470, 375, 70, 30))
+        save_button.clicked.connect(save_end_result)
+        use_button = QtWidgets.QPushButton("Use", dlg)
+        use_button.clicked.connect(lambda: use_as_new_soliton_graph(dlg))
+        use_button.setGeometry(QtCore.QRect(395, 375, 70, 30))
+
+        dlg.setWindowTitle("End result")
+        dlg.setFixedSize(545, 410)
+        dlg.exec_()
+
+
+    def show_animation_clicked(self, button: QtWidgets.QPushButton):
         """Method that is called when user clicks button to have the animation of the soliton traversing the graph displayed.
         Makes a small window pop up that shows the animation and provides a save button.
         Instead of displaying the `gif` it uses a sequence of `PIL` images and always shows the next image after a certain time.
         """
-        
+
         def save_animation():
             """Opens a file dialog in which user can specify a path where the animation should be saved.
             Only allows `.gif` file suffix.
             """
             option = QtWidgets.QFileDialog.Options()
-            name = QtWidgets.QFileDialog.getSaveFileName(self.centralwidget, 'Save File', 'animation.gif', 'Images (*.gif)', options = option)
+            name = QtWidgets.QFileDialog.getSaveFileName(wid, 'Save File', 'animation.gif', 'Images (*.gif)', options = option)
             if name != ('', ''):
                 path = name[0]
-                ani = Animation.graph_animation(self.my_graph, self.desired_path)
+                if button == self.show_animation:
+                    ani = Animation.graph_animation(self.my_graph, self.desired_path)
+                else: ani = Animation.graph_animation_multiwave(self.my_graph_m, self.desired_traversal)
                 ani.save(path, writer='pillow', dpi = 600)
 
         def update_image():
             """Displays next image of animation after a certain time (method is triggered by a timer).
             """
             self.step += 1
-            if self.step == len(self.desired_path.path): # start animation all over again as soon as end is reached (endless loop)
-                self.step = 0
+            if button == self.show_animation:
+                if self.step == len(self.desired_path.path): # start animation all over again as soon as end is reached (endless loop)
+                    self.step = 0
+            else:
+                if self.step == len(self.desired_traversal.pos):
+                    self.step = 0
             im = self.pil_images[self.step]
             qim = ImageQt(im)
             self.label.setPixmap(QtGui.QPixmap.fromImage(qim.copy()))
@@ -591,8 +1026,12 @@ class MainWindow(QMainWindow):
 
         def update_image_reverse():
             self.step -= 1
-            if self.step == -1: # if start of animation was reached in the step before then continue at end of animation
-                self.step = len(self.desired_path.path) - 1
+            if button == self.show_animation:
+                if self.step == -1: # if start of animation was reached in the step before then continue at end of animation
+                    self.step = len(self.desired_path.path) - 1
+            else:
+                if self.step == -1:
+                    self.step = len(self.desired_traversal.pos) - 1
             im = self.pil_images[self.step]
             qim = ImageQt(im)
             self.label.setPixmap(QtGui.QPixmap.fromImage(qim.copy()))
@@ -602,51 +1041,79 @@ class MainWindow(QMainWindow):
         def pause_animation(button: QtWidgets.QPushButton):
             if self.timer.isActive():
                 self.timer.stop()
-                button.setStyleSheet("QPushButton {background-color: rgb(191, 207, 255); image: url(:/icons/play.svg);} QPushButton::pressed {background-color : rgb(132, 145, 193);}")
+                if button.parentWidget().parentWidget() == self.wid_single:
+                    button.setStyleSheet("QPushButton {background-color: rgb(191, 207, 255); image: url(:/icons/play.svg);} QPushButton::pressed {background-color : rgb(132, 145, 193);}")
+                else: button.setStyleSheet("QPushButton {background-color: rgb(149, 221, 185); image: url(:/icons/play.svg);} QPushButton::pressed {background-color : rgb(90, 159, 123);}")
             else:
                 update_image()
                 self.timer.start(800)
-                button.setStyleSheet("QPushButton {background-color: rgb(191, 207, 255); image: url(:/icons/pause.svg);} QPushButton::pressed {background-color : rgb(132, 145, 193);}")
+                if button.parentWidget().parentWidget() == self.wid_single:
+                    button.setStyleSheet("QPushButton {background-color: rgb(191, 207, 255); image: url(:/icons/pause.svg);} QPushButton::pressed {background-color : rgb(132, 145, 193);}")
+                else: button.setStyleSheet("QPushButton {background-color: rgb(149, 221, 185); image: url(:/icons/pause.svg);} QPushButton::pressed {background-color : rgb(90, 159, 123);}")
 
         def next_img(button: QtWidgets.QPushButton):
             if self.timer.isActive():
                 self.timer.stop()
-                button.setStyleSheet("QPushButton {background-color: rgb(191, 207, 255); image: url(:/icons/play.svg);} QPushButton::pressed {background-color : rgb(132, 145, 193);}")
+                if button.parentWidget().parentWidget() == self.wid_single:
+                    button.setStyleSheet("QPushButton {background-color: rgb(191, 207, 255); image: url(:/icons/play.svg);} QPushButton::pressed {background-color : rgb(132, 145, 193);}")
+                else: button.setStyleSheet("QPushButton {background-color: rgb(149, 221, 185); image: url(:/icons/play.svg);} QPushButton::pressed {background-color : rgb(90, 159, 123);}")
             update_image()
 
         def prev_img(button: QtWidgets.QPushButton):
             if self.timer.isActive():
                 self.timer.stop()
-                button.setStyleSheet("QPushButton {background-color: rgb(191, 207, 255); image: url(:/icons/play.svg);} QPushButton::pressed {background-color : rgb(132, 145, 193);}")
+                if button.parentWidget().parentWidget() == self.wid_single:
+                    button.setStyleSheet("QPushButton {background-color: rgb(191, 207, 255); image: url(:/icons/play.svg);} QPushButton::pressed {background-color : rgb(132, 145, 193);}")
+                else: button.setStyleSheet("QPushButton {background-color: rgb(149, 221, 185); image: url(:/icons/play.svg);} QPushButton::pressed {background-color : rgb(90, 159, 123);}")
             update_image_reverse()
             
-
-        dlg = QDialog()
+        if button == self.show_animation:
+            dlg = QDialog(self.wid_single)
+        else: dlg = QDialog(self.wid_mult)
         self.label = QtWidgets.QLabel(dlg)
         self.label.setGeometry(QtCore.QRect(0, 0, 540, 405))
         
-        if self.path_index != self.paths.currentIndex():
-            self.path_index = self.paths.currentIndex()
-            self.desired_path = self.automata.soliton_paths[self.path_index]
-            plots_and_arrays = Animation.list_of_plots_and_arrays(self.my_graph, self.desired_path)
-            self.pil_images = Animation.list_of_pil_images(plots_and_arrays)
+        if button == self.show_animation:
+            wid = self.wid_single
+        else:
+            wid = self.wid_mult
+        
+        if button == self.show_animation:
+            if self.path_index != self.paths.currentIndex():
+                self.path_index = self.paths.currentIndex()
+                self.desired_path = self.automata.soliton_paths[self.path_index]
+                plots_and_arrays = Animation.list_of_plots_and_arrays(self.my_graph, self.desired_path)
+                self.pil_images = Animation.list_of_pil_images(plots_and_arrays)
+        else:
+            if self.traversal_index != self.traversals.currentIndex():
+                self.traversal_index = self.traversals.currentIndex()
+                self.desired_traversal = self.found_traversals[self.traversal_index]
+                plots_and_arrays = Animation.list_of_plots_and_arrays_multiwave(self.my_graph_m, self.desired_traversal)
+                self.pil_images = Animation.list_of_pil_images(plots_and_arrays)
 
         save_button = QtWidgets.QPushButton(dlg)
-        save_button.setStyleSheet("QPushButton {background-color: rgb(191, 207, 255); image: url(:/icons/save.svg);} QPushButton::pressed {background-color : rgb(132, 145, 193);}")
         save_button.setGeometry(QtCore.QRect(470, 375, 70, 30))
         save_button.clicked.connect(save_animation)
         pause_button = QtWidgets.QPushButton(dlg)
-        pause_button.setStyleSheet("QPushButton {background-color: rgb(191, 207, 255); image: url(:/icons/pause.svg);} QPushButton::pressed {background-color : rgb(132, 145, 193);}")
         pause_button.setGeometry(QtCore.QRect(240, 375, 30, 30))
         pause_button.clicked.connect(lambda: pause_animation(pause_button))
         next_button = QtWidgets.QPushButton(dlg)
-        next_button.setStyleSheet("QPushButton {background-color: rgb(191, 207, 255); image: url(:/icons/right-arrow.svg);} QPushButton::pressed {background-color : rgb(132, 145, 193);}")
         next_button.setGeometry(QtCore.QRect(275, 375, 30, 30))
         next_button.clicked.connect(lambda: next_img(pause_button))
         prev_button = QtWidgets.QPushButton(dlg)
-        prev_button.setStyleSheet("QPushButton {background-color: rgb(191, 207, 255); image: url(:/icons/left-arrow.svg);} QPushButton::pressed {background-color : rgb(132, 145, 193)}")
         prev_button.setGeometry(QtCore.QRect(205, 375, 30, 30))
         prev_button.clicked.connect(lambda: prev_img(pause_button))
+        if button == self.show_animation:
+            save_button.setStyleSheet("QPushButton {background-color: rgb(191, 207, 255); image: url(:/icons/save.svg);} QPushButton::pressed {background-color : rgb(132, 145, 193);}")
+            pause_button.setStyleSheet("QPushButton {background-color: rgb(191, 207, 255); image: url(:/icons/pause.svg);} QPushButton::pressed {background-color : rgb(132, 145, 193);}")
+            next_button.setStyleSheet("QPushButton {background-color: rgb(191, 207, 255); image: url(:/icons/right-arrow.svg);} QPushButton::pressed {background-color : rgb(132, 145, 193);}")
+            prev_button.setStyleSheet("QPushButton {background-color: rgb(191, 207, 255); image: url(:/icons/left-arrow.svg);} QPushButton::pressed {background-color : rgb(132, 145, 193)}")
+        else:
+            save_button.setStyleSheet("QPushButton {background-color: rgb(149, 221, 185); image: url(:/icons/save.svg);} QPushButton::pressed {background-color : rgb(90, 159, 123);}")
+            pause_button.setStyleSheet("QPushButton {background-color: rgb(149, 221, 185); image: url(:/icons/pause.svg);} QPushButton::pressed {background-color : rgb(90, 159, 123);}")
+            next_button.setStyleSheet("QPushButton {background-color: rgb(149, 221, 185); image: url(:/icons/right-arrow.svg);} QPushButton::pressed {background-color : rgb(90, 159, 123);}")
+            prev_button.setStyleSheet("QPushButton {background-color: rgb(149, 221, 185); image: url(:/icons/left-arrow.svg);} QPushButton::pressed {background-color : rgb(90, 159, 123)}")
+
         self.step = -1
         self.timer = QtCore.QTimer(self)
         self.timer.timeout.connect(update_image)
@@ -668,15 +1135,26 @@ class MainWindow(QMainWindow):
         self.timer.disconnect()
 
 
-    def hide_retain_space(self, widget):
+    def hide_retain_space(self, widgets: list):
         """Retains the space of a widget even when it's hidden.
 
         Args:
             widget (QtWidgets.QWidget ): Widget whose space should be retained.
         """
-        retain = widget.sizePolicy()
-        retain.setRetainSizeWhenHidden(True)
-        widget.setSizePolicy(retain)
+        for widget in widgets:
+            retain = widget.sizePolicy()
+            retain.setRetainSizeWhenHidden(True)
+            widget.setSizePolicy(retain)
+
+
+    def hide_multiple(self, widgets: list):
+        for widget in widgets:
+            widget.hide()
+
+
+    def show_multiple(self, widgets: list):
+        for widget in widgets:
+            widget.show()
 
 
     def heightForWidth(self, width: float):
@@ -688,7 +1166,8 @@ class MainWindow(QMainWindow):
         Returns:
             float: Computed height.
         """
-        return math.ceil(width * self.height_for_width_factor)
+        height_for_width_factor = 1.0 * 519 / 688
+        return math.ceil(width * height_for_width_factor)
 
 
     def widthForHeight(self, height):
@@ -700,7 +1179,8 @@ class MainWindow(QMainWindow):
         Returns:
             float: Computed width.
         """
-        return math.ceil(height * self.width_for_height_factor)
+        width_for_height_factor = 1.0 * 688 / 519
+        return math.ceil(height * width_for_height_factor)
 
 
     def resizeEvent(self, event: QtGui.QResizeEvent):
@@ -718,3 +1198,4 @@ class MainWindow(QMainWindow):
         else:
             width = self.widthForHeight(height)
         self.display_molecule.setPixmap(QtGui.QPixmap.fromImage(self.qim).scaled(width, height, QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation))
+        self.display_molecule_m.setPixmap(QtGui.QPixmap.fromImage(self.qim_m).scaled(width, height, QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation))
