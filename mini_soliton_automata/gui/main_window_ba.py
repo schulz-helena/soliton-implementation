@@ -17,6 +17,7 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QDialog, QMainWindow, QMessageBox, QScrollArea
 from soliton_classes.mini_soliton_automata import MiniSolitonAutomata
 from soliton_classes.multiwave_soliton_automata import MultiwaveSolitonAutomata
+from soliton_classes.soliton_automata import SolitonAutomata
 from soliton_classes.soliton_graph import SolitonGraph
 from soliton_classes.soliton_path import SolitonPath
 from visualisations.animation import Animation
@@ -170,8 +171,10 @@ class MainWindow(QMainWindow):
         # Function connections of different widgets:
         self.slider.valueChanged.connect(self.change_window)
         self.traversal_mode.stateChanged.connect(lambda:self.change_mode(self.traversal_mode))
+        self.mol_info.clicked.connect(self.mol_info_clicked)
         self.save.clicked.connect(self.save_clicked)
         self.submit_molecule.clicked.connect(self.submit_molecule_clicked)
+        self.all_exterior_nodes.stateChanged.connect(self.all_exterior_nodes_statechanged)
         self.submit_exterior_nodes.clicked.connect(self.submit_exterior_nodes_clicked)
         self.show_matrices.clicked.connect(self.show_matrices_clicked)
         self.show_end_result.clicked.connect(self.show_end_result_clicked)
@@ -313,6 +316,7 @@ class MainWindow(QMainWindow):
         # Function connections of different widgets:
         self.slider_m.valueChanged.connect(self.change_window)
         self.traversal_mode_m.stateChanged.connect(lambda:self.change_mode_m(self.traversal_mode_m))
+        self.mol_info_m.clicked.connect(self.mol_info_clicked_m)
         self.save_m.clicked.connect(self.save_clicked_m)
         self.all_bursts.stateChanged.connect(self.all_bursts_statechanged)
         self.submit_molecule_m.clicked.connect(self.submit_molecule_clicked_m)
@@ -380,6 +384,60 @@ class MainWindow(QMainWindow):
             self.slider.setValue(0)
             self.front_wid = 1
 
+    
+    def mol_info_clicked(self):
+        if self.automata is None:
+            self.automata = SolitonAutomata(self.my_graph)
+        
+        dlg = QDialog(self.wid_single)
+        grid = QtWidgets.QGridLayout(dlg)
+        label_det = QtWidgets.QLabel(dlg)
+        label_det.setText("Deterministic:")
+        grid.addWidget(label_det, 0, 0, 1, 1)
+        checkbox_det = QtWidgets.QCheckBox(dlg)
+        checkbox_det.setChecked(self.automata.deterministic)
+        checkbox_det.setEnabled(False)
+        grid.addWidget(checkbox_det, 0, 1, 1, 1)
+        label_strong_det = QtWidgets.QLabel(dlg)
+        label_strong_det.setText("Strongly deterministic:")
+        grid.addWidget(label_strong_det, 1, 0, 1, 1)
+        checkbox_strong_det = QtWidgets.QCheckBox(dlg)
+        checkbox_strong_det.setChecked(self.automata.strongly_deterministic)
+        checkbox_strong_det.setEnabled(False)
+        grid.addWidget(checkbox_strong_det, 1, 1, 1, 1)
+        label_imp_paths = QtWidgets.QLabel(dlg)
+        label_imp_paths.setText("Impervious path(s):")
+        grid.addWidget(label_imp_paths, 2, 0, 1, 1, alignment = QtCore.Qt.AlignTop)
+
+        group = QtWidgets.QGroupBox()
+        layout = QtWidgets.QGridLayout(group)
+        layout.setContentsMargins(0, 0, 0, 0)
+        impervs = self.automata.find_impervious_paths()
+        if impervs == []:
+            layout.addWidget(QtWidgets.QLabel("-"))
+        for i, path in enumerate(impervs):
+            layout.addWidget(QtWidgets.QLabel(path), i, 0, 1, 1, alignment = QtCore.Qt.AlignTop)
+        grid.addWidget(group, 2, 1, 1, 1, alignment = QtCore.Qt.AlignTop)
+
+        dlg.setWindowTitle("Info")
+        dlg.exec_()
+
+    
+    def mol_info_clicked_m(self):
+        
+        dlg = QDialog(self.wid_single)
+        grid = QtWidgets.QGridLayout(dlg)
+        label_det = QtWidgets.QLabel(dlg)
+        label_det.setText("Deterministic:")
+        grid.addWidget(label_det, 0, 0, 1, 1)
+        checkbox_det = QtWidgets.QCheckBox(dlg)
+        checkbox_det.setChecked(False)
+        checkbox_det.setEnabled(False)
+        grid.addWidget(checkbox_det, 0, 1, 1, 1)
+
+        dlg.setWindowTitle("Info")
+        dlg.exec_()
+
 
     def change_mode(self, checkbox: QtWidgets.QCheckBox):
         """Realizes the change between being in traversal mode and not being in traversal mode.
@@ -446,6 +504,7 @@ class MainWindow(QMainWindow):
         self.node_1.clear()
         self.node_2.clear()
         smiles_string = self.molecule_lineedit.text()
+        self.automata = None
         try:
             self.my_graph = SolitonGraph(smiles_string)
             errors = self.my_graph.validate_soliton_graph()
@@ -594,9 +653,16 @@ class MainWindow(QMainWindow):
             x = msg.exec_()
 
 
+    def all_exterior_nodes_statechanged(self):
+        if self.all_exterior_nodes.isChecked():
+            #self.hide_retain_space([self.node_1, self.exterior_nodes_label2, self.node_2])
+            self.hide_multiple([self.node_1, self.exterior_nodes_label2, self.node_2])
+        else: self.show_multiple([self.node_1, self.exterior_nodes_label2, self.node_2])
+
+
     def all_bursts_statechanged(self):
         if self.all_bursts.isChecked():
-            self.hide_retain_space([self.burst])
+            #self.hide_retain_space([self.burst])
             self.burst.hide()
         else: self.burst.show()
 
@@ -642,10 +708,17 @@ class MainWindow(QMainWindow):
         """
         self.path_index = None # we need this variable later in show_animation_clicked
         self.paths.clear()
-        node1 = int(self.node_1.currentText())
-        node2 = int(self.node_2.currentText())
-        self.automata = MiniSolitonAutomata(self.my_graph, node1, node2)
-        if self.automata.soliton_paths == []:
+        if self.all_exterior_nodes.isChecked():
+            if self.automata is None:
+                self.automata = SolitonAutomata(self.my_graph)
+            key = self.automata.matrix_to_string(nx.to_numpy_array(self.my_graph.graph))
+            self.found_paths = self.automata.states_plus_soliton_paths[key][1]
+        else:
+            node1 = int(self.node_1.currentText())
+            node2 = int(self.node_2.currentText())
+            miniautomata = MiniSolitonAutomata(self.my_graph, node1, node2)
+            self.found_paths = miniautomata.soliton_paths
+        if self.found_paths == []:
             self.hide_multiple([self.soliton_paths_label, self.paths, self.show_matrices, self.show_end_result, self.show_animation])
             msg = QMessageBox(self.wid_single)
             msg.setStyleSheet(" QPushButton{ height: 32px; width: 130px;}")
@@ -656,9 +729,9 @@ class MainWindow(QMainWindow):
             msg.setInformativeText("Please try again with different exterior nodes.")
             x = msg.exec_()
         else:
-            self.soliton_paths_label.setText(f"Soliton paths ({len(self.automata.soliton_paths)}):")
+            self.soliton_paths_label.setText(f"Soliton paths ({len(self.found_paths)}):")
             self.show_multiple([self.soliton_paths_label, self.paths, self.show_matrices, self.show_end_result, self.show_animation])
-            for soliton_path in self.automata.soliton_paths:
+            for soliton_path in self.found_paths:
                 self.paths.addItem(str(soliton_path.path_for_user))
 
     
@@ -687,7 +760,6 @@ class MainWindow(QMainWindow):
             self.show_multiple([self.traversals_label, self.traversals, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
             for traversal in self.found_traversals:
                 this_traversal = ""
-                #self.traversals.addItem(str(traversal.traversal_for_user))
                 for i, path in enumerate(traversal.traversal_for_user):
                     this_traversal = this_traversal + path
                     if i != len(traversal.traversal_for_user)-1:
@@ -715,7 +787,7 @@ class MainWindow(QMainWindow):
                 file.close()
 
         index = self.paths.currentIndex()
-        desired_path = self.automata.soliton_paths[index]
+        desired_path = self.found_paths[index]
     
         dlg = QDialog(self.wid_single)
         scrollArea = QScrollArea(dlg)
@@ -914,7 +986,7 @@ class MainWindow(QMainWindow):
             dlg.close()
 
         index = self.paths.currentIndex()
-        self.desired_path = self.automata.soliton_paths[index]
+        self.desired_path = self.found_paths[index]
         bindings_index = len(self.desired_path.path) - 1
         result_pic = Visualisation.visualize_soliton_graph(self.my_graph, self.desired_path.bindings_list[bindings_index], False, True)
         qim = ImageQt(result_pic)
@@ -1081,7 +1153,7 @@ class MainWindow(QMainWindow):
         if button == self.show_animation:
             if self.path_index != self.paths.currentIndex():
                 self.path_index = self.paths.currentIndex()
-                self.desired_path = self.automata.soliton_paths[self.path_index]
+                self.desired_path = self.found_paths[self.path_index]
                 plots_and_arrays = Animation.list_of_plots_and_arrays(self.my_graph, self.desired_path)
                 self.pil_images = Animation.list_of_pil_images(plots_and_arrays)
         else:
