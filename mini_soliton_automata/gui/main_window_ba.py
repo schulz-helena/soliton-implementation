@@ -368,7 +368,7 @@ class MainWindow(QMainWindow):
         self.submit_set_of_bursts.setText(_translate("MainWindow", "Submit"))
         self.bursts_label.setText(_translate("MainWindow", "Bursts:"))
         self.submit_burst.setText(_translate("MainWindow", "Submit"))
-        self.traversals_label.setText(_translate("MainWindow", "Traversals:"))
+        self.traversals_label.setText(_translate("MainWindow", "Sets of paths:"))
         self.show_matrices_m.setText(_translate("MainWindow", "Show matrices"))
         self.show_end_result_m.setText(_translate("MainWindow", "Show end result"))
         self.show_animation_m.setText(_translate("MainWindow", "Show animation"))
@@ -394,17 +394,19 @@ class MainWindow(QMainWindow):
         label_det = QtWidgets.QLabel(dlg)
         label_det.setText("Deterministic:")
         grid.addWidget(label_det, 0, 0, 1, 1)
-        checkbox_det = QtWidgets.QCheckBox(dlg)
-        checkbox_det.setChecked(self.automata.deterministic)
-        checkbox_det.setEnabled(False)
-        grid.addWidget(checkbox_det, 0, 1, 1, 1)
+        det_bool = QtWidgets.QLabel(dlg)
+        if self.automata.deterministic:
+            det_bool.setText("Yes")
+        else: det_bool.setText("No")
+        grid.addWidget(det_bool, 0, 1, 1, 1)
         label_strong_det = QtWidgets.QLabel(dlg)
         label_strong_det.setText("Strongly deterministic:")
         grid.addWidget(label_strong_det, 1, 0, 1, 1)
-        checkbox_strong_det = QtWidgets.QCheckBox(dlg)
-        checkbox_strong_det.setChecked(self.automata.strongly_deterministic)
-        checkbox_strong_det.setEnabled(False)
-        grid.addWidget(checkbox_strong_det, 1, 1, 1, 1)
+        strong_det_bool = QtWidgets.QLabel(dlg)
+        if self.automata.strongly_deterministic:
+            strong_det_bool.setText("Yes")
+        else: strong_det_bool.setText("No")
+        grid.addWidget(strong_det_bool, 1, 1, 1, 1)
         label_imp_paths = QtWidgets.QLabel(dlg)
         label_imp_paths.setText("Impervious path(s):")
         grid.addWidget(label_imp_paths, 2, 0, 1, 1, alignment = QtCore.Qt.AlignTop)
@@ -648,7 +650,7 @@ class MainWindow(QMainWindow):
             details = details + f"- Solitons are seperated by '||'\n"
             details = details + f"- The number in front of a soliton's pair of exterior nodes defines how many timesteps later than the previous soliton this soliton enters the graph\n"
             details = details + f"- A set of bursts is embedded in braces, where individual bursts are seperated by ';'\n"
-            details = details + "- Example: " + "{(3,1)||1(1,2); (3,2)||2(1,1)}\n"
+            details = details + "- Example: " + "{(3,1)||1(1,2); (3,2)||4(2,1)}\n"
             msg.setDetailedText(details)
             x = msg.exec_()
 
@@ -742,6 +744,7 @@ class MainWindow(QMainWindow):
         if self.all_bursts.isChecked():
             key = self.multi_automata.matrix_to_string(nx.to_numpy_array(self.my_graph_m.graph))
             self.found_traversals = self.multi_automata.states_plus_traversals[key][1]
+            self.num_traversals_per_burst = self.multi_automata.states_plus_traversals[key][2]
         else:
             burst_index = int(self.burst.currentIndex())
             self.found_traversals = self.multi_automata.call_find_all_travs_given_burst(self.multi_automata.bursts_dicts[burst_index], self.my_graph_m)
@@ -756,7 +759,7 @@ class MainWindow(QMainWindow):
             msg.setInformativeText("Please try again with different bursts.")
             x = msg.exec_()
         else:
-            self.traversals_label.setText(f"Traversals ({len(self.found_traversals)}):")
+            self.traversals_label.setText(f"Sets of paths ({len(self.found_traversals)}):")
             self.show_multiple([self.traversals_label, self.traversals, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
             for traversal in self.found_traversals:
                 this_traversal = ""
@@ -765,6 +768,16 @@ class MainWindow(QMainWindow):
                     if i != len(traversal.traversal_for_user)-1:
                         this_traversal = this_traversal + ", "
                 self.traversals.addItem(this_traversal)
+            sep_index = 0
+            for n, num in enumerate(self.num_traversals_per_burst): # add seperators to distinct which traversals resulted from which burst
+                if num != 0 and n != len(self.num_traversals_per_burst)-1: # don't add if there is no traversal for this burst of if it's the last burst
+                    sep_index += num
+                    self.traversals.insertSeparator(sep_index)
+                    self.found_traversals.insert(sep_index, None) # so the indices in found_traversals correspond to the indices of the combobox items
+                    sep_index += 1 # indices got shifted by one because seperator was added
+                
+
+
 
     
 

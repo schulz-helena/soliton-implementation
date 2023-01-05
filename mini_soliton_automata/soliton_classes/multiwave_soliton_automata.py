@@ -23,8 +23,8 @@ class MultiwaveSolitonAutomata:
         self.bursts_dicts: list = self.build_bursts_dicts()
         """List of the bursts as dictionaries (soliton number as key and a list containing exterior nodes and entry time as value)."""
         self.states_plus_traversals: dict = self.all_traversals()
-        """All states of the soliton automata plus all traversals that can be found in each state
-        (Id/ string of the states adjacency matrix as key and state and traversals as values)."""
+        """All states of the soliton automata plus all traversals that can be found in each state plus number of traversals found for each burst
+        (Id/ string of the states adjacency matrix as key and state, traversals and list of numbers as values)."""
 
 
     def build_bursts_dicts(self):
@@ -257,25 +257,28 @@ class MultiwaveSolitonAutomata:
         """Calls `call_find_all_travs_given_burst` for all states of the automata and all bursts in order to get all possible traversals in all states.
 
         Returns:
-            dict: All states of the soliton graph plus all traversals that can be found in each state.
+            dict: All states of the soliton graph plus all traversals that can be found in each state plus number of traversals found for each burst.
         """
         initial_matrix = nx.to_numpy_array(self.soliton_graph.graph)
         states = [self.soliton_graph] # stores all possible states as soliton graphs, needed to iterate over states 
-        states_plus_traversals = {self.matrix_to_string(initial_matrix): [self.soliton_graph, []]} # stores all states plus all traversals that can be found in that state
+        states_plus_traversals = {self.matrix_to_string(initial_matrix): [self.soliton_graph, [], []]} # stores all states plus all traversals that can be found in that state plus number of traversals found for each burst
 
         for state in states: # for all states/ soliton graphs of the automata
             state_matrix_id = self.matrix_to_string(nx.to_numpy_array(state.graph))
             all_traversals = []
+            num_traversals_per_burst = []
             for burst_dict in self.bursts_dicts: # loop over all bursts
                 traversals = self.call_find_all_travs_given_burst(burst_dict, state) # find soliton paths with all bursts
+                num_traversals_per_burst.append(len(traversals))
                 for traversal in traversals:
                     all_traversals.append(traversal)
                     resulting_matrix = traversal.adjacency_matrices_list[len(traversal.adjacency_matrices_list)-1] # adjacency matrix of the soliton graph the traversal results in
                     resulting_matrix_id = self.matrix_to_string(resulting_matrix)
                     if resulting_matrix_id not in states_plus_traversals: # if we found a new state
-                        states_plus_traversals[resulting_matrix_id] = [traversal.resulting_soliton_graph, []] # add it to the dictionary
+                        states_plus_traversals[resulting_matrix_id] = [traversal.resulting_soliton_graph, [], []] # add it to the dictionary
                         states.append(traversal.resulting_soliton_graph)
             states_plus_traversals[state_matrix_id][1] = all_traversals # add all found traversals in this state
+            states_plus_traversals[state_matrix_id][2] = num_traversals_per_burst # add number of traversals found for each burst (in this state)
 
         return states_plus_traversals
 
