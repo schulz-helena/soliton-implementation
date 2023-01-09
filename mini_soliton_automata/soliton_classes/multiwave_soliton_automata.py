@@ -22,9 +22,14 @@ class MultiwaveSolitonAutomata:
         """The set of input burst."""
         self.bursts_dicts: list = self.build_bursts_dicts()
         """List of the bursts as dictionaries (soliton number as key and a list containing exterior nodes and entry time as value)."""
-        self.states_plus_traversals: dict = self.all_traversals()
+        self.deterministic: bool
+        """Whether the multiwave soliton automata is deterministic."""
+        self.strongly_deterministic: bool
+        """Whether the multiwave soliton graph is strongly deterministic."""
+        self.states_plus_traversals: dict
         """All states of the soliton automata plus all traversals that can be found in each state plus number of traversals found for each burst
         (Id/ string of the states adjacency matrix as key and state, traversals and list of numbers as values)."""
+        self.deterministic, self.strongly_deterministic, self.states_plus_traversals = self.all_traversals()
 
 
     def build_bursts_dicts(self):
@@ -182,7 +187,11 @@ class MultiwaveSolitonAutomata:
                     nodes_combs.append({soliton: possible_nodes[soliton][i]}) # add dictionary with node for this soliton
                 else:
                     for j, comb in enumerate(edges_combs): # if it's not the first soliton loop over all existing combinations
-                        if edge == -1 or edge == -2 or edge not in comb: # if edge is not already in combination (or soliton is outside the graph)
+                        same_ext_node = False
+                        for sol in nodes_combs[j]: # check if in this case two solitons would enter/ leave the graph via the same exterior node
+                            if nodes_combs[j][sol] == possible_nodes[soliton][i] and nodes_combs[j][sol] in self.soliton_graph.exterior_nodes:
+                                same_ext_node = True # this is not allowed to happen so combination is invalid
+                        if edge == -1 or edge == -2 or (edge not in comb and same_ext_node == False): # if edge is not already in combination (or soliton is outside the graph)
                             if len(comb) < soliton:
                                 edges_combs[j].append(edge) # add the edge if this combination doesn't contain an edge for this soliton already
                                 nodes_combs[j][soliton] = possible_nodes[soliton][i]
@@ -262,6 +271,8 @@ class MultiwaveSolitonAutomata:
         initial_matrix = nx.to_numpy_array(self.soliton_graph.graph)
         states = [self.soliton_graph] # stores all possible states as soliton graphs, needed to iterate over states 
         states_plus_traversals = {self.matrix_to_string(initial_matrix): [self.soliton_graph, [], []]} # stores all states plus all traversals that can be found in that state plus number of traversals found for each burst
+        deterministic = True
+        strongly_deterministic = True
 
         for state in states: # for all states/ soliton graphs of the automata
             state_matrix_id = self.matrix_to_string(nx.to_numpy_array(state.graph))
@@ -277,10 +288,14 @@ class MultiwaveSolitonAutomata:
                     if resulting_matrix_id not in states_plus_traversals: # if we found a new state
                         states_plus_traversals[resulting_matrix_id] = [traversal.resulting_soliton_graph, [], []] # add it to the dictionary
                         states.append(traversal.resulting_soliton_graph)
+                    if np.array_equal(resulting_matrix, traversals[0].adjacency_matrices_list[len(traversals[0].adjacency_matrices_list)-1]) == False:
+                            deterministic = False # two or more different soliton graphs have emerged although the same pair of exterior nodes was used
+                if len(traversals) > 1:
+                        strongly_deterministic = False # more than one soliton path was found between one pair of exterior nodes
             states_plus_traversals[state_matrix_id][1] = all_traversals # add all found traversals in this state
             states_plus_traversals[state_matrix_id][2] = num_traversals_per_burst # add number of traversals found for each burst (in this state)
 
-        return states_plus_traversals
+        return deterministic, strongly_deterministic, states_plus_traversals
 
         
     def matrix_to_string(self, matrix: np.ndarray):

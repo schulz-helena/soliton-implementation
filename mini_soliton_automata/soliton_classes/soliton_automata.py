@@ -18,9 +18,9 @@ class SolitonAutomata:
         self.soliton_graph: SolitonGraph = soliton_graph
         """Soliton graph the automata is based on."""
         self.deterministic: bool
-        """Whether the soliton graph is deterministic."""
+        """Whether the soliton automata is deterministic."""
         self.strongly_deterministic: bool
-        """Whether the soliton graph is strongly deterministic."""
+        """Whether the soliton automata is strongly deterministic."""
         self.states_plus_soliton_paths: dict
         """All states of the soliton automata plus all soliton paths that can be found in each state
         (Id/ string of the states adjacency matrix as key and state and soliton paths as values)."""
@@ -160,8 +160,8 @@ class SolitonAutomata:
         Checks for determinism with the help of the found states and soliton paths.
 
         Returns:
-            bool: Whether the soliton graph is deterministic or not.
-            bool: Whether the soliton graph is strongly deterministic or not.
+            bool: Whether the soliton automata is deterministic or not.
+            bool: Whether the soliton automata is strongly deterministic or not.
             dict: All states of the soliton graph plus all soliton paths that can be found in each state.
         """
         ext_nodes = []
