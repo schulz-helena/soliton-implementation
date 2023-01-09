@@ -326,8 +326,8 @@ class MainWindow(QMainWindow):
         self.show_end_result_m.clicked.connect(self.show_end_result_clicked_m)
         self.show_animation_m.clicked.connect(lambda:self.show_animation_clicked(self.show_animation_m))
         # Hide most widgets at the beginning (while retaining space)
-        self.hide_retain_space([self.traversal_mode_m, self.row2_m, self.set_of_bursts_label, self.set_of_bursts_lineedit, self.submit_set_of_bursts, self.bursts_label, self.row5_m, self.submit_burst, self.traversals_label, self.traversals, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
-        self.hide_multiple([self.traversal_mode_m, self.row2_m, self.set_of_bursts_label, self.set_of_bursts_lineedit, self.submit_set_of_bursts, self.bursts_label, self.row5_m, self.submit_burst, self.traversals_label, self.traversals, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
+        self.hide_retain_space([self.traversal_mode_m, self.save_m, self.mol_info_m, self.set_of_bursts_label, self.set_of_bursts_lineedit, self.submit_set_of_bursts, self.bursts_label, self.row5_m, self.submit_burst, self.traversals_label, self.traversals, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
+        self.hide_multiple([self.traversal_mode_m, self.save_m, self.mol_info_m, self.set_of_bursts_label, self.set_of_bursts_lineedit, self.submit_set_of_bursts, self.bursts_label, self.row5_m, self.submit_burst, self.traversals_label, self.traversals, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
         # Stylesheet:
         readme_path_m = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../styles_m.css')
         with open(readme_path_m, "r", encoding="utf-8") as fh_m:
@@ -432,10 +432,19 @@ class MainWindow(QMainWindow):
         label_det = QtWidgets.QLabel(dlg)
         label_det.setText("Deterministic:")
         grid.addWidget(label_det, 0, 0, 1, 1)
-        checkbox_det = QtWidgets.QCheckBox(dlg)
-        checkbox_det.setChecked(False)
-        checkbox_det.setEnabled(False)
-        grid.addWidget(checkbox_det, 0, 1, 1, 1)
+        det_bool = QtWidgets.QLabel(dlg)
+        if self.multi_automata.deterministic:
+            det_bool.setText("Yes")
+        else: det_bool.setText("No")
+        grid.addWidget(det_bool, 0, 1, 1, 1)
+        label_strong_det = QtWidgets.QLabel(dlg)
+        label_strong_det.setText("Strongly deterministic:")
+        grid.addWidget(label_strong_det, 1, 0, 1, 1)
+        strong_det_bool = QtWidgets.QLabel(dlg)
+        if self.multi_automata.strongly_deterministic:
+            strong_det_bool.setText("Yes")
+        else: strong_det_bool.setText("No")
+        grid.addWidget(strong_det_bool, 1, 1, 1, 1)
 
         dlg.setWindowTitle("Info")
         dlg.exec_()
@@ -576,7 +585,7 @@ class MainWindow(QMainWindow):
             self.display_molecule_m.setPixmap(QtGui.QPixmap.fromImage(self.qim_m).scaled(self.display_molecule_m.size(), QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation))
             self.set_of_bursts_lineedit.clear()
             if errors != []:
-                self.hide_multiple([self.traversal_mode_m, self.row2_m, self.set_of_bursts_label, self.set_of_bursts_lineedit, self.submit_set_of_bursts, self.bursts_label, self.row5_m, self.submit_burst, self.traversals_label, self.traversals, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
+                self.hide_multiple([self.traversal_mode_m, self.save_m, self.mol_info_m, self.set_of_bursts_label, self.set_of_bursts_lineedit, self.submit_set_of_bursts, self.bursts_label, self.row5_m, self.submit_burst, self.traversals_label, self.traversals, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
                 msg = QMessageBox(self.wid_mult)
                 msg.setStyleSheet(" QPushButton{ height: 32px; width: 130px}")
                 msg.setWindowTitle("No soliton graph")
@@ -593,7 +602,7 @@ class MainWindow(QMainWindow):
                 msg.setDetailedText(details)
                 x = msg.exec_() # show messagebox
             elif self.my_graph_m.exterior_nodes_name_collision() == True:
-                self.hide_multiple([self.traversal_mode_m, self.row2_m, self.set_of_bursts_label, self.set_of_bursts_lineedit, self.submit_set_of_bursts, self.bursts_label, self.row5_m, self.submit_burst, self.traversals_label, self.traversals, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
+                self.hide_multiple([self.traversal_mode_m, self.save_m, self.mol_info_m, self.set_of_bursts_label, self.set_of_bursts_lineedit, self.submit_set_of_bursts, self.bursts_label, self.row5_m, self.submit_burst, self.traversals_label, self.traversals, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
                 msg = QMessageBox(self.wid_mult)
                 msg.setStyleSheet(" QPushButton{ height: 32px; width: 130px}")
                 msg.setWindowTitle("Name collision")
@@ -602,10 +611,10 @@ class MainWindow(QMainWindow):
                 msg.setStandardButtons(QMessageBox.Retry)
                 x = msg.exec_()
             else:
-                self.show_multiple([self.traversal_mode_m, self.row2_m, self.set_of_bursts_label, self.set_of_bursts_lineedit, self.submit_set_of_bursts])
-                self.hide_multiple([self.bursts_label, self.row5_m, self.submit_burst, self.traversals_label, self.traversals, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
+                self.show_multiple([self.traversal_mode_m, self.save_m, self.set_of_bursts_label, self.set_of_bursts_lineedit, self.submit_set_of_bursts])
+                self.hide_multiple([self.mol_info_m, self.bursts_label, self.row5_m, self.submit_burst, self.traversals_label, self.traversals, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
         except:
-            self.hide_multiple([self.traversal_mode_m, self.row2_m, self.set_of_bursts_label, self.set_of_bursts_lineedit, self.submit_set_of_bursts, self.bursts_label, self.row5_m, self.submit_burst, self.traversals_label, self.traversals, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
+            self.hide_multiple([self.traversal_mode_m, self.save_m, self.mol_info_m, self.set_of_bursts_label, self.set_of_bursts_lineedit, self.submit_set_of_bursts, self.mol_info_m, self.bursts_label, self.row5_m, self.submit_burst, self.traversals_label, self.traversals, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
             msg = QMessageBox(self.wid_mult)
             msg.setStyleSheet(" QPushButton{ height: 32px; width: 130px}")
             msg.setWindowTitle("Incorrect input")
@@ -634,10 +643,10 @@ class MainWindow(QMainWindow):
             for burst in bursts:
                 burst = re.sub(r"[{}]+", "", burst)
                 self.burst.addItem(burst)
-            self.show_multiple([self.bursts_label, self.row5_m, self.submit_burst])
+            self.show_multiple([self.mol_info_m, self.bursts_label, self.row5_m, self.submit_burst])
             self.hide_multiple([self.traversals_label, self.traversals, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
         except:
-            self.hide_multiple([self.bursts_label, self.row5_m, self.submit_burst, self.traversals_label, self.traversals, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
+            self.hide_multiple([self.mol_info_m, self.bursts_label, self.row5_m, self.submit_burst, self.traversals_label, self.traversals, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
             msg = QMessageBox(self.wid_mult)
             msg.setStyleSheet(" QPushButton{ height: 32px; width: 130px;}")
             msg.setWindowTitle("Incorrect input")
@@ -657,7 +666,6 @@ class MainWindow(QMainWindow):
 
     def all_exterior_nodes_statechanged(self):
         if self.all_exterior_nodes.isChecked():
-            #self.hide_retain_space([self.node_1, self.exterior_nodes_label2, self.node_2])
             self.hide_multiple([self.node_1, self.exterior_nodes_label2, self.node_2])
         else: self.show_multiple([self.node_1, self.exterior_nodes_label2, self.node_2])
 
@@ -748,6 +756,7 @@ class MainWindow(QMainWindow):
         else:
             burst_index = int(self.burst.currentIndex())
             self.found_traversals = self.multi_automata.call_find_all_travs_given_burst(self.multi_automata.bursts_dicts[burst_index], self.my_graph_m)
+            self.num_traversals_per_burst = None
         if self.found_traversals == []:
             self.hide_multiple([self.traversals_label, self.traversals, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
             msg = QMessageBox(self.wid_mult)
@@ -769,12 +778,13 @@ class MainWindow(QMainWindow):
                         this_traversal = this_traversal + ", "
                 self.traversals.addItem(this_traversal)
             sep_index = 0
-            for n, num in enumerate(self.num_traversals_per_burst): # add seperators to distinct which traversals resulted from which burst
-                if num != 0 and n != len(self.num_traversals_per_burst)-1: # don't add if there is no traversal for this burst of if it's the last burst
-                    sep_index += num
-                    self.traversals.insertSeparator(sep_index)
-                    self.found_traversals.insert(sep_index, None) # so the indices in found_traversals correspond to the indices of the combobox items
-                    sep_index += 1 # indices got shifted by one because seperator was added
+            if self.num_traversals_per_burst:
+                for n, num in enumerate(self.num_traversals_per_burst): # add seperators to distinct which traversals resulted from which burst
+                    if num != 0 and n != len(self.num_traversals_per_burst)-1: # don't add if there is no traversal for this burst of if it's the last burst
+                        sep_index += num
+                        self.traversals.insertSeparator(sep_index)
+                        self.found_traversals.insert(sep_index, None) # so the indices in found_traversals correspond to the indices of the combobox items
+                        sep_index += 1 # indices got shifted by one because seperator was added
                 
 
 
