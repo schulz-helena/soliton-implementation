@@ -87,8 +87,12 @@ class MultiwaveSolitonAutomata:
         """
         traversals = []
         for trav in travs:
-            traversal = Traversal(soliton_graph, trav)
-            traversals.append(traversal)
+            if isinstance(trav[len(trav)-1], int): # if trav is not a real traversal but part of an endlessly looping traversal
+                traversal = Traversal(soliton_graph, trav[0])
+                traversals.append([traversal, trav[1]])
+            else:
+                traversal = Traversal(soliton_graph, trav)
+                traversals.append(traversal)
 
         return traversals
 
@@ -136,7 +140,7 @@ class MultiwaveSolitonAutomata:
             if (akt_positions[soliton] != burst_dict[soliton][1] and akt_positions[soliton] != -2) or s_pos_all_timesteps[t-2][soliton] == -1 or t < 2: # if not all solitons reached their end node or already left the graph
                 finished = False
                 break
-        # base case: if all solitons traversed the graph successfully
+        # base case 1: if all solitons traversed the graph successfully
         if finished == True:
             trav = []
             for i, pos in enumerate(s_pos_all_timesteps):
@@ -144,6 +148,16 @@ class MultiwaveSolitonAutomata:
                 trav.append(this_timestep)
             travs.append(trav) # trav = traversal of all solitons through the graph
             return travs
+
+        # base case 2: if some solitons are stuck in an endless loop
+        for k in range(0, len(bindings_all_timesteps)-1):
+            if akt_bindings == bindings_all_timesteps[k] and akt_positions == s_pos_all_timesteps[k]: # if we already had that exact graph and position map in this configuration trail
+                trav = []
+                for i, pos in enumerate(s_pos_all_timesteps):
+                    this_timestep = (pos, bindings_all_timesteps[i])
+                    trav.append(this_timestep)
+                travs.append([trav, k+1]) # append the found trav plus the loop point/ timestep (+1, because otherwise in animation we would display the loop point twice)
+                return travs
         
 
         # in this timestep find possible edges for each soliton individually
@@ -281,16 +295,22 @@ class MultiwaveSolitonAutomata:
             for burst_dict in self.bursts_dicts: # loop over all bursts
                 traversals = self.call_find_all_travs_given_burst(burst_dict, state) # find soliton paths with all bursts
                 num_traversals_per_burst.append(len(traversals))
-                for traversal in traversals:
+                loops_num = 0
+                first_real_trav = -1
+                for t, traversal in enumerate(traversals):
                     all_traversals.append(traversal)
-                    resulting_matrix = traversal.adjacency_matrices_list[len(traversal.adjacency_matrices_list)-1] # adjacency matrix of the soliton graph the traversal results in
-                    resulting_matrix_id = self.matrix_to_string(resulting_matrix)
-                    if resulting_matrix_id not in states_plus_traversals: # if we found a new state
-                        states_plus_traversals[resulting_matrix_id] = [traversal.resulting_soliton_graph, [], []] # add it to the dictionary
-                        states.append(traversal.resulting_soliton_graph)
-                    if np.array_equal(resulting_matrix, traversals[0].adjacency_matrices_list[len(traversals[0].adjacency_matrices_list)-1]) == False:
-                            deterministic = False # two or more different soliton graphs have emerged although the same pair of exterior nodes was used
-                if len(traversals) > 1:
+                    if isinstance(traversal, Traversal): # if traversal is a real traversal and no endless loop
+                        if first_real_trav == -1:
+                            first_real_trav = t
+                        resulting_matrix = traversal.adjacency_matrices_list[len(traversal.adjacency_matrices_list)-1] # adjacency matrix of the soliton graph the traversal results in
+                        resulting_matrix_id = self.matrix_to_string(resulting_matrix)
+                        if resulting_matrix_id not in states_plus_traversals: # if we found a new state
+                            states_plus_traversals[resulting_matrix_id] = [traversal.resulting_soliton_graph, [], []] # add it to the dictionary
+                            states.append(traversal.resulting_soliton_graph)
+                        if np.array_equal(resulting_matrix, traversals[first_real_trav].adjacency_matrices_list[len(traversals[first_real_trav].adjacency_matrices_list)-1]) == False:
+                                deterministic = False # two or more different soliton graphs have emerged although the same pair of exterior nodes was used
+                    else: loops_num += 1
+                if (len(traversals) - loops_num) > 1:
                         strongly_deterministic = False # more than one soliton path was found between one pair of exterior nodes
             states_plus_traversals[state_matrix_id][1] = all_traversals # add all found traversals in this state
             states_plus_traversals[state_matrix_id][2] = num_traversals_per_burst # add number of traversals found for each burst (in this state)
