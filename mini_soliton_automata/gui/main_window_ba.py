@@ -20,6 +20,7 @@ from soliton_classes.multiwave_soliton_automata import MultiwaveSolitonAutomata
 from soliton_classes.soliton_automata import SolitonAutomata
 from soliton_classes.soliton_graph import SolitonGraph
 from soliton_classes.soliton_path import SolitonPath
+from soliton_classes.traversal import Traversal
 from visualisations.animation import Animation
 from visualisations.visualisation import Visualisation
 
@@ -43,6 +44,7 @@ class MainWindow(QMainWindow):
         center_point = QtWidgets.QDesktopWidget().availableGeometry().center()
         qt_rectangle.moveCenter(center_point)
         self.move(qt_rectangle.topLeft().x(), 0)
+        self.resize(QtCore.QSize(600, 650))
 
 
         # SOLITON AUTOMATA WIDGET
@@ -53,20 +55,16 @@ class MainWindow(QMainWindow):
         self.display_molecule = QtWidgets.QLabel(self.wid_single)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
         self.display_molecule.setSizePolicy(sizePolicy)
-        self.display_molecule.setMinimumSize(QtCore.QSize(600, 450))
+        self.display_molecule.setMinimumSize(QtCore.QSize(50, 37.5))
         startscreen = Startscreen().image
         self.qim = ImageQt(startscreen)
         self.display_molecule.setPixmap(QtGui.QPixmap.fromImage(self.qim).scaled(self.display_molecule.size(), QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation))
         self.gridLayout.addWidget(self.display_molecule, 0, 0, 2, 5, alignment = QtCore.Qt.AlignHCenter|QtCore.Qt.AlignVCenter)
-        # Slider/ toggle button that changes between the two windows
-        self.slider = QtWidgets.QSlider(Qt.Horizontal)
-        self.slider.setMinimum(0)
-        self.slider.setMaximum(1)
-        self.slider.setValue(0)
-        self.slider.setTickInterval(2)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
-        self.slider.setSizePolicy(sizePolicy)
-        self.gridLayout.addWidget(self.slider, 0, 3, 1, 1)
+        # Button that changes between the two windows
+        self.change_window_button = QtWidgets.QPushButton("Switch Mode")
+        self.change_window_button.setMinimumSize(QtCore.QSize(0, 20))
+        self.gridLayout.addWidget(self.change_window_button, 0, 0, 1, 1)
+        self.change_window_button.setStyleSheet("QPushButton {border-radius: 10px;}")
         # Row 1: -
         # Row 2:
         # "Traversal Mode" Checkbox
@@ -169,7 +167,7 @@ class MainWindow(QMainWindow):
         self.setMenuBar(self.menubar)
 
         # Function connections of different widgets:
-        self.slider.valueChanged.connect(self.change_window)
+        self.change_window_button.clicked.connect(self.change_window)
         self.traversal_mode.stateChanged.connect(lambda:self.change_mode(self.traversal_mode))
         self.mol_info.clicked.connect(self.mol_info_clicked)
         self.save.clicked.connect(self.save_clicked)
@@ -197,20 +195,16 @@ class MainWindow(QMainWindow):
         self.display_molecule_m = QtWidgets.QLabel(self.wid_mult)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
         self.display_molecule_m.setSizePolicy(sizePolicy)
-        self.display_molecule_m.setMinimumSize(QtCore.QSize(600, 450))
+        self.display_molecule_m.setMinimumSize(QtCore.QSize(50, 37.5))
         startscreen_m = Startscreen().image
         self.qim_m = ImageQt(startscreen_m)
         self.display_molecule_m.setPixmap(QtGui.QPixmap.fromImage(self.qim_m).scaled(self.display_molecule_m.size(), QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation))
         self.gridLayout_m.addWidget(self.display_molecule_m, 0, 0, 2, 5, alignment = QtCore.Qt.AlignHCenter|QtCore.Qt.AlignVCenter)
-        # Slider/ toggle button that changes between the two windows
-        self.slider_m = QtWidgets.QSlider(Qt.Horizontal)
-        self.slider_m.setMinimum(0)
-        self.slider_m.setMaximum(1)
-        self.slider_m.setValue(1)
-        self.slider_m.setTickInterval(2)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
-        self.slider_m.setSizePolicy(sizePolicy)
-        self.gridLayout_m.addWidget(self.slider_m, 0, 3, 1, 1)
+        # Button that changes between the two windows
+        self.change_window_button_m = QtWidgets.QPushButton("Switch Mode")
+        self.change_window_button_m.setMinimumSize(QtCore.QSize(0, 20))
+        self.gridLayout_m.addWidget(self.change_window_button_m, 0, 0, 1, 1)
+        self.change_window_button_m.setStyleSheet("QPushButton {border-radius: 10px;}")
         # Row 1: -
         # Row 2:
         # "Traversal Mode" Checkbox
@@ -314,7 +308,7 @@ class MainWindow(QMainWindow):
         self.gridLayout_m.addWidget(self.show_animation_m, 7, 3, 1, 1)
 
         # Function connections of different widgets:
-        self.slider_m.valueChanged.connect(self.change_window)
+        self.change_window_button_m.clicked.connect(self.change_window)
         self.traversal_mode_m.stateChanged.connect(lambda:self.change_mode_m(self.traversal_mode_m))
         self.mol_info_m.clicked.connect(self.mol_info_clicked_m)
         self.save_m.clicked.connect(self.save_clicked_m)
@@ -322,6 +316,7 @@ class MainWindow(QMainWindow):
         self.submit_molecule_m.clicked.connect(self.submit_molecule_clicked_m)
         self.submit_set_of_bursts.clicked.connect(self.submit_set_of_bursts_clicked)
         self.submit_burst.clicked.connect(self.submit_burst_clicked)
+        self.traversals.currentIndexChanged.connect(lambda: self.endless_loop_picked(self.traversals))
         self.show_matrices_m.clicked.connect(self.show_matrices_clicked_m)
         self.show_end_result_m.clicked.connect(self.show_end_result_clicked_m)
         self.show_animation_m.clicked.connect(lambda:self.show_animation_clicked(self.show_animation_m))
@@ -377,11 +372,9 @@ class MainWindow(QMainWindow):
     def change_window(self):
         if self.front_wid == 1:
             self.layout_for_wids.setCurrentIndex(1)
-            self.slider_m.setValue(1)
             self.front_wid = 2
         else:
             self.layout_for_wids.setCurrentIndex(0)
-            self.slider.setValue(0)
             self.front_wid = 1
 
     
@@ -448,6 +441,30 @@ class MainWindow(QMainWindow):
 
         dlg.setWindowTitle("Info")
         dlg.exec_()
+
+    
+    def endless_loop_picked(self, combobox: QtWidgets.QComboBox):
+        if not isinstance(self.found_traversals[combobox.currentIndex()], Traversal):
+            try:
+                self.show_matrices_m.clicked.disconnect()
+                self.show_matrices_m.setStyleSheet("QPushButton {background-color: rgb(230, 230, 230);}")
+                self.show_end_result_m.clicked.disconnect()
+                self.show_end_result_m.setStyleSheet("QPushButton {background-color: rgb(230, 230, 230);}")
+            except:
+                pass
+        else:
+            try:
+                self.show_matrices_m.clicked.disconnect()
+                self.show_matrices_m.clicked.connect(self.show_matrices_clicked_m)
+                self.show_matrices_m.setStyleSheet("QPushButton {background-color: rgb(149, 221, 185);} QPushButton::pressed {background-color : rgb(90, 159, 123);}")
+                self.show_end_result_m.clicked.disconnect()
+                self.show_end_result_m.clicked.connect(self.show_end_result_clicked_m)
+                self.show_end_result_m.setStyleSheet("QPushButton {background-color: rgb(149, 221, 185);} QPushButton::pressed {background-color : rgb(90, 159, 123);}")
+            except:
+                self.show_matrices_m.clicked.connect(self.show_matrices_clicked_m)
+                self.show_matrices_m.setStyleSheet("QPushButton {background-color: rgb(149, 221, 185);} QPushButton::pressed {background-color : rgb(90, 159, 123);}")
+                self.show_end_result_m.clicked.connect(self.show_end_result_clicked_m)
+                self.show_end_result_m.setStyleSheet("QPushButton {background-color: rgb(149, 221, 185);} QPushButton::pressed {background-color : rgb(90, 159, 123);}")
 
 
     def change_mode(self, checkbox: QtWidgets.QCheckBox):
@@ -768,15 +785,25 @@ class MainWindow(QMainWindow):
             msg.setInformativeText("Please try again with different bursts.")
             x = msg.exec_()
         else:
-            self.traversals_label.setText(f"Sets of paths ({len(self.found_traversals)}):")
-            self.show_multiple([self.traversals_label, self.traversals, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
+            endless_loops = 0
             for traversal in self.found_traversals:
-                this_traversal = ""
-                for i, path in enumerate(traversal.traversal_for_user):
-                    this_traversal = this_traversal + path
-                    if i != len(traversal.traversal_for_user)-1:
-                        this_traversal = this_traversal + ", "
-                self.traversals.addItem(this_traversal)
+                if isinstance(traversal, Traversal): # if traversal is a real traversal and no endless loop
+                    this_traversal = ""
+                    for i, path in enumerate(traversal.traversal_for_user):
+                        this_traversal = this_traversal + path
+                        if i != len(traversal.traversal_for_user)-1:
+                            this_traversal = this_traversal + ", "
+                    self.traversals.addItem(this_traversal)
+                else:
+                    this_traversal = "LOOP! "
+                    for i, path in enumerate(traversal[0].traversal_for_user):
+                        this_traversal = this_traversal + path + " ..."
+                        if i != len(traversal[0].traversal_for_user)-1:
+                            this_traversal = this_traversal + ", "
+                    self.traversals.addItem(this_traversal)
+                    endless_loops += 1
+            self.traversals_label.setText(f"Sets of paths ({len(self.found_traversals) - endless_loops}):")
+            self.show_multiple([self.traversals_label, self.traversals, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
             sep_index = 0
             if self.num_traversals_per_burst:
                 for n, num in enumerate(self.num_traversals_per_burst): # add seperators to distinct which traversals resulted from which burst
@@ -785,11 +812,7 @@ class MainWindow(QMainWindow):
                         self.traversals.insertSeparator(sep_index)
                         self.found_traversals.insert(sep_index, None) # so the indices in found_traversals correspond to the indices of the combobox items
                         sep_index += 1 # indices got shifted by one because seperator was added
-                
 
-
-
-    
 
     def show_matrices_clicked(self):
         """Method that is called when user clicks button to have the adjacency matrices of every timestep displayed.
@@ -1112,8 +1135,13 @@ class MainWindow(QMainWindow):
                 if self.step == len(self.desired_path.path): # start animation all over again as soon as end is reached (endless loop)
                     self.step = 0
             else:
-                if self.step == len(self.desired_traversal.pos):
-                    self.step = 0
+                if isinstance(self.desired_traversal, Traversal):
+                    if self.step == len(self.desired_traversal.pos):
+                        self.step = 0
+                else:
+                    if self.step == len(self.desired_traversal[0].pos):
+                        self.over_looppoint_count += 1 # another "round" of loop made
+                        self.step = self.desired_traversal[1] # we reached the "end" (which in reality is the point where we noticed we are stuck in a loop) so we have to continue at the loop point now
             im = self.pil_images[self.step]
             qim = ImageQt(im)
             self.label.setPixmap(QtGui.QPixmap.fromImage(qim.copy()))
@@ -1125,8 +1153,15 @@ class MainWindow(QMainWindow):
                 if self.step == -1: # if start of animation was reached in the step before then continue at end of animation
                     self.step = len(self.desired_path.path) - 1
             else:
-                if self.step == -1:
-                    self.step = len(self.desired_traversal.pos) - 1
+                if isinstance(self.desired_traversal, Traversal):
+                    if self.step == -1:
+                        self.step = len(self.desired_traversal.pos) - 1
+                else:
+                    if self.step == -1:
+                        self.step = 0 # we can't go back to the end of the animation because it has no end, instead we stay at the beginning
+                    elif self.step == self.desired_traversal[1] - 1 and self.over_looppoint_count != 0: # before we go back to before the loop point we have to dismantle all "rounds" of loop that we made
+                        self.step = len(self.desired_traversal[0].pos) - 1 # continue again at the "end"
+                        self.over_looppoint_count -= 1 # dismantle
             im = self.pil_images[self.step]
             qim = ImageQt(im)
             self.label.setPixmap(QtGui.QPixmap.fromImage(qim.copy()))
@@ -1183,12 +1218,18 @@ class MainWindow(QMainWindow):
             if self.traversal_index != self.traversals.currentIndex():
                 self.traversal_index = self.traversals.currentIndex()
                 self.desired_traversal = self.found_traversals[self.traversal_index]
-                plots_and_arrays = Animation.list_of_plots_and_arrays_multiwave(self.my_graph_m, self.desired_traversal)
+                if isinstance(self.desired_traversal, Traversal):
+                    plots_and_arrays = Animation.list_of_plots_and_arrays_multiwave(self.my_graph_m, self.desired_traversal)
+                else: 
+                    plots_and_arrays = Animation.list_of_plots_and_arrays_multiwave(self.my_graph_m, self.desired_traversal[0])
                 self.pil_images = Animation.list_of_pil_images(plots_and_arrays)
 
         save_button = QtWidgets.QPushButton(dlg)
         save_button.setGeometry(QtCore.QRect(470, 375, 70, 30))
-        save_button.clicked.connect(save_animation)
+        if isinstance(self.desired_traversal, Traversal):
+            save_button.clicked.connect(save_animation)
+        else:
+            self.over_looppoint_count = 0 # how many times we passed the loop point
         pause_button = QtWidgets.QPushButton(dlg)
         pause_button.setGeometry(QtCore.QRect(240, 375, 30, 30))
         pause_button.clicked.connect(lambda: pause_animation(pause_button))
@@ -1204,7 +1245,10 @@ class MainWindow(QMainWindow):
             next_button.setStyleSheet("QPushButton {background-color: rgb(191, 207, 255); image: url(:/icons/right-arrow.svg);} QPushButton::pressed {background-color : rgb(132, 145, 193);}")
             prev_button.setStyleSheet("QPushButton {background-color: rgb(191, 207, 255); image: url(:/icons/left-arrow.svg);} QPushButton::pressed {background-color : rgb(132, 145, 193)}")
         else:
-            save_button.setStyleSheet("QPushButton {background-color: rgb(149, 221, 185); image: url(:/icons/save.svg);} QPushButton::pressed {background-color : rgb(90, 159, 123);}")
+            if isinstance(self.desired_traversal, Traversal):
+                save_button.setStyleSheet("QPushButton {background-color: rgb(149, 221, 185); image: url(:/icons/save.svg);} QPushButton::pressed {background-color : rgb(90, 159, 123);}")
+            else:
+                save_button.setStyleSheet("QPushButton {background-color: rgb(230, 230, 230); image: url(:/icons/save.svg);}")
             pause_button.setStyleSheet("QPushButton {background-color: rgb(149, 221, 185); image: url(:/icons/pause.svg);} QPushButton::pressed {background-color : rgb(90, 159, 123);}")
             next_button.setStyleSheet("QPushButton {background-color: rgb(149, 221, 185); image: url(:/icons/right-arrow.svg);} QPushButton::pressed {background-color : rgb(90, 159, 123);}")
             prev_button.setStyleSheet("QPushButton {background-color: rgb(149, 221, 185); image: url(:/icons/left-arrow.svg);} QPushButton::pressed {background-color : rgb(90, 159, 123)}")
