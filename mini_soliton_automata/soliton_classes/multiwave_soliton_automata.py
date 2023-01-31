@@ -13,13 +13,15 @@ class MultiwaveSolitonAutomata:
     """Representation of a multiwave soliton automata, which finds all traversals for a burst.
     """
 
-    def __init__(self, soliton_graph: SolitonGraph, bursts: str):
+    def __init__(self, soliton_graph: SolitonGraph, bursts: str, stop: int):
         """Initializes a `MultiwaveSolitonAutomata` object by using a soliton graph and a burst.
         """
         self.soliton_graph: SolitonGraph = soliton_graph
         """Soliton graph the automata is based on."""
         self.bursts = bursts
         """The set of input burst."""
+        self.stop = stop
+        """After how many equal soliton graph + soliton positions to stop searching for traversals on current path in search tree."""
         self.bursts_dicts: list = self.build_bursts_dicts()
         """List of the bursts as dictionaries (soliton number as key and a list containing exterior nodes and entry time as value)."""
         self.deterministic: bool
@@ -114,7 +116,7 @@ class MultiwaveSolitonAutomata:
             
         return bindings
 
-
+    
     def find_all_travs_given_burst (self, graph: nx.Graph, burst_dict: dict, t: int, s_pos_all_timesteps: list, bindings_all_timesteps: list, binds_all_timesteps: list, travs: list):
         """Finds all possible traversals for a given burst by using a recursive backtracking algorithm.
 
@@ -150,14 +152,17 @@ class MultiwaveSolitonAutomata:
             return travs
 
         # base case 2: if some solitons are stuck in an endless loop
+        count = 1
         for k in range(0, len(bindings_all_timesteps)-1):
             if akt_bindings == bindings_all_timesteps[k] and akt_positions == s_pos_all_timesteps[k]: # if we already had that exact graph and position map in this configuration trail
-                trav = []
-                for i, pos in enumerate(s_pos_all_timesteps):
-                    this_timestep = (pos, bindings_all_timesteps[i])
-                    trav.append(this_timestep)
-                travs.append([trav, k+1]) # append the found trav plus the loop point/ timestep (+1, because otherwise in animation we would display the loop point twice)
-                return travs
+                count += 1
+                if count == self.stop:
+                    trav = []
+                    for i, pos in enumerate(s_pos_all_timesteps):
+                        this_timestep = (pos, bindings_all_timesteps[i])
+                        trav.append(this_timestep)
+                    travs.append([trav, k+1]) # append the found trav plus the loop point/ timestep (+1, because otherwise in animation we would display the loop point twice)
+                    return travs
         
 
         # in this timestep find possible edges for each soliton individually
@@ -177,13 +182,10 @@ class MultiwaveSolitonAutomata:
             elif burst_dict[soliton][2] == t: # if soliton enters the graph now (place it at its starting node)
                 possible_edges[soliton].append(burst_dict[soliton][0])
                 possible_nodes[soliton].append(burst_dict[soliton][0])
-            elif end in list(nx.neighbors(graph, akt_pos)) and akt_bindings[tuple(sorted((akt_pos, end)))] != akt_binds[soliton] and end != s_pos_all_timesteps[t-2][soliton]: # if end node is reachable
-                possible_edges[soliton].append(tuple(sorted((akt_pos, end))))
-                possible_nodes[soliton].append(end)
             else:
                 for node in list(nx.neighbors(graph, akt_pos)): # iterate over all nodes that are adjacent to current position
                     # soliton can not go to an exterior node that is not the end node, soliton is not allowed to make a direct turnaround and edge to next node has to have the right binding type
-                    if node not in self.soliton_graph.exterior_nodes and node != s_pos_all_timesteps[t-2][soliton] and akt_bindings[tuple(sorted((akt_pos, node)))] != akt_binds[soliton]:
+                    if ((node not in self.soliton_graph.exterior_nodes) or (node == end)) and node != s_pos_all_timesteps[t-2][soliton] and akt_bindings[tuple(sorted((akt_pos, node)))] != akt_binds[soliton]:
                         possible_edges[soliton].append(tuple(sorted((akt_pos, node))))
                         possible_nodes[soliton].append(node)
         # find all possible combinations of the found edges 
@@ -219,8 +221,11 @@ class MultiwaveSolitonAutomata:
                                 nodes_combs.append(node_comb_copy)
                         if i == len(possible_edges[soliton])-1: # if we are looking at the last possible edge of this soliton
                             if len(comb) < soliton: # and the combination does not contain an edge for each soliton
-                                del edges_combs[j] # delete the combination
-                                del nodes_combs[j]
+                                edges_combs[j] = [] # "delete" the combination
+                                nodes_combs[j] = []
+
+        edges_combs = [elem for elem in edges_combs if elem != []]
+        nodes_combs = [elem for elem in nodes_combs if elem != []]
 
         # iterate over all possible combinations
         for i, comb in enumerate(nodes_combs):

@@ -54,3 +54,26 @@ QSlider::handle:horizontal {
     height: 20px;
     border-radius: 10px;
 }
+QSpinBox {
+    border: 1px solid rgb(149, 221, 185);
+    border-radius: 10px;
+    padding-right: 15px;
+}
+QSpinBox::up-button {
+    width: 14px; /* 16 + 2*1px border-width = 15px padding + 3px parent border */
+    border-width: 1px;
+}
+QSpinBox::down-button {
+    width: 14px; /* 16 + 2*1px border-width = 15px padding + 3px parent border */
+    border-width: 1px;
+}
+QSpinBox::down-arrow {
+    image: url(:/icons/drop-down-arrow.svg);
+    width: 12px;
+    height: 12px;
+}
+QSpinBox::up-arrow {
+    image: url(:/icons/up-arrow.svg);
+    width: 12px;
+    height: 12px;
+}

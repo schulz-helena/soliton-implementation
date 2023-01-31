@@ -247,9 +247,27 @@ class MainWindow(QMainWindow):
         # "Set of bursts" label
         self.set_of_bursts_label = QtWidgets.QLabel(self.wid_mult)
         self.gridLayout_m.addWidget(self.set_of_bursts_label, 4, 0, 1, 1)
+        # Groupbox containg middle two elements of row 4
+        self.row4_m = QtWidgets.QGroupBox()
+        self.minigrid4_m = QtWidgets.QGridLayout(self.row4_m)
+        self.minigrid4_m.setContentsMargins(0, 0, 0, 0)
+        self.gridLayout_m.addWidget(self.row4_m, 4, 1, 1, 2)
         # Text field for set of bursts
-        self.set_of_bursts_lineedit = QtWidgets.QLineEdit(self.wid_mult)
-        self.gridLayout_m.addWidget(self.set_of_bursts_lineedit, 4, 1, 1, 2)
+        self.set_of_bursts_lineedit = QtWidgets.QLineEdit(self.row4_m)
+        self.minigrid4_m.addWidget(self.set_of_bursts_lineedit, 0, 0, 1, 1)
+        # Groupbox containg "stop number" widgets
+        self.row4_2_m = QtWidgets.QGroupBox()
+        self.minigrid4_2_m = QtWidgets.QGridLayout(self.row4_2_m)
+        self.minigrid4_2_m.setContentsMargins(0, 0, 0, 0)
+        self.minigrid4_m.addWidget(self.row4_2_m, 0, 1, 1, 1)
+        # "Stop number" label
+        self.stop_number_label = QtWidgets.QLabel(self.row4_2_m)
+        self.minigrid4_2_m.addWidget(self.stop_number_label, 0, 0, 1, 1)
+        # Spinbox for "stop number"
+        self.stop_number_spinbox = QtWidgets.QSpinBox(self.row4_2_m)
+        self.stop_number_spinbox.setValue(3)
+        self.stop_number_spinbox.setMinimum(2)
+        self.minigrid4_2_m.addWidget(self.stop_number_spinbox, 0, 1, 1, 1)
         # Submit button for set of bursts
         self.submit_set_of_bursts = QtWidgets.QPushButton(self.wid_mult)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Fixed)
@@ -284,9 +302,23 @@ class MainWindow(QMainWindow):
         # "Traversals" label
         self.traversals_label = QtWidgets.QLabel(self.wid_mult)
         self.gridLayout_m.addWidget(self.traversals_label, 6, 0, 1, 1)
+        # Groupbox containg middle elements of row 6
+        self.row6_m = QtWidgets.QGroupBox()
+        self.minigrid6_m = QtWidgets.QGridLayout(self.row6_m)
+        self.minigrid6_m.setContentsMargins(0, 0, 0, 0)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+        self.row6_m.setSizePolicy(sizePolicy)
+        self.row6_m.setMinimumSize(QtCore.QSize(0, 32))
+        self.gridLayout_m.addWidget(self.row6_m, 6, 1, 1, 3)
+        # "Loops" Checkbox
+        self.if_loops = QtWidgets.QCheckBox("Loops")
+        self.if_loops.setChecked(True)
+        self.minigrid6_m.addWidget(self.if_loops, 6, 0, 1, 1)
         # Combobox to choose a traversal
-        self.traversals = QtWidgets.QComboBox(self.wid_mult)
-        self.gridLayout_m.addWidget(self.traversals, 6, 1, 1, 3)
+        self.traversals = QtWidgets.QComboBox(self.row6_m)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+        self.traversals.setSizePolicy(sizePolicy)
+        self.minigrid6_m.addWidget(self.traversals, 6, 1, 1, 2)
         # Row 7:
         # "Show matrices" button
         self.show_matrices_m = QtWidgets.QPushButton(self.wid_mult)
@@ -316,13 +348,14 @@ class MainWindow(QMainWindow):
         self.submit_molecule_m.clicked.connect(self.submit_molecule_clicked_m)
         self.submit_set_of_bursts.clicked.connect(self.submit_set_of_bursts_clicked)
         self.submit_burst.clicked.connect(self.submit_burst_clicked)
+        self.if_loops.stateChanged.connect(lambda:self.loops_onoff(self.if_loops))
         self.traversals.currentIndexChanged.connect(lambda: self.endless_loop_picked(self.traversals))
         self.show_matrices_m.clicked.connect(self.show_matrices_clicked_m)
         self.show_end_result_m.clicked.connect(self.show_end_result_clicked_m)
         self.show_animation_m.clicked.connect(lambda:self.show_animation_clicked(self.show_animation_m))
         # Hide most widgets at the beginning (while retaining space)
-        self.hide_retain_space([self.traversal_mode_m, self.save_m, self.mol_info_m, self.set_of_bursts_label, self.set_of_bursts_lineedit, self.submit_set_of_bursts, self.bursts_label, self.row5_m, self.submit_burst, self.traversals_label, self.traversals, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
-        self.hide_multiple([self.traversal_mode_m, self.save_m, self.mol_info_m, self.set_of_bursts_label, self.set_of_bursts_lineedit, self.submit_set_of_bursts, self.bursts_label, self.row5_m, self.submit_burst, self.traversals_label, self.traversals, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
+        self.hide_retain_space([self.traversal_mode_m, self.save_m, self.mol_info_m, self.set_of_bursts_label, self.row4_m, self.row4_2_m, self.submit_set_of_bursts, self.bursts_label, self.row5_m, self.submit_burst, self.traversals_label, self.traversals, self.if_loops, self.row6_m, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
+        self.hide_multiple([self.traversal_mode_m, self.save_m, self.mol_info_m, self.set_of_bursts_label, self.row4_m, self.row4_2_m, self.submit_set_of_bursts, self.bursts_label, self.row5_m, self.submit_burst, self.traversals_label, self.traversals, self.if_loops, self.row6_m, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
         # Stylesheet:
         readme_path_m = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../styles_m.css')
         with open(readme_path_m, "r", encoding="utf-8") as fh_m:
@@ -362,6 +395,7 @@ class MainWindow(QMainWindow):
         self.set_of_bursts_label.setText(_translate("MainWindow", "Set of bursts:"))
         self.submit_set_of_bursts.setText(_translate("MainWindow", "Submit"))
         self.bursts_label.setText(_translate("MainWindow", "Bursts:"))
+        self.stop_number_label.setText(_translate("MainWindow", "Stop number:"))
         self.submit_burst.setText(_translate("MainWindow", "Submit"))
         self.traversals_label.setText(_translate("MainWindow", "Sets of paths:"))
         self.show_matrices_m.setText(_translate("MainWindow", "Show matrices"))
@@ -510,6 +544,8 @@ class MainWindow(QMainWindow):
             self.submit_set_of_bursts.setStyleSheet("QPushButton {background-color: rgb(230, 230, 230);}")
             self.set_of_bursts_lineedit.setReadOnly(True)
             self.set_of_bursts_lineedit.setStyleSheet("QLineEdit {border: 2px solid rgb(230, 230, 230);border-radius: 10px;padding: 0 8px;}")
+            self.stop_number_spinbox.setReadOnly(True)
+            self.stop_number_spinbox.setStyleSheet("QSpinBox {border: 1px solid rgb(230, 230, 230);border-radius: 10px;padding-right: 15px;}")
         else:
             self.submit_molecule_m.clicked.connect(self.submit_molecule_clicked_m)
             self.submit_molecule_m.setStyleSheet("QPushButton {background-color: rgb(149, 221, 185);} QPushButton::pressed {background-color : rgb(90, 159, 123);}")
@@ -521,6 +557,36 @@ class MainWindow(QMainWindow):
             self.submit_set_of_bursts.setStyleSheet("QPushButton {background-color: rgb(149, 221, 185);} QPushButton::pressed {background-color : rgb(90, 159, 123);}")
             self.set_of_bursts_lineedit.setReadOnly(False)
             self.set_of_bursts_lineedit.setStyleSheet("QLineEdit {border: 2px solid rgb(149, 221, 185);border-radius: 10px;padding: 0 8px;}")
+            self.stop_number_spinbox.setReadOnly(False)
+            self.stop_number_spinbox.setStyleSheet("QSpinBox {border: 1px solid rgb(149, 221, 185);border-radius: 10px;padding-right: 15px;}")
+
+
+    def loops_onoff(self, checkbox: QtWidgets.QCheckBox):
+
+        if checkbox.isChecked() == True:
+            for index in self.loops_indices:
+                if index < self.traversals.count():
+                    view = self.traversals.view()
+                    view.setRowHidden(index, False)
+                    model = self.traversals.model()
+                    item = model.item(index)
+                    item.setFlags(item.flags() | Qt.ItemIsEnabled)
+            self.traversals.setCurrentIndex(0)
+        else:
+            for index in self.loops_indices:
+                if index < self.traversals.count():
+                    view = self.traversals.view()
+                    view.setRowHidden(index, True)
+                    model = self.traversals.model()
+                    item = model.item(index)
+                    item.setFlags(item.flags() & ~Qt.ItemIsEnabled)
+            curIndex = 0
+            for i in range (0, len(self.found_traversals)):
+                if curIndex not in self.loops_indices:
+                    break
+                else:
+                    curIndex += 1
+            self.traversals.setCurrentIndex(curIndex)
 
 
     def submit_molecule_clicked(self):
@@ -602,7 +668,7 @@ class MainWindow(QMainWindow):
             self.display_molecule_m.setPixmap(QtGui.QPixmap.fromImage(self.qim_m).scaled(self.display_molecule_m.size(), QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation))
             self.set_of_bursts_lineedit.clear()
             if errors != []:
-                self.hide_multiple([self.traversal_mode_m, self.save_m, self.mol_info_m, self.set_of_bursts_label, self.set_of_bursts_lineedit, self.submit_set_of_bursts, self.bursts_label, self.row5_m, self.submit_burst, self.traversals_label, self.traversals, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
+                self.hide_multiple([self.traversal_mode_m, self.save_m, self.mol_info_m, self.set_of_bursts_label, self.row4_m, self.row4_2_m, self.submit_set_of_bursts, self.bursts_label, self.row5_m, self.submit_burst, self.traversals_label, self.traversals, self.if_loops, self.row6_m, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
                 msg = QMessageBox(self.wid_mult)
                 msg.setStyleSheet(" QPushButton{ height: 32px; width: 130px}")
                 msg.setWindowTitle("No soliton graph")
@@ -619,7 +685,7 @@ class MainWindow(QMainWindow):
                 msg.setDetailedText(details)
                 x = msg.exec_() # show messagebox
             elif self.my_graph_m.exterior_nodes_name_collision() == True:
-                self.hide_multiple([self.traversal_mode_m, self.save_m, self.mol_info_m, self.set_of_bursts_label, self.set_of_bursts_lineedit, self.submit_set_of_bursts, self.bursts_label, self.row5_m, self.submit_burst, self.traversals_label, self.traversals, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
+                self.hide_multiple([self.traversal_mode_m, self.save_m, self.mol_info_m, self.set_of_bursts_label, self.row4_m, self.row4_2_m, self.submit_set_of_bursts, self.bursts_label, self.row5_m, self.submit_burst, self.traversals_label, self.traversals, self.if_loops, self.row6_m, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
                 msg = QMessageBox(self.wid_mult)
                 msg.setStyleSheet(" QPushButton{ height: 32px; width: 130px}")
                 msg.setWindowTitle("Name collision")
@@ -628,10 +694,10 @@ class MainWindow(QMainWindow):
                 msg.setStandardButtons(QMessageBox.Retry)
                 x = msg.exec_()
             else:
-                self.show_multiple([self.traversal_mode_m, self.save_m, self.set_of_bursts_label, self.set_of_bursts_lineedit, self.submit_set_of_bursts])
-                self.hide_multiple([self.mol_info_m, self.bursts_label, self.row5_m, self.submit_burst, self.traversals_label, self.traversals, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
+                self.show_multiple([self.traversal_mode_m, self.save_m, self.set_of_bursts_label, self.row4_m, self.row4_2_m, self.submit_set_of_bursts])
+                self.hide_multiple([self.mol_info_m, self.bursts_label, self.row5_m, self.submit_burst, self.traversals_label, self.traversals, self.if_loops, self.row6_m, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
         except:
-            self.hide_multiple([self.traversal_mode_m, self.save_m, self.mol_info_m, self.set_of_bursts_label, self.set_of_bursts_lineedit, self.submit_set_of_bursts, self.mol_info_m, self.bursts_label, self.row5_m, self.submit_burst, self.traversals_label, self.traversals, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
+            self.hide_multiple([self.traversal_mode_m, self.save_m, self.mol_info_m, self.set_of_bursts_label, self.row4_m, self.row4_2_m, self.submit_set_of_bursts, self.mol_info_m, self.bursts_label, self.row5_m, self.submit_burst, self.traversals_label, self.traversals, self.if_loops, self.row6_m, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
             msg = QMessageBox(self.wid_mult)
             msg.setStyleSheet(" QPushButton{ height: 32px; width: 130px}")
             msg.setWindowTitle("Incorrect input")
@@ -655,15 +721,15 @@ class MainWindow(QMainWindow):
         bursts = self.set_of_bursts_lineedit.text()
         self.burst.clear()
         try:
-            self.multi_automata = MultiwaveSolitonAutomata(self.my_graph_m, bursts)
+            self.multi_automata = MultiwaveSolitonAutomata(self.my_graph_m, bursts, self.stop_number_spinbox.value())
             bursts = bursts.split(";")
             for burst in bursts:
                 burst = re.sub(r"[{}]+", "", burst)
                 self.burst.addItem(burst)
             self.show_multiple([self.mol_info_m, self.bursts_label, self.row5_m, self.submit_burst])
-            self.hide_multiple([self.traversals_label, self.traversals, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
+            self.hide_multiple([self.traversals_label, self.traversals, self.if_loops, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
         except:
-            self.hide_multiple([self.mol_info_m, self.bursts_label, self.row5_m, self.submit_burst, self.traversals_label, self.traversals, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
+            self.hide_multiple([self.mol_info_m, self.bursts_label, self.row5_m, self.submit_burst, self.traversals_label, self.traversals, self.if_loops, self.row6_m, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
             msg = QMessageBox(self.wid_mult)
             msg.setStyleSheet(" QPushButton{ height: 32px; width: 130px;}")
             msg.setWindowTitle("Incorrect input")
@@ -766,6 +832,7 @@ class MainWindow(QMainWindow):
 
         self.traversal_index = None # we need this variable later in show_animation_clicked
         self.traversals.clear()
+        self.if_loops.setChecked(True)
         if self.all_bursts.isChecked():
             key = self.multi_automata.matrix_to_string(nx.to_numpy_array(self.my_graph_m.graph))
             self.found_traversals = self.multi_automata.states_plus_traversals[key][1]
@@ -775,7 +842,7 @@ class MainWindow(QMainWindow):
             self.found_traversals = self.multi_automata.call_find_all_travs_given_burst(self.multi_automata.bursts_dicts[burst_index], self.my_graph_m)
             self.num_traversals_per_burst = None
         if self.found_traversals == []:
-            self.hide_multiple([self.traversals_label, self.traversals, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
+            self.hide_multiple([self.traversals_label, self.traversals, self.if_loops, self.row6_m, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
             msg = QMessageBox(self.wid_mult)
             msg.setStyleSheet(" QPushButton{ height: 32px; width: 130px;}")
             msg.setWindowTitle("No soliton paths found")
@@ -786,7 +853,8 @@ class MainWindow(QMainWindow):
             x = msg.exec_()
         else:
             endless_loops = 0
-            for traversal in self.found_traversals:
+            self.loops_indices = []
+            for t, traversal in enumerate(self.found_traversals):
                 if isinstance(traversal, Traversal): # if traversal is a real traversal and no endless loop
                     this_traversal = ""
                     for i, path in enumerate(traversal.traversal_for_user):
@@ -795,22 +863,24 @@ class MainWindow(QMainWindow):
                             this_traversal = this_traversal + ", "
                     self.traversals.addItem(this_traversal)
                 else:
-                    this_traversal = "LOOP! "
+                    this_traversal = "[!] "
                     for i, path in enumerate(traversal[0].traversal_for_user):
                         this_traversal = this_traversal + path + " ..."
                         if i != len(traversal[0].traversal_for_user)-1:
                             this_traversal = this_traversal + ", "
                     self.traversals.addItem(this_traversal)
                     endless_loops += 1
+                    self.loops_indices.append(t)
             self.traversals_label.setText(f"Sets of paths ({len(self.found_traversals) - endless_loops}):")
-            self.show_multiple([self.traversals_label, self.traversals, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
+            self.show_multiple([self.traversals_label, self.traversals, self.if_loops, self.row6_m, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
             sep_index = 0
             if self.num_traversals_per_burst:
                 for n, num in enumerate(self.num_traversals_per_burst): # add seperators to distinct which traversals resulted from which burst
                     if num != 0 and n != len(self.num_traversals_per_burst)-1: # don't add if there is no traversal for this burst of if it's the last burst
                         sep_index += num
                         self.traversals.insertSeparator(sep_index)
-                        self.found_traversals.insert(sep_index, None) # so the indices in found_traversals correspond to the indices of the combobox items
+                        self.found_traversals.insert(sep_index, None) # so the indices in found_traversals correspond with the indices of the combobox items
+                        self.loops_indices = [(index + 1) if (index >= sep_index) else index for index in self.loops_indices]
                         sep_index += 1 # indices got shifted by one because seperator was added
 
 
@@ -1081,7 +1151,7 @@ class MainWindow(QMainWindow):
             self.display_molecule_m.setPixmap(QtGui.QPixmap.fromImage(self.qim_m).scaled(self.display_molecule_m.size(), QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation))
 
             self.traversal_mode_m.setChecked(True)
-            self.hide_multiple([self.traversals_label, self.traversals, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
+            self.hide_multiple([self.traversals_label, self.traversals, self.if_loops, self.row6_m, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
             self.burst.setCurrentIndex(0)
             dlg.close()
 
@@ -1226,10 +1296,10 @@ class MainWindow(QMainWindow):
 
         save_button = QtWidgets.QPushButton(dlg)
         save_button.setGeometry(QtCore.QRect(470, 375, 70, 30))
-        if isinstance(self.desired_traversal, Traversal):
+        '''if isinstance(self.desired_traversal, Traversal):
             save_button.clicked.connect(save_animation)
         else:
-            self.over_looppoint_count = 0 # how many times we passed the loop point
+            self.over_looppoint_count = 0 # how many times we passed the loop point'''
         pause_button = QtWidgets.QPushButton(dlg)
         pause_button.setGeometry(QtCore.QRect(240, 375, 30, 30))
         pause_button.clicked.connect(lambda: pause_animation(pause_button))
@@ -1244,10 +1314,13 @@ class MainWindow(QMainWindow):
             pause_button.setStyleSheet("QPushButton {background-color: rgb(191, 207, 255); image: url(:/icons/pause.svg);} QPushButton::pressed {background-color : rgb(132, 145, 193);}")
             next_button.setStyleSheet("QPushButton {background-color: rgb(191, 207, 255); image: url(:/icons/right-arrow.svg);} QPushButton::pressed {background-color : rgb(132, 145, 193);}")
             prev_button.setStyleSheet("QPushButton {background-color: rgb(191, 207, 255); image: url(:/icons/left-arrow.svg);} QPushButton::pressed {background-color : rgb(132, 145, 193)}")
+            save_button.clicked.connect(save_animation)
         else:
             if isinstance(self.desired_traversal, Traversal):
                 save_button.setStyleSheet("QPushButton {background-color: rgb(149, 221, 185); image: url(:/icons/save.svg);} QPushButton::pressed {background-color : rgb(90, 159, 123);}")
+                save_button.clicked.connect(save_animation)
             else:
+                self.over_looppoint_count = 0 # how many times we passed the loop point
                 save_button.setStyleSheet("QPushButton {background-color: rgb(230, 230, 230); image: url(:/icons/save.svg);}")
             pause_button.setStyleSheet("QPushButton {background-color: rgb(149, 221, 185); image: url(:/icons/pause.svg);} QPushButton::pressed {background-color : rgb(90, 159, 123);}")
             next_button.setStyleSheet("QPushButton {background-color: rgb(149, 221, 185); image: url(:/icons/right-arrow.svg);} QPushButton::pressed {background-color : rgb(90, 159, 123);}")
