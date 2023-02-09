@@ -105,9 +105,9 @@ class SolitonGraph:
         Returns:
             str: `SMILES` string (used with `pysmiles`).
         """
-        pysmiles_smiles = re.sub(r"[{][0-9]*[}]", "(C)", user_input)
-        pysmiles_smiles = re.sub(r"[{][-][0-9]*[}]", "(-C)", pysmiles_smiles)
-        pysmiles_smiles = re.sub(r"[{][=][0-9]*[}]", "(=C)", pysmiles_smiles)
+        pysmiles_smiles = re.sub(r"[{][0-9]+[}]", "C", user_input)
+        pysmiles_smiles = re.sub(r"[{][-][0-9]+[}]", "-C", pysmiles_smiles)
+        pysmiles_smiles = re.sub(r"[{][=][0-9]+[}]", "=C", pysmiles_smiles)
 
         return pysmiles_smiles
 
@@ -122,7 +122,7 @@ class SolitonGraph:
         Returns:
             str: Modified `SMILES` string (used with `rdkit`).
         """
-        rdkit_smiles = re.sub(r"[{][-=]*[0-9]*[}]", "(C)", user_input)
+        rdkit_smiles = re.sub(r"[{][-=]*[0-9]+[}]", "C", user_input)
 
         return rdkit_smiles
 
