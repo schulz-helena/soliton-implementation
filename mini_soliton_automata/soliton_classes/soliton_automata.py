@@ -12,11 +12,13 @@ class SolitonAutomata:
     """Representation of a soliton automata, which finds all soliton paths between all pairs of exterior nodes.
     """
 
-    def __init__(self, soliton_graph):
+    def __init__(self, soliton_graph: SolitonGraph, stop: int):
         """Initializes a `SolitonAutomata` object by using a soliton graph.
         """
         self.soliton_graph: SolitonGraph = soliton_graph
         """Soliton graph the automata is based on."""
+        self.stop = stop
+        """After how many equal soliton graph + soliton position to stop searching for traversals on current path in search tree."""
         self.deterministic: bool
         """Whether the soliton automata is deterministic."""
         self.strongly_deterministic: bool
@@ -42,8 +44,12 @@ class SolitonAutomata:
         """
         soliton_paths = []
         for path in paths:
-            soliton_path = SolitonPath(soliton_graph, path)
-            soliton_paths.append(soliton_path)
+            if isinstance(path[0], list):
+                soliton_path = SolitonPath(soliton_graph, path[0])
+                soliton_paths.append([soliton_path, path[1]])
+            else:
+                soliton_path = SolitonPath(soliton_graph, path)
+                soliton_paths.append(soliton_path)
 
         return soliton_paths
 
@@ -89,7 +95,7 @@ class SolitonAutomata:
         return akt_copy, path_copy, bindings_copy, bind_copy
 
 
-    def find_all_paths_given_nodes(self, graph: nx.Graph, bindings: dict, end: int, path: list, akt: int, bind: int, paths: list):
+    '''def find_all_paths_given_nodes(self, graph: nx.Graph, bindings: dict, end: int, path: list, akt: int, bind: int, paths: list):
         """Finds all possible soliton paths between two given exterior nodes by using a recursive backtracking algorithm.
             A path can only be a soliton path if the edges traversed by the soliton have alternating binding types (1,2,1,2,...).
 
@@ -128,6 +134,58 @@ class SolitonAutomata:
                 bindings = bindings_copy
                 bind = bind_copy
 
+        return paths # if at some point no new node could be added, then all possible paths are found'''
+
+    
+    def find_all_paths_given_nodes(self, graph: nx.Graph, bindings: dict, end: int, path: list, akt: int, bind: int, paths: list, bindings_all_timesteps: list):
+        """Finds all possible soliton paths between two given exterior nodes by using a recursive backtracking algorithm.
+            A path can only be a soliton path if the edges traversed by the soliton have alternating binding types (1,2,1,2,...).
+
+        Args:
+            graph (nx.Graph): Graph the paths should be found in.
+            bindings (dict): Current binding types of all edges in the graph.
+            end (int): End node of path.
+            path (list): Current found path.
+            akt (int): Node that was currently added to path.
+            bind (int): Binding type of the last edge that was traversed.
+            paths (list): All currently found paths.
+
+        Returns:
+            list: All found paths (is empty if no path exists).
+        """
+        # base case 1: if end node is reached then finished path to paths
+        if end == akt and len(path) >= 3:
+            paths.append(path)
+            return paths
+
+        # base case 2: if soliton is stuck in endless loop
+        count = 1
+        for k in range(0, len(bindings_all_timesteps)-1):
+            if bindings == bindings_all_timesteps[k] and akt == path[k]: # if we already had that exact graph and position map in this configuration trail
+                count += 1
+                if count == self.stop:
+                    paths.append([path, k+1]) # append the found trav plus the loop point/ timestep (+1, because otherwise in animation we would display the loop point twice)
+                    return paths
+
+        # iterate over all nodes that are adjacent to latest node in path
+        for node in list(nx.neighbors(graph, akt)):
+            if node != path[len(path)-2] and bindings[tuple(sorted((akt, node)))] != bind and (node == end or node not in self.soliton_graph.exterior_nodes): # soliton is not allowed to make a direct turnaround and edge to next node has to have the right binding type
+                akt_copy, path_copy, bindings_copy, bind_copy = self.build_copies(akt, path, bindings, bind) # make copies so we can backtrack later
+                path.append(node)
+                bind = bindings[tuple(sorted((akt, node)))] # change bind to binding type of edge that was just traversed
+                bindings = self.change_bindings(bindings, tuple(sorted((akt, node))))
+                bindings_copy2 = copy.deepcopy(bindings)
+                akt = node
+                bindings_all_timesteps.append(bindings_copy2)
+                # call function recursively: if we can find a path if we go further with the decision we just made (with the node we just added) then paths is changed (new path added)
+                paths = self.find_all_paths_given_nodes(graph, bindings, end, path, akt, bind, paths, bindings_all_timesteps)
+                # try different decisions (nodes) next, so we need variables in the state before the last decision
+                akt = akt_copy
+                path = path_copy
+                bindings = bindings_copy
+                bind = bind_copy
+                bindings_all_timesteps.pop()
+
         return paths # if at some point no new node could be added, then all possible paths are found
     
 
@@ -149,7 +207,8 @@ class SolitonAutomata:
         path = [start]
         akt = start
         bind = 0
-        paths = self.find_all_paths_given_nodes(graph, bindings, end, path, akt, bind, paths)
+        bindings_all_timesteps = [soliton_graph_copy.bindings] # already add bindings for timestep 0
+        paths = self.find_all_paths_given_nodes(graph, bindings, end, path, akt, bind, paths, bindings_all_timesteps)
         soliton_paths = self.build_soliton_paths(paths, soliton_graph)
         
         return soliton_paths
@@ -178,16 +237,22 @@ class SolitonAutomata:
             for i in range(0, len(ext_nodes)):
                 for j in range(0, len(ext_nodes)): # loop over all pairs of exterior nodes 
                     paths = self.call_find_all_paths_given_nodes(ext_nodes[i], ext_nodes[j], state) # find soliton paths with all pairs of exterior nodes
-                    for path in paths:
+                    loops_num = 0
+                    first_real_path = -1
+                    for p, path in enumerate(paths):
                         all_paths.append(path)
-                        resulting_matrix = path.adjacency_matrices_list[len(path.adjacency_matrices_list)-1] # adjacency matrix of the soliton graph the path results in
-                        resulting_matrix_id = self.matrix_to_string(resulting_matrix)
-                        if resulting_matrix_id not in states_plus_soliton_paths: # if we found a new state
-                            states_plus_soliton_paths[resulting_matrix_id] = [path.resulting_soliton_graph, []] # add it to the dictionary
-                            states.append(path.resulting_soliton_graph)
-                        if np.array_equal(resulting_matrix, paths[0].adjacency_matrices_list[len(paths[0].adjacency_matrices_list)-1]) == False:
-                            deterministic = False # two or more different soliton graphs have emerged although the same pair of exterior nodes was used
-                    if len(paths) > 1:
+                        if isinstance(path, SolitonPath): # if traversal is a real traversal and no endless loop
+                            if first_real_path == -1:
+                                first_real_path = p
+                            resulting_matrix = path.adjacency_matrices_list[len(path.adjacency_matrices_list)-1] # adjacency matrix of the soliton graph the path results in
+                            resulting_matrix_id = self.matrix_to_string(resulting_matrix)
+                            if resulting_matrix_id not in states_plus_soliton_paths: # if we found a new state
+                                states_plus_soliton_paths[resulting_matrix_id] = [path.resulting_soliton_graph, []] # add it to the dictionary
+                                states.append(path.resulting_soliton_graph)
+                            if np.array_equal(resulting_matrix, paths[first_real_path].adjacency_matrices_list[len(paths[first_real_path].adjacency_matrices_list)-1]) == False:
+                                deterministic = False # two or more different soliton graphs have emerged although the same pair of exterior nodes was used
+                        else: loops_num += 1
+                    if (len(paths) - loops_num) > 1:
                         strongly_deterministic = False # more than one soliton path was found between one pair of exterior nodes
             states_plus_soliton_paths[state_matrix_id][1] = all_paths # add all found soliton paths in this state
 
@@ -211,7 +276,7 @@ class SolitonAutomata:
         return matrix_id
 
 
-    def find_impervious_paths(self):
+    def find_impervious_paths(self): # TO-DO: nur mit richtigen Pfaden
         """Finds all impervious paths of the initial soliton graph.
 
         Returns:
@@ -222,10 +287,11 @@ class SolitonAutomata:
         initial_soliton_paths = self.states_plus_soliton_paths[initial_matrix_id][1]
         # remove all edges that are traversed in any soliton path:
         for soliton_path in initial_soliton_paths:
-            for i, node in enumerate(soliton_path.path):
-                if i < (len(soliton_path.path)-1):
-                    if tuple(sorted((node, soliton_path.path[i+1]))) in unused_edges:
-                        unused_edges.remove(tuple(sorted((node, soliton_path.path[i+1]))))
+            if isinstance(soliton_path, SolitonPath):
+                for i, node in enumerate(soliton_path.path):
+                    if i < (len(soliton_path.path)-1):
+                        if tuple(sorted((node, soliton_path.path[i+1]))) in unused_edges:
+                            unused_edges.remove(tuple(sorted((node, soliton_path.path[i+1]))))
 
         akt_path = []
         imperv_paths = []
