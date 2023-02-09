@@ -195,7 +195,7 @@ class MultiwaveSolitonAutomata:
             if possible_edges[soliton] == []: # if for one soliton there are no possible next edges, no combinations are possible
                 edges_combs.clear()
                 nodes_combs.clear()
-            if soliton != 1 and edges_combs == []: # if no possible edge combination exists anymore, terminate the loop
+            if soliton != 1 and not any(edges_combs): # if no possible edge combination exists anymore, terminate the loop (not any(edges_combs) makes sure list is empty or only contains empty lists)
                 break
             for i, edge in enumerate(possible_edges[soliton]): # for all possible edges for this soliton
                 if soliton == 1:
