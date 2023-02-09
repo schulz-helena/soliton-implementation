@@ -448,30 +448,59 @@ class MainWindow(QMainWindow):
 
     
     def mol_info_clicked(self):
-        if self.automata is None:
-            self.automata = SolitonAutomata(self.my_graph, self.stop_number_spinbox.value())
+
+        def save_info():
+            """Opens a file dialog in which user can specify a path where a text file with all info on soliton automata/ soliton graph should be saved.
+            Text file also contains the input string representing the molecule.
+            Only allows `.txt` file suffix.
+            """
+            option = QtWidgets.QFileDialog.Options()
+            name = QtWidgets.QFileDialog.getSaveFileName(self.wid_single, 'Save File', 'info.txt', 'Text files (*.txt)', options = option)
+            if name != ('', ''): # only do the following if user clicked on save button (without this line the application closes with an error if save action is cancelled)
+                path = name[0]
+                file = open(path, "w")
+                file.write(txt_text)
+                file.close()
         
+        txt_text = f"Soliton graph: {self.smiles_string} \n"
+        txt_text = txt_text + f"Stop number: {self.stop_number} \n\n"
         dlg = QDialog(self.wid_single)
         grid = QtWidgets.QGridLayout(dlg)
         label_det = QtWidgets.QLabel(dlg)
         label_det.setText("Deterministic:")
+        txt_text = txt_text + f"Deterministic: "
         grid.addWidget(label_det, 0, 0, 1, 1)
         det_bool = QtWidgets.QLabel(dlg)
         if self.automata.deterministic:
             det_bool.setText("Yes")
-        else: det_bool.setText("No")
+            txt_text = txt_text + f"Yes \n"
+        else: 
+            det_bool.setText("No")
+            txt_text = txt_text + f"No \n"
         grid.addWidget(det_bool, 0, 1, 1, 1)
         label_strong_det = QtWidgets.QLabel(dlg)
         label_strong_det.setText("Strongly deterministic:")
+        txt_text = txt_text + f"Strongly deterministic: "
         grid.addWidget(label_strong_det, 1, 0, 1, 1)
         strong_det_bool = QtWidgets.QLabel(dlg)
         if self.automata.strongly_deterministic:
             strong_det_bool.setText("Yes")
-        else: strong_det_bool.setText("No")
+            txt_text = txt_text + f"Yes \n"
+        else: 
+            strong_det_bool.setText("No")
+            txt_text = txt_text + f"No \n"
         grid.addWidget(strong_det_bool, 1, 1, 1, 1)
         label_imp_paths = QtWidgets.QLabel(dlg)
         label_imp_paths.setText("Impervious path(s):")
+        txt_text = txt_text + f"Impervious path(s): "
         grid.addWidget(label_imp_paths, 2, 0, 1, 1, alignment = QtCore.Qt.AlignTop)
+        save_button = QtWidgets.QPushButton(dlg)
+        save_button.setStyleSheet("QPushButton {background-color: rgb(191, 207, 255); image: url(:/icons/save.svg);} QPushButton::pressed {background-color : rgb(132, 145, 193);}")
+        save_button.setMinimumSize(QtCore.QSize(0, 32))
+        grid.addWidget(save_button, 3, 1, 1, 1)
+        save_button.clicked.connect(save_info)
+
+
 
         group = QtWidgets.QGroupBox()
         layout = QtWidgets.QGridLayout(group)
@@ -479,8 +508,12 @@ class MainWindow(QMainWindow):
         impervs = self.automata.find_impervious_paths()
         if impervs == []:
             layout.addWidget(QtWidgets.QLabel("-"))
+            txt_text = txt_text + f"-"
         for i, path in enumerate(impervs):
             layout.addWidget(QtWidgets.QLabel(path), i, 0, 1, 1, alignment = QtCore.Qt.AlignTop)
+            txt_text = txt_text + f"{path}"
+            if i != len(impervs)-1:
+                txt_text = txt_text + f", "
         grid.addWidget(group, 2, 1, 1, 1, alignment = QtCore.Qt.AlignTop)
 
         dlg.setWindowTitle("Info")
@@ -488,25 +521,54 @@ class MainWindow(QMainWindow):
 
     
     def mol_info_clicked_m(self):
+
+        def save_info():
+            """Opens a file dialog in which user can specify a path where a text file with all info on soliton automata/ soliton graph should be saved.
+            Text file also contains the input string representing the molecule.
+            Only allows `.txt` file suffix.
+            """
+            option = QtWidgets.QFileDialog.Options()
+            name = QtWidgets.QFileDialog.getSaveFileName(self.wid_single, 'Save File', 'info.txt', 'Text files (*.txt)', options = option)
+            if name != ('', ''): # only do the following if user clicked on save button (without this line the application closes with an error if save action is cancelled)
+                path = name[0]
+                file = open(path, "w")
+                file.write(txt_text)
+                file.close()
         
         dlg = QDialog(self.wid_single)
         grid = QtWidgets.QGridLayout(dlg)
         label_det = QtWidgets.QLabel(dlg)
+        txt_text = f"Soliton graph: {self.smiles_string_m} \n"
+        txt_text = txt_text + f"Set of bursts: {self.bursts} \n"
+        txt_text = txt_text + f"Stop number: {self.stop_number_m} \n\n"
         label_det.setText("Deterministic:")
+        txt_text = txt_text + f"Deterministic: "
         grid.addWidget(label_det, 0, 0, 1, 1)
         det_bool = QtWidgets.QLabel(dlg)
         if self.multi_automata.deterministic:
             det_bool.setText("Yes")
-        else: det_bool.setText("No")
+            txt_text = txt_text + f"Yes \n"
+        else: 
+            det_bool.setText("No")
+            txt_text = txt_text + f"No \n"
         grid.addWidget(det_bool, 0, 1, 1, 1)
         label_strong_det = QtWidgets.QLabel(dlg)
         label_strong_det.setText("Strongly deterministic:")
+        txt_text = txt_text + f"Strongly deterministic: "
         grid.addWidget(label_strong_det, 1, 0, 1, 1)
         strong_det_bool = QtWidgets.QLabel(dlg)
         if self.multi_automata.strongly_deterministic:
             strong_det_bool.setText("Yes")
-        else: strong_det_bool.setText("No")
+            txt_text = txt_text + f"Yes \n"
+        else: 
+            strong_det_bool.setText("No")
+            txt_text = txt_text + f"No \n"
         grid.addWidget(strong_det_bool, 1, 1, 1, 1)
+        save_button = QtWidgets.QPushButton(dlg)
+        save_button.setStyleSheet("QPushButton {background-color: rgb(149, 221, 185); image: url(:/icons/save.svg);} QPushButton::pressed {background-color : rgb(90, 159, 123);}")
+        save_button.setMinimumSize(QtCore.QSize(0, 32))
+        grid.addWidget(save_button, 3, 1, 1, 1)
+        save_button.clicked.connect(save_info)
 
         dlg.setWindowTitle("Info")
         dlg.exec_()
@@ -688,11 +750,12 @@ class MainWindow(QMainWindow):
         """
         self.node_1.clear()
         self.node_2.clear()
-        smiles_string = self.molecule_lineedit.text()
+        self.smiles_string = self.molecule_lineedit.text()
+        self.stop_number = self.stop_number_spinbox.value()
         try:
-            self.my_graph = SolitonGraph(smiles_string)
+            self.my_graph = SolitonGraph(self.smiles_string)
             errors = self.my_graph.validate_soliton_graph()
-            self.automata = SolitonAutomata(self.my_graph, self.stop_number_spinbox.value())
+            self.automata = SolitonAutomata(self.my_graph, self.stop_number)
             self.graph_pic = Visualisation.visualize_soliton_graph(self.my_graph, self.my_graph.bindings, False, True)
             self.qim = ImageQt(self.graph_pic)
             self.display_molecule.setPixmap(QtGui.QPixmap.fromImage(self.qim).scaled(self.display_molecule.size(), QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation))
@@ -750,9 +813,9 @@ class MainWindow(QMainWindow):
 
     def submit_molecule_clicked_m(self):
     
-        smiles_string = self.molecule_lineedit_m.text()
+        self.smiles_string_m = self.molecule_lineedit_m.text()
         try:
-            self.my_graph_m = SolitonGraph(smiles_string)
+            self.my_graph_m = SolitonGraph(self.smiles_string_m)
             errors = self.my_graph_m.validate_soliton_graph()
             self.graph_pic_m = Visualisation.visualize_soliton_graph(self.my_graph_m, self.my_graph_m.bindings, False, True)
             self.qim_m = ImageQt(self.graph_pic_m)
@@ -810,9 +873,11 @@ class MainWindow(QMainWindow):
     def submit_set_of_bursts_clicked(self):
     
         bursts = self.set_of_bursts_lineedit.text()
+        self.bursts = bursts
         self.burst.clear()
+        self.stop_number_m = self.stop_number_spinbox_m.value()
         try:
-            self.multi_automata = MultiwaveSolitonAutomata(self.my_graph_m, bursts, self.stop_number_spinbox_m.value())
+            self.multi_automata = MultiwaveSolitonAutomata(self.my_graph_m, bursts, self.stop_number_m)
             bursts = bursts.split(";")
             for burst in bursts:
                 burst = re.sub(r"[{}]+", "", burst)
@@ -894,8 +959,6 @@ class MainWindow(QMainWindow):
         self.paths.clear()
         self.if_loops.setChecked(True)
         if self.all_exterior_nodes.isChecked():
-            if self.automata is None:
-                self.automata = SolitonAutomata(self.my_graph, self.stop_number_spinbox.value())
             key = self.automata.matrix_to_string(nx.to_numpy_array(self.my_graph.graph))
             self.found_paths = self.automata.states_plus_soliton_paths[key][1]
         else:
@@ -1099,7 +1162,13 @@ class MainWindow(QMainWindow):
             txt_text = f"Way to soliton graph: {self.my_graph_m.way} \n"
         else:
             txt_text = f"Soliton graph: {self.my_graph_m.way} \n"
-        txt_text = txt_text + f"Traversal: {desired_traversal.traversal_for_user} \n \n"
+        txt_text = txt_text + f"Set of bursts: {self.bursts} \n"
+        this_traversal = ""
+        for i, path in enumerate(desired_traversal.traversal_for_user):
+            this_traversal = this_traversal + path
+            if i != len(desired_traversal.traversal_for_user)-1:
+                this_traversal = this_traversal + ", "
+        txt_text = txt_text + f"Traversal: {this_traversal} \n \n"
         # labelling of matrix depends on wether we have long node labels ("aa", "ab", ...) or short ones ("a", "b", ...)
         if (len(self.my_graph_m.labels) - len(self.my_graph_m.exterior_nodes)) > 26:
             matrix_label_horizontal = "    "
