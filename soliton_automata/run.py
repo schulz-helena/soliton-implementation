@@ -2,8 +2,9 @@
 import os
 import sys
 
-from gui.main_window_ba import MainWindow
 from PyQt5 import QtWidgets
+
+from soliton_automata.gui.main_window_ba import MainWindow
 
 
 def main():
