@@ -199,15 +199,11 @@ class MultiwaveSolitonAutomata:
                 break
             for i, edge in enumerate(possible_edges[soliton]): # for all possible edges for this soliton
                 if soliton == 1:
-                    edges_combs.append([edge]) # simply add the edge if it's the first soliton 
+                    edges_combs.append([edge]) # simply add the edge if it's the first soliton
                     nodes_combs.append({soliton: possible_nodes[soliton][i]}) # add dictionary with node for this soliton
                 else:
                     for j, comb in enumerate(edges_combs): # if it's not the first soliton loop over all existing combinations
-                        same_ext_node = False
-                        for sol in nodes_combs[j]: # check if in this case two solitons would enter/ leave the graph via the same exterior node
-                            if nodes_combs[j][sol] == possible_nodes[soliton][i] and nodes_combs[j][sol] in self.soliton_graph.exterior_nodes:
-                                same_ext_node = True # this is not allowed to happen so combination is invalid
-                        if edge == -1 or edge == -2 or (edge not in comb and same_ext_node == False): # if edge is not already in combination (or soliton is outside the graph)
+                        if edge == -1 or edge == -2 or edge not in comb: # if edge is not already in combination (or soliton is outside the graph)
                             if len(comb) < soliton:
                                 edges_combs[j].append(edge) # add the edge if this combination doesn't contain an edge for this soliton already
                                 nodes_combs[j][soliton] = possible_nodes[soliton][i]
@@ -222,10 +218,9 @@ class MultiwaveSolitonAutomata:
                         if i == len(possible_edges[soliton])-1: # if we are looking at the last possible edge of this soliton
                             if len(comb) < soliton: # and the combination does not contain an edge for each soliton
                                 edges_combs[j] = [] # "delete" the combination
-                                nodes_combs[j] = []
-
+                                nodes_combs[j] = {}
         edges_combs = [elem for elem in edges_combs if elem != []]
-        nodes_combs = [elem for elem in nodes_combs if elem != []]
+        nodes_combs = [elem for elem in nodes_combs if elem]
 
         # iterate over all possible combinations
         for i, comb in enumerate(nodes_combs):
