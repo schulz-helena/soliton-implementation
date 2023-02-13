@@ -1,4 +1,4 @@
-"""Traversal
+"""Traversal.
 """
 import copy
 
