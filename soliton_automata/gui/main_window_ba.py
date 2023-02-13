@@ -55,7 +55,7 @@ class MainWindow(QMainWindow):
         self.display_molecule = QtWidgets.QLabel(self.wid_single)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
         self.display_molecule.setSizePolicy(sizePolicy)
-        self.display_molecule.setMinimumSize(QtCore.QSize(50, 37.5))
+        self.display_molecule.setMinimumSize(QtCore.QSize(50, 37))
         startscreen = Startscreen().image
         self.qim = ImageQt(startscreen)
         self.display_molecule.setPixmap(QtGui.QPixmap.fromImage(self.qim).scaled(self.display_molecule.size(), QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation))
