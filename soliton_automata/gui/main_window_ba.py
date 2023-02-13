@@ -168,7 +168,7 @@ class MainWindow(QMainWindow):
         # "Loops" checkbox
         self.if_loops = QtWidgets.QCheckBox("Loops")
         self.if_loops.setChecked(True)
-        self.if_loops.setFixedWidth(65)
+        self.if_loops.setFixedWidth(70)
         self.minigrid5.addWidget(self.if_loops, 5, 0, 1, 1)
         # Combobox to choose a soliton path
         self.paths = QtWidgets.QComboBox(self.row5)
@@ -346,7 +346,7 @@ class MainWindow(QMainWindow):
         # "Loops" Checkbox
         self.if_loops_m = QtWidgets.QCheckBox("Loops")
         self.if_loops_m.setChecked(True)
-        self.if_loops_m.setFixedWidth(65)
+        self.if_loops_m.setFixedWidth(70)
         self.minigrid6_m.addWidget(self.if_loops_m, 6, 0, 1, 1)
         # Combobox to choose a traversal
         self.traversals = QtWidgets.QComboBox(self.row6_m)
