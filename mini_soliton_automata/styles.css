@@ -1,7 +1,7 @@
 QWidget {
     background-color: rgb(255, 255, 255);
     color: black;
-    font: 57 15pt Futura; /*font: 57 15pt "Century Gothic", Futura, Arial;*/
+    font: 57 15pt "Century Gothic", Futura, Arial;
     border-radius: 15px;
 }
 QPushButton {
@@ -58,31 +58,17 @@ QScrollBar::sub-line:horizontal {
 QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {
     height: 0px;
 }
-QSlider::groove:horizontal {
-    border: 1px solid rgb(191, 207, 255);
-    background: rgb(191, 207, 255);
-    height: 20px;
-    width: 40px;
-    border-radius: 11px;
-}
-QSlider::handle:horizontal {
-    border: 1px solid rgb(0, 0, 0);
-    background: rgb(0, 0, 0);
-    width: 18px;
-    height: 20px;
-    border-radius: 10px;
-}
 QSpinBox {
     border: 1px solid rgb(191, 207, 255);
     border-radius: 10px;
     padding-right: 15px;
 }
 QSpinBox::up-button {
-    width: 14px; /* 16 + 2*1px border-width = 15px padding + 3px parent border */
+    width: 14px;
     border-width: 1px;
 }
 QSpinBox::down-button {
-    width: 14px; /* 16 + 2*1px border-width = 15px padding + 3px parent border */
+    width: 14px;
     border-width: 1px;
 }
 QSpinBox::down-arrow {

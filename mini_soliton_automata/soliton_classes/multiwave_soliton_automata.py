@@ -14,7 +14,7 @@ class MultiwaveSolitonAutomata:
     """
 
     def __init__(self, soliton_graph: SolitonGraph, bursts: str, stop: int):
-        """Initializes a `MultiwaveSolitonAutomata` object by using a soliton graph and a burst.
+        """Initializes a `MultiwaveSolitonAutomata` object by using a soliton graph, a burst and a stop number.
         """
         self.soliton_graph: SolitonGraph = soliton_graph
         """Soliton graph the automata is based on."""
@@ -124,9 +124,9 @@ class MultiwaveSolitonAutomata:
             graph (nx.Graph): Graph the traversals should be found in.
             burst_dict (dict): The burst that is used. 
             t (int): Current timestep.
-            s_pos_all_timesteps (list): Current soliton positions for each timestep.
-            bindings_all_timesteps (list): Current binding types of all edges in the graph.
-            binds_all_timesteps (list): Binding type of the last edge that was traversed by each soliton.
+            s_pos_all_timesteps (list): Soliton positions for all past timesteps.
+            bindings_all_timesteps (list): Binding types of all edges in the graph for all past timesteps.
+            binds_all_timesteps (list): Binding type of the last edge that was traversed by each soliton for all past timesteps.
             travs (list): All currently found traversals.
 
         Returns:
@@ -285,6 +285,8 @@ class MultiwaveSolitonAutomata:
         """Calls `call_find_all_travs_given_burst` for all states of the automata and all bursts in order to get all possible traversals in all states.
 
         Returns:
+            bool: Whether the soliton automata is deterministic or not.
+            bool: Whether the soliton automata is strongly deterministic or not.
             dict: All states of the soliton graph plus all traversals that can be found in each state plus number of traversals found for each burst.
         """
         initial_matrix = nx.to_numpy_array(self.soliton_graph.graph)

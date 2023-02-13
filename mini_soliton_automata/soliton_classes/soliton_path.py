@@ -12,7 +12,7 @@ class SolitonPath:
     """
 
     def __init__(self, soliton_graph: SolitonGraph, path: list):
-        """Initializes a `SolitonPath` object.
+        """Initializes a `SolitonPath` object by using a soliton graph and a path.
         """
         self.path: list = path
         """Path consisting of node ids."""

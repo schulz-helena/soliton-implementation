@@ -50,7 +50,7 @@ class Traversal:
 
     def traversal_representation(self):
         """Creates a representation of a traversal that is readable for the user. 
-        Builds human readable soliton paths marked with the corresponding soliton.
+        Paths are marked with the corresponding soliton.
         Uses '-' if the soliton is not currently in the graph at a specific timestep and otherwise 
         node labels to indicate where the soliton is.
 

@@ -81,6 +81,7 @@ class SolitonGraph:
 
         return exterior_nodes, exterior_nodes_reverse
 
+
     def exterior_nodes_name_collision(self):
         """Checks for name collisions between exterior nodes.
 
@@ -95,6 +96,7 @@ class SolitonGraph:
                 return True
 
         return False
+
 
     def create_pysmiles_smiles(self, user_input: str):
         """Transforms user input in `SMILES` representation (treating exterior nodes as Cs now).

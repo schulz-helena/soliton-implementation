@@ -11,7 +11,6 @@ from PIL import Image
 from soliton_classes.soliton_graph import SolitonGraph
 from soliton_classes.soliton_path import SolitonPath
 from soliton_classes.traversal import Traversal
-
 from visualisations.visualisation import Visualisation
 
 
@@ -117,8 +116,8 @@ class Animation:
                     if soliton == 1:
                         plt.plot(x, y, marker="o", markersize=6, markeredgecolor="black", markerfacecolor="black")
                     else:
-                        rgb = hsv_to_rgb((akt_color/360, 1, 0.9))
-                        plt.plot(x, y, marker="o", markersize=6, markeredgecolor=rgb, markerfacecolor=rgb)
+                        rgb = hsv_to_rgb((akt_color/360, 1, 1.0))
+                        plt.plot(x, y, marker="o", markersize=6, markeredgecolor=rgb, markerfacecolor=rgb, zorder = 3)
 
 
         fig, ax = plt.subplots()
@@ -135,6 +134,9 @@ class Animation:
     def list_of_plots_and_arrays(soliton_graph: SolitonGraph, soliton_path: SolitonPath):
         """Builds a list of plots and plots as arrays for each timestep of soliton traversing a path.
 
+        Args:
+            soliton_graph (SolitonGraph): The graph that is traversed.
+            soliton_path (SolitonPath): Path the soliton should traverse in the animation.
         Returns:
             list: `Matplotlib` plots and plots as `Numpy` arrays for each timestep.
         """
@@ -169,6 +171,9 @@ class Animation:
     def list_of_plots_and_arrays_multiwave(soliton_graph: SolitonGraph, traversal: Traversal):
         """Builds a list of plots and plots as arrays for each timestep of solitons traversing the graph.
 
+        Args:
+            soliton_graph (SolitonGraph): The graph that is traversed.
+            traversal (Traversal): The traversal that contains bindings and soliton positions for each timestep.
         Returns:
             list: `Matplotlib` plots and plots as `Numpy` arrays for each timestep.
         """
@@ -214,8 +219,8 @@ class Animation:
                     if soliton == 1:
                         plt.plot(x, y, marker="o", markersize=6, markeredgecolor="black", markerfacecolor="black")
                     else:
-                        rgb = hsv_to_rgb((akt_color/360, 1, 0.9))
-                        plt.plot(x, y, marker="o", markersize=6, markeredgecolor=rgb, markerfacecolor=rgb)
+                        rgb = hsv_to_rgb((akt_color/360, 1, 1.0))
+                        plt.plot(x, y, marker="o", markersize=6, markeredgecolor=rgb, markerfacecolor=rgb, zorder = 3)
 
             # convert plot into numpy array
             canvas.draw()
@@ -232,6 +237,8 @@ class Animation:
     def list_of_pil_images(plots_and_arrays: list):
         """Builds a list of `PIL` images for each timestep of soliton traversing a path/ solitons traversing the graph.
 
+        Args:
+            plots_and_arrays (list): `Matplotlib` plots and plots as `Numpy` arrays for each timestep. 
         Returns:
             list: `PIL` images for each timestep in animation.
         """
