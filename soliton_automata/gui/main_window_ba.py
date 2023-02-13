@@ -7,12 +7,12 @@ import os
 import re
 
 import networkx as nx
-import res.resources
 from PIL.ImageQt import ImageQt
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QDialog, QMainWindow, QMessageBox, QScrollArea
 
+import soliton_automata.res.resources
 from soliton_automata.gui.startscreen import Startscreen
 from soliton_automata.soliton_classes.multiwave_soliton_automata import \
     MultiwaveSolitonAutomata
