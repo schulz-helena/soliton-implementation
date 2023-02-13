@@ -1,3 +1,5 @@
+"""Traversal
+"""
 import copy
 
 import networkx as nx
@@ -7,7 +9,7 @@ from soliton_automata.soliton_classes.soliton_graph import SolitonGraph
 
 
 class Traversal:
-    """Representation of a traversal. Traversal means the soliton paths of all solitons in a burst.
+    """Representation of a traversal. Traversal means the paths of all solitons in a burst (alternative representation to configurationtrail).
     """
 
     def __init__(self, soliton_graph: SolitonGraph, pos_and_bindings: list):

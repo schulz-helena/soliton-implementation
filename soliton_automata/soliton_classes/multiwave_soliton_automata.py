@@ -1,4 +1,4 @@
-"""Soliton automata.
+"""Multiwave soliton automata.
 """
 import copy
 import re
