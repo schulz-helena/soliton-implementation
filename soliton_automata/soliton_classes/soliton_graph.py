@@ -32,6 +32,8 @@ class SolitonGraph:
         """Positions for a second line (that can be plotted) for each edge."""
         self.labels: dict = nx.get_node_attributes(self.graph, 'label')
         """Node labels (node id as key, node label as value)."""
+        self.way: str = user_input
+        """Way that led to the soliton graph (consists of user input of initial soliton graph of a soliton automata and soliton paths)."""
 
 
     def set_bindings(self, bindings: dict):
@@ -79,6 +81,7 @@ class SolitonGraph:
 
         return exterior_nodes, exterior_nodes_reverse
 
+
     def exterior_nodes_name_collision(self):
         """Checks for name collisions between exterior nodes.
 
@@ -94,6 +97,7 @@ class SolitonGraph:
 
         return False
 
+
     def create_pysmiles_smiles(self, user_input: str):
         """Transforms user input in `SMILES` representation (treating exterior nodes as Cs now).
 
@@ -103,9 +107,9 @@ class SolitonGraph:
         Returns:
             str: `SMILES` string (used with `pysmiles`).
         """
-        pysmiles_smiles = re.sub(r"[{][0-9]*[}]", "(C)", user_input)
-        pysmiles_smiles = re.sub(r"[{][-][0-9]*[}]", "(-C)", pysmiles_smiles)
-        pysmiles_smiles = re.sub(r"[{][=][0-9]*[}]", "(=C)", pysmiles_smiles)
+        pysmiles_smiles = re.sub(r"[{][0-9]+[}]", "C", user_input)
+        pysmiles_smiles = re.sub(r"[{][-][0-9]+[}]", "-C", pysmiles_smiles)
+        pysmiles_smiles = re.sub(r"[{][=][0-9]+[}]", "=C", pysmiles_smiles)
 
         return pysmiles_smiles
 
@@ -120,7 +124,7 @@ class SolitonGraph:
         Returns:
             str: Modified `SMILES` string (used with `rdkit`).
         """
-        rdkit_smiles = re.sub(r"[{][-=]*[0-9]*[}]", "(C)", user_input)
+        rdkit_smiles = re.sub(r"[{][-=]*[0-9]+[}]", "C", user_input)
 
         return rdkit_smiles
 

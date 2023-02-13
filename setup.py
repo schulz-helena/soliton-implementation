@@ -1,4 +1,4 @@
-"""Setup script for mini-soliton-automata-software
+"""Setup script for Soliton Automata Software
 """
 
 import os
@@ -10,15 +10,15 @@ with open(readme_path, "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setup(
-    name = 'mini-soliton-automata',
-    version = '1.1.0',
-    description = 'Mini Soliton Automata Software that computes soliton paths for a given molecule and pair of exterior nodes',
+    name = 'soliton-automata-software',
+    version = '2.0.0',
+    description = 'Soliton Automata Software that computes soliton paths/ total legal configuration trails for a given soliton graph (and a given set of bursts)',
     long_description=long_description,
     long_description_content_type="text/markdown",
     author = 'Helena Schulz',
     author_email = 'schulz-helena@gmx.de',
     url = 'https://github.com/schulz-helena/soliton-implementation',
-    packages = ['mini_soliton_automata', 'mini_soliton_automata.gui', 'mini_soliton_automata.res', 'mini_soliton_automata.soliton_classes', 'mini_soliton_automata.visualisations'],
+    packages = ['soliton_automata', 'soliton_automata.gui', 'soliton_automata.res', 'soliton_automata.soliton_classes', 'soliton_automata.visualisations'],
     python_requires = '>=3.7',
     install_requires = [
         'rdkit>=2021.09.5',
@@ -27,11 +27,11 @@ setup(
         'matplotlib>=3.5.1',
         'Pyqt5>=5.15.4',
     ],
-    package_data={'': ['styles.css']},
+    package_data={'': ['styles.css', 'styles_m.css']},
     include_package_data=True,
     entry_points = {
         'console_scripts': [
-            'mini-soliton-automata-software = mini_soliton_automata.run:main'
+            'solitons = soliton_automata.run:main'
         ],
     },
 )

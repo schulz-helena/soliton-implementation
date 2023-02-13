@@ -1,0 +1,83 @@
+QWidget {
+    background-color: rgb(255, 255, 255);
+    color: black;
+    font: 57 15pt "Century Gothic", Futura, Arial;
+    border-radius: 15px;
+}
+QPushButton {
+    background-color: rgb(149, 221, 185);
+}
+QPushButton::pressed {
+    background-color : rgb(90, 159, 123);
+}
+QLineEdit {
+    border: 2px solid rgb(149, 221, 185);
+    border-radius: 10px;
+    padding: 0 8px;
+}
+QComboBox {
+    border: 1px solid rgb(149, 221, 185);
+    border-radius: 10px;
+    padding: 0 8px;
+}
+QComboBox::drop-down {
+    width: 15px;
+    border-left-width: 1px;
+    border-left-color: rgb(255, 255, 255);
+    border-left-style: solid;
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+}
+QComboBox::down-arrow {
+    image: url(:/icons/drop-down-arrow.svg);
+    width: 15px;
+    height: 15px;
+    margin-right: 5px;
+}
+QScrollBar::handle:horizontal {
+    background: rgb(149, 221, 185);
+}
+QScrollBar::handle:vertical {
+    background: rgb(149, 221, 185);
+}
+QScrollBar::add-line:vertical {
+    height: 0px;
+}  
+QScrollBar::sub-line:vertical {
+    height: 0px;
+} 
+QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
+    height: 0px;
+}
+QScrollBar::add-line:horizontal {
+    height: 0px;
+}  
+QScrollBar::sub-line:horizontal {
+    height: 0px;
+} 
+QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {
+    height: 0px;
+}
+QSpinBox {
+    border: 1px solid rgb(149, 221, 185);
+    border-radius: 10px;
+    padding-right: 15px;
+}
+QSpinBox::up-button {
+    width: 14px;
+    border-width: 1px;
+}
+QSpinBox::down-button {
+    width: 14px;
+    border-width: 1px;
+}
+QSpinBox::down-arrow {
+    image: url(:/icons/drop-down-arrow.svg);
+    width: 12px;
+    height: 12px;
+}
+QSpinBox::up-arrow {
+    image: url(:/icons/up-arrow.svg);
+    width: 12px;
+    height: 12px;
+}
