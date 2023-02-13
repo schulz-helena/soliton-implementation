@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.10.0" />
-<title>mini_soliton_automata.soliton_classes.soliton_path API documentation</title>
+<title>soliton_automata.soliton_classes.soliton_path API documentation</title>
 <meta name="description" content="Soliton path." />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
@@ -19,7 +19,7 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>mini_soliton_automata.soliton_classes.soliton_path</code></h1>
+<h1 class="title">Module <code>soliton_automata.soliton_classes.soliton_path</code></h1>
 </header>
 <section id="section-intro">
 <p>Soliton path.</p>
@@ -33,7 +33,8 @@ import copy
 
 import networkx as nx
 import numpy as np
-from mini_soliton_automata.soliton_classes.soliton_graph import SolitonGraph
+
+from soliton_automata.soliton_classes.soliton_graph import SolitonGraph
 
 
 class SolitonPath:
@@ -41,19 +42,22 @@ class SolitonPath:
     &#34;&#34;&#34;
 
     def __init__(self, soliton_graph: SolitonGraph, path: list):
-        &#34;&#34;&#34;Initializes a `SolitonPath` object.
+        &#34;&#34;&#34;Initializes a `SolitonPath` object by using a soliton graph and a path.
         &#34;&#34;&#34;
         self.path: list = path
         &#34;&#34;&#34;Path consisting of node ids.&#34;&#34;&#34;
         self.soliton_graph: SolitonGraph = soliton_graph
-        &#34;&#34;&#34;According soliton graph.&#34;&#34;&#34;
+        &#34;&#34;&#34;Soliton graph the path was found in.&#34;&#34;&#34;
         self.path_labels: list
         &#34;&#34;&#34;Path consisiting of node labels.&#34;&#34;&#34;
         self.path_for_user: str
         &#34;&#34;&#34;Representation of the path as a readable user output.&#34;&#34;&#34;
         self.path_labels, self.path_for_user = self.path_representations()
-        self.bindings_list: list = self.find_bindings_for_each_timestep()
+        self.bindings_list: list
         &#34;&#34;&#34;Bindings for each timestep.&#34;&#34;&#34;
+        self.resulting_soliton_graph: SolitonGraph
+        &#34;&#34;&#34;Soliton graph the traversal of the soliton path results in.&#34;&#34;&#34;
+        self.bindings_list, self.resulting_soliton_graph = self.find_bindings_for_each_timestep()
         self.adjacency_matrices_list: list = self.find_adjacency_matrices_for_each_timestep()
         &#34;&#34;&#34;Adjacency matrices for each timestep.&#34;&#34;&#34;
 
@@ -78,26 +82,29 @@ class SolitonPath:
 
 
     def find_bindings_for_each_timestep(self):
-        &#34;&#34;&#34;Finds the binding dictionary for each timestep of traversal of a path.
+        &#34;&#34;&#34;Finds the binding dictionary for each timestep of traversal of a path and the soliton graph the traversal results in.
 
         Returns:
             list: Contains bindings for each timestep.
+            SolitonGraph: The soliton graph the traversal of the soliton path results in.
         &#34;&#34;&#34;
-        soliton_graph_copy = copy.deepcopy(self.soliton_graph) # working on a copy of the soliton graph so no unwanted changes occur
+        resulting_soliton_graph = copy.deepcopy(self.soliton_graph) # working on a deepcopy of the soliton graph so no unwanted changes occur
         bindings_list = []
-        bindings_copy = soliton_graph_copy.bindings.copy()
+        bindings_copy = resulting_soliton_graph.bindings.copy()
         bindings_list.append(bindings_copy)
         # for each node in soliton path: change binding of edge that soliton just traversed:
         for i in range(1, len(self.path)): # starting at 1 because self.path[0] has no predecessor node
-            if soliton_graph_copy.bindings[tuple(sorted((self.path[i-1], self.path[i])))] == 2:
-                soliton_graph_copy.bindings[tuple(sorted((self.path[i-1], self.path[i])))] = 1
+            if resulting_soliton_graph.bindings[tuple(sorted((self.path[i-1], self.path[i])))] == 2:
+                resulting_soliton_graph.bindings[tuple(sorted((self.path[i-1], self.path[i])))] = 1
+                resulting_soliton_graph.graph.edges[tuple(sorted((self.path[i-1], self.path[i])))][&#39;weight&#39;] = 1
             else:
-                soliton_graph_copy.bindings[tuple(sorted((self.path[i-1], self.path[i])))] = 2
+                resulting_soliton_graph.bindings[tuple(sorted((self.path[i-1], self.path[i])))] = 2
+                resulting_soliton_graph.graph.edges[tuple(sorted((self.path[i-1], self.path[i])))][&#39;weight&#39;] = 2
 
-            bindings_copy = soliton_graph_copy.bindings.copy()
+            bindings_copy = resulting_soliton_graph.bindings.copy()
             bindings_list.append(bindings_copy)
 
-        return bindings_list
+        return bindings_list, resulting_soliton_graph
 
 
     def find_adjacency_matrices_for_each_timestep(self):
@@ -111,7 +118,7 @@ class SolitonPath:
         adjacency_matrices_list = []
         for bindings in self.bindings_list:
             soliton_graph_copy.set_bindings(bindings) # change bindings in graph which changes edge weights which changes adjacency matrix
-            matrix = nx.to_numpy_matrix(soliton_graph_copy.graph)
+            matrix = nx.to_numpy_array(soliton_graph_copy.graph)
             adjacency_matrices_list.append(matrix)
 
         return adjacency_matrices_list
@@ -127,13 +134,13 @@ class SolitonPath:
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
-<dt id="mini_soliton_automata.soliton_classes.soliton_path.SolitonPath"><code class="flex name class">
+<dt id="soliton_automata.soliton_classes.soliton_path.SolitonPath"><code class="flex name class">
 <span>class <span class="ident">SolitonPath</span></span>
-<span>(</span><span>soliton_graph: <a title="mini_soliton_automata.soliton_classes.soliton_graph.SolitonGraph" href="soliton_graph.html#mini_soliton_automata.soliton_classes.soliton_graph.SolitonGraph">SolitonGraph</a>, path: list)</span>
+<span>(</span><span>soliton_graph: <a title="soliton_automata.soliton_classes.soliton_graph.SolitonGraph" href="soliton_graph.html#soliton_automata.soliton_classes.soliton_graph.SolitonGraph">SolitonGraph</a>, path: list)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Representation of a soliton path.</p>
-<p>Initializes a <code><a title="mini_soliton_automata.soliton_classes.soliton_path.SolitonPath" href="#mini_soliton_automata.soliton_classes.soliton_path.SolitonPath">SolitonPath</a></code> object.</p></div>
+<p>Initializes a <code><a title="soliton_automata.soliton_classes.soliton_path.SolitonPath" href="#soliton_automata.soliton_classes.soliton_path.SolitonPath">SolitonPath</a></code> object by using a soliton graph and a path.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -143,19 +150,22 @@ class SolitonPath:
     &#34;&#34;&#34;
 
     def __init__(self, soliton_graph: SolitonGraph, path: list):
-        &#34;&#34;&#34;Initializes a `SolitonPath` object.
+        &#34;&#34;&#34;Initializes a `SolitonPath` object by using a soliton graph and a path.
         &#34;&#34;&#34;
         self.path: list = path
         &#34;&#34;&#34;Path consisting of node ids.&#34;&#34;&#34;
         self.soliton_graph: SolitonGraph = soliton_graph
-        &#34;&#34;&#34;According soliton graph.&#34;&#34;&#34;
+        &#34;&#34;&#34;Soliton graph the path was found in.&#34;&#34;&#34;
         self.path_labels: list
         &#34;&#34;&#34;Path consisiting of node labels.&#34;&#34;&#34;
         self.path_for_user: str
         &#34;&#34;&#34;Representation of the path as a readable user output.&#34;&#34;&#34;
         self.path_labels, self.path_for_user = self.path_representations()
-        self.bindings_list: list = self.find_bindings_for_each_timestep()
+        self.bindings_list: list
         &#34;&#34;&#34;Bindings for each timestep.&#34;&#34;&#34;
+        self.resulting_soliton_graph: SolitonGraph
+        &#34;&#34;&#34;Soliton graph the traversal of the soliton path results in.&#34;&#34;&#34;
+        self.bindings_list, self.resulting_soliton_graph = self.find_bindings_for_each_timestep()
         self.adjacency_matrices_list: list = self.find_adjacency_matrices_for_each_timestep()
         &#34;&#34;&#34;Adjacency matrices for each timestep.&#34;&#34;&#34;
 
@@ -180,26 +190,29 @@ class SolitonPath:
 
 
     def find_bindings_for_each_timestep(self):
-        &#34;&#34;&#34;Finds the binding dictionary for each timestep of traversal of a path.
+        &#34;&#34;&#34;Finds the binding dictionary for each timestep of traversal of a path and the soliton graph the traversal results in.
 
         Returns:
             list: Contains bindings for each timestep.
+            SolitonGraph: The soliton graph the traversal of the soliton path results in.
         &#34;&#34;&#34;
-        soliton_graph_copy = copy.deepcopy(self.soliton_graph) # working on a copy of the soliton graph so no unwanted changes occur
+        resulting_soliton_graph = copy.deepcopy(self.soliton_graph) # working on a deepcopy of the soliton graph so no unwanted changes occur
         bindings_list = []
-        bindings_copy = soliton_graph_copy.bindings.copy()
+        bindings_copy = resulting_soliton_graph.bindings.copy()
         bindings_list.append(bindings_copy)
         # for each node in soliton path: change binding of edge that soliton just traversed:
         for i in range(1, len(self.path)): # starting at 1 because self.path[0] has no predecessor node
-            if soliton_graph_copy.bindings[tuple(sorted((self.path[i-1], self.path[i])))] == 2:
-                soliton_graph_copy.bindings[tuple(sorted((self.path[i-1], self.path[i])))] = 1
+            if resulting_soliton_graph.bindings[tuple(sorted((self.path[i-1], self.path[i])))] == 2:
+                resulting_soliton_graph.bindings[tuple(sorted((self.path[i-1], self.path[i])))] = 1
+                resulting_soliton_graph.graph.edges[tuple(sorted((self.path[i-1], self.path[i])))][&#39;weight&#39;] = 1
             else:
-                soliton_graph_copy.bindings[tuple(sorted((self.path[i-1], self.path[i])))] = 2
+                resulting_soliton_graph.bindings[tuple(sorted((self.path[i-1], self.path[i])))] = 2
+                resulting_soliton_graph.graph.edges[tuple(sorted((self.path[i-1], self.path[i])))][&#39;weight&#39;] = 2
 
-            bindings_copy = soliton_graph_copy.bindings.copy()
+            bindings_copy = resulting_soliton_graph.bindings.copy()
             bindings_list.append(bindings_copy)
 
-        return bindings_list
+        return bindings_list, resulting_soliton_graph
 
 
     def find_adjacency_matrices_for_each_timestep(self):
@@ -213,41 +226,45 @@ class SolitonPath:
         adjacency_matrices_list = []
         for bindings in self.bindings_list:
             soliton_graph_copy.set_bindings(bindings) # change bindings in graph which changes edge weights which changes adjacency matrix
-            matrix = nx.to_numpy_matrix(soliton_graph_copy.graph)
+            matrix = nx.to_numpy_array(soliton_graph_copy.graph)
             adjacency_matrices_list.append(matrix)
 
         return adjacency_matrices_list</code></pre>
 </details>
 <h3>Instance variables</h3>
 <dl>
-<dt id="mini_soliton_automata.soliton_classes.soliton_path.SolitonPath.adjacency_matrices_list"><code class="name">var <span class="ident">adjacency_matrices_list</span></code></dt>
+<dt id="soliton_automata.soliton_classes.soliton_path.SolitonPath.adjacency_matrices_list"><code class="name">var <span class="ident">adjacency_matrices_list</span></code></dt>
 <dd>
 <div class="desc"><p>Adjacency matrices for each timestep.</p></div>
 </dd>
-<dt id="mini_soliton_automata.soliton_classes.soliton_path.SolitonPath.bindings_list"><code class="name">var <span class="ident">bindings_list</span></code></dt>
+<dt id="soliton_automata.soliton_classes.soliton_path.SolitonPath.bindings_list"><code class="name">var <span class="ident">bindings_list</span></code></dt>
 <dd>
 <div class="desc"><p>Bindings for each timestep.</p></div>
 </dd>
-<dt id="mini_soliton_automata.soliton_classes.soliton_path.SolitonPath.path"><code class="name">var <span class="ident">path</span></code></dt>
+<dt id="soliton_automata.soliton_classes.soliton_path.SolitonPath.path"><code class="name">var <span class="ident">path</span></code></dt>
 <dd>
 <div class="desc"><p>Path consisting of node ids.</p></div>
 </dd>
-<dt id="mini_soliton_automata.soliton_classes.soliton_path.SolitonPath.path_for_user"><code class="name">var <span class="ident">path_for_user</span></code></dt>
+<dt id="soliton_automata.soliton_classes.soliton_path.SolitonPath.path_for_user"><code class="name">var <span class="ident">path_for_user</span></code></dt>
 <dd>
 <div class="desc"><p>Representation of the path as a readable user output.</p></div>
 </dd>
-<dt id="mini_soliton_automata.soliton_classes.soliton_path.SolitonPath.path_labels"><code class="name">var <span class="ident">path_labels</span></code></dt>
+<dt id="soliton_automata.soliton_classes.soliton_path.SolitonPath.path_labels"><code class="name">var <span class="ident">path_labels</span></code></dt>
 <dd>
 <div class="desc"><p>Path consisiting of node labels.</p></div>
 </dd>
-<dt id="mini_soliton_automata.soliton_classes.soliton_path.SolitonPath.soliton_graph"><code class="name">var <span class="ident">soliton_graph</span></code></dt>
+<dt id="soliton_automata.soliton_classes.soliton_path.SolitonPath.resulting_soliton_graph"><code class="name">var <span class="ident">resulting_soliton_graph</span></code></dt>
 <dd>
-<div class="desc"><p>According soliton graph.</p></div>
+<div class="desc"><p>Soliton graph the traversal of the soliton path results in.</p></div>
+</dd>
+<dt id="soliton_automata.soliton_classes.soliton_path.SolitonPath.soliton_graph"><code class="name">var <span class="ident">soliton_graph</span></code></dt>
+<dd>
+<div class="desc"><p>Soliton graph the path was found in.</p></div>
 </dd>
 </dl>
 <h3>Methods</h3>
 <dl>
-<dt id="mini_soliton_automata.soliton_classes.soliton_path.SolitonPath.find_adjacency_matrices_for_each_timestep"><code class="name flex">
+<dt id="soliton_automata.soliton_classes.soliton_path.SolitonPath.find_adjacency_matrices_for_each_timestep"><code class="name flex">
 <span>def <span class="ident">find_adjacency_matrices_for_each_timestep</span></span>(<span>self)</span>
 </code></dt>
 <dd>
@@ -272,50 +289,55 @@ class SolitonPath:
     adjacency_matrices_list = []
     for bindings in self.bindings_list:
         soliton_graph_copy.set_bindings(bindings) # change bindings in graph which changes edge weights which changes adjacency matrix
-        matrix = nx.to_numpy_matrix(soliton_graph_copy.graph)
+        matrix = nx.to_numpy_array(soliton_graph_copy.graph)
         adjacency_matrices_list.append(matrix)
 
     return adjacency_matrices_list</code></pre>
 </details>
 </dd>
-<dt id="mini_soliton_automata.soliton_classes.soliton_path.SolitonPath.find_bindings_for_each_timestep"><code class="name flex">
+<dt id="soliton_automata.soliton_classes.soliton_path.SolitonPath.find_bindings_for_each_timestep"><code class="name flex">
 <span>def <span class="ident">find_bindings_for_each_timestep</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Finds the binding dictionary for each timestep of traversal of a path.</p>
+<div class="desc"><p>Finds the binding dictionary for each timestep of traversal of a path and the soliton graph the traversal results in.</p>
 <h2 id="returns">Returns</h2>
 <dl>
 <dt><code>list</code></dt>
 <dd>Contains bindings for each timestep.</dd>
+<dt><code>SolitonGraph</code></dt>
+<dd>The soliton graph the traversal of the soliton path results in.</dd>
 </dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def find_bindings_for_each_timestep(self):
-    &#34;&#34;&#34;Finds the binding dictionary for each timestep of traversal of a path.
+    &#34;&#34;&#34;Finds the binding dictionary for each timestep of traversal of a path and the soliton graph the traversal results in.
 
     Returns:
         list: Contains bindings for each timestep.
+        SolitonGraph: The soliton graph the traversal of the soliton path results in.
     &#34;&#34;&#34;
-    soliton_graph_copy = copy.deepcopy(self.soliton_graph) # working on a copy of the soliton graph so no unwanted changes occur
+    resulting_soliton_graph = copy.deepcopy(self.soliton_graph) # working on a deepcopy of the soliton graph so no unwanted changes occur
     bindings_list = []
-    bindings_copy = soliton_graph_copy.bindings.copy()
+    bindings_copy = resulting_soliton_graph.bindings.copy()
     bindings_list.append(bindings_copy)
     # for each node in soliton path: change binding of edge that soliton just traversed:
     for i in range(1, len(self.path)): # starting at 1 because self.path[0] has no predecessor node
-        if soliton_graph_copy.bindings[tuple(sorted((self.path[i-1], self.path[i])))] == 2:
-            soliton_graph_copy.bindings[tuple(sorted((self.path[i-1], self.path[i])))] = 1
+        if resulting_soliton_graph.bindings[tuple(sorted((self.path[i-1], self.path[i])))] == 2:
+            resulting_soliton_graph.bindings[tuple(sorted((self.path[i-1], self.path[i])))] = 1
+            resulting_soliton_graph.graph.edges[tuple(sorted((self.path[i-1], self.path[i])))][&#39;weight&#39;] = 1
         else:
-            soliton_graph_copy.bindings[tuple(sorted((self.path[i-1], self.path[i])))] = 2
+            resulting_soliton_graph.bindings[tuple(sorted((self.path[i-1], self.path[i])))] = 2
+            resulting_soliton_graph.graph.edges[tuple(sorted((self.path[i-1], self.path[i])))][&#39;weight&#39;] = 2
 
-        bindings_copy = soliton_graph_copy.bindings.copy()
+        bindings_copy = resulting_soliton_graph.bindings.copy()
         bindings_list.append(bindings_copy)
 
-    return bindings_list</code></pre>
+    return bindings_list, resulting_soliton_graph</code></pre>
 </details>
 </dd>
-<dt id="mini_soliton_automata.soliton_classes.soliton_path.SolitonPath.path_representations"><code class="name flex">
+<dt id="soliton_automata.soliton_classes.soliton_path.SolitonPath.path_representations"><code class="name flex">
 <span>def <span class="ident">path_representations</span></span>(<span>self)</span>
 </code></dt>
 <dd>
@@ -363,23 +385,24 @@ class SolitonPath:
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="mini_soliton_automata.soliton_classes" href="index.html">mini_soliton_automata.soliton_classes</a></code></li>
+<li><code><a title="soliton_automata.soliton_classes" href="index.html">soliton_automata.soliton_classes</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
 <li>
-<h4><code><a title="mini_soliton_automata.soliton_classes.soliton_path.SolitonPath" href="#mini_soliton_automata.soliton_classes.soliton_path.SolitonPath">SolitonPath</a></code></h4>
+<h4><code><a title="soliton_automata.soliton_classes.soliton_path.SolitonPath" href="#soliton_automata.soliton_classes.soliton_path.SolitonPath">SolitonPath</a></code></h4>
 <ul class="">
-<li><code><a title="mini_soliton_automata.soliton_classes.soliton_path.SolitonPath.adjacency_matrices_list" href="#mini_soliton_automata.soliton_classes.soliton_path.SolitonPath.adjacency_matrices_list">adjacency_matrices_list</a></code></li>
-<li><code><a title="mini_soliton_automata.soliton_classes.soliton_path.SolitonPath.bindings_list" href="#mini_soliton_automata.soliton_classes.soliton_path.SolitonPath.bindings_list">bindings_list</a></code></li>
-<li><code><a title="mini_soliton_automata.soliton_classes.soliton_path.SolitonPath.find_adjacency_matrices_for_each_timestep" href="#mini_soliton_automata.soliton_classes.soliton_path.SolitonPath.find_adjacency_matrices_for_each_timestep">find_adjacency_matrices_for_each_timestep</a></code></li>
-<li><code><a title="mini_soliton_automata.soliton_classes.soliton_path.SolitonPath.find_bindings_for_each_timestep" href="#mini_soliton_automata.soliton_classes.soliton_path.SolitonPath.find_bindings_for_each_timestep">find_bindings_for_each_timestep</a></code></li>
-<li><code><a title="mini_soliton_automata.soliton_classes.soliton_path.SolitonPath.path" href="#mini_soliton_automata.soliton_classes.soliton_path.SolitonPath.path">path</a></code></li>
-<li><code><a title="mini_soliton_automata.soliton_classes.soliton_path.SolitonPath.path_for_user" href="#mini_soliton_automata.soliton_classes.soliton_path.SolitonPath.path_for_user">path_for_user</a></code></li>
-<li><code><a title="mini_soliton_automata.soliton_classes.soliton_path.SolitonPath.path_labels" href="#mini_soliton_automata.soliton_classes.soliton_path.SolitonPath.path_labels">path_labels</a></code></li>
-<li><code><a title="mini_soliton_automata.soliton_classes.soliton_path.SolitonPath.path_representations" href="#mini_soliton_automata.soliton_classes.soliton_path.SolitonPath.path_representations">path_representations</a></code></li>
-<li><code><a title="mini_soliton_automata.soliton_classes.soliton_path.SolitonPath.soliton_graph" href="#mini_soliton_automata.soliton_classes.soliton_path.SolitonPath.soliton_graph">soliton_graph</a></code></li>
+<li><code><a title="soliton_automata.soliton_classes.soliton_path.SolitonPath.adjacency_matrices_list" href="#soliton_automata.soliton_classes.soliton_path.SolitonPath.adjacency_matrices_list">adjacency_matrices_list</a></code></li>
+<li><code><a title="soliton_automata.soliton_classes.soliton_path.SolitonPath.bindings_list" href="#soliton_automata.soliton_classes.soliton_path.SolitonPath.bindings_list">bindings_list</a></code></li>
+<li><code><a title="soliton_automata.soliton_classes.soliton_path.SolitonPath.find_adjacency_matrices_for_each_timestep" href="#soliton_automata.soliton_classes.soliton_path.SolitonPath.find_adjacency_matrices_for_each_timestep">find_adjacency_matrices_for_each_timestep</a></code></li>
+<li><code><a title="soliton_automata.soliton_classes.soliton_path.SolitonPath.find_bindings_for_each_timestep" href="#soliton_automata.soliton_classes.soliton_path.SolitonPath.find_bindings_for_each_timestep">find_bindings_for_each_timestep</a></code></li>
+<li><code><a title="soliton_automata.soliton_classes.soliton_path.SolitonPath.path" href="#soliton_automata.soliton_classes.soliton_path.SolitonPath.path">path</a></code></li>
+<li><code><a title="soliton_automata.soliton_classes.soliton_path.SolitonPath.path_for_user" href="#soliton_automata.soliton_classes.soliton_path.SolitonPath.path_for_user">path_for_user</a></code></li>
+<li><code><a title="soliton_automata.soliton_classes.soliton_path.SolitonPath.path_labels" href="#soliton_automata.soliton_classes.soliton_path.SolitonPath.path_labels">path_labels</a></code></li>
+<li><code><a title="soliton_automata.soliton_classes.soliton_path.SolitonPath.path_representations" href="#soliton_automata.soliton_classes.soliton_path.SolitonPath.path_representations">path_representations</a></code></li>
+<li><code><a title="soliton_automata.soliton_classes.soliton_path.SolitonPath.resulting_soliton_graph" href="#soliton_automata.soliton_classes.soliton_path.SolitonPath.resulting_soliton_graph">resulting_soliton_graph</a></code></li>
+<li><code><a title="soliton_automata.soliton_classes.soliton_path.SolitonPath.soliton_graph" href="#soliton_automata.soliton_classes.soliton_path.SolitonPath.soliton_graph">soliton_graph</a></code></li>
 </ul>
 </li>
 </ul>
