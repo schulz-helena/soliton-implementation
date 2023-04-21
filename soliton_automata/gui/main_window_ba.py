@@ -7,19 +7,21 @@ import os
 import re
 
 import networkx as nx
-import res.resources
-from gui.startscreen import Startscreen
 from PIL.ImageQt import ImageQt
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QDialog, QMainWindow, QMessageBox, QScrollArea
-from soliton_classes.multiwave_soliton_automata import MultiwaveSolitonAutomata
-from soliton_classes.soliton_automata import SolitonAutomata
-from soliton_classes.soliton_graph import SolitonGraph
-from soliton_classes.soliton_path import SolitonPath
-from soliton_classes.traversal import Traversal
-from visualisations.animation import Animation
-from visualisations.visualisation import Visualisation
+
+import soliton_automata.res.resources
+from soliton_automata.gui.startscreen import Startscreen
+from soliton_automata.soliton_classes.multiwave_soliton_automata import \
+    MultiwaveSolitonAutomata
+from soliton_automata.soliton_classes.soliton_automata import SolitonAutomata
+from soliton_automata.soliton_classes.soliton_graph import SolitonGraph
+from soliton_automata.soliton_classes.soliton_path import SolitonPath
+from soliton_automata.soliton_classes.traversal import Traversal
+from soliton_automata.visualisations.animation import Animation
+from soliton_automata.visualisations.visualisation import Visualisation
 
 
 class MainWindow(QMainWindow):
@@ -53,7 +55,7 @@ class MainWindow(QMainWindow):
         self.display_molecule = QtWidgets.QLabel(self.wid_single)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
         self.display_molecule.setSizePolicy(sizePolicy)
-        self.display_molecule.setMinimumSize(QtCore.QSize(50, 37.5))
+        self.display_molecule.setMinimumSize(QtCore.QSize(50, 37))
         startscreen = Startscreen().image
         self.qim = ImageQt(startscreen)
         self.display_molecule.setPixmap(QtGui.QPixmap.fromImage(self.qim).scaled(self.display_molecule.size(), QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation))
@@ -166,7 +168,7 @@ class MainWindow(QMainWindow):
         # "Loops" checkbox
         self.if_loops = QtWidgets.QCheckBox("Loops")
         self.if_loops.setChecked(True)
-        self.if_loops.setFixedWidth(65)
+        self.if_loops.setFixedWidth(68)
         self.minigrid5.addWidget(self.if_loops, 5, 0, 1, 1)
         # Combobox to choose a soliton path
         self.paths = QtWidgets.QComboBox(self.row5)
@@ -226,7 +228,7 @@ class MainWindow(QMainWindow):
         self.display_molecule_m = QtWidgets.QLabel(self.wid_mult)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
         self.display_molecule_m.setSizePolicy(sizePolicy)
-        self.display_molecule_m.setMinimumSize(QtCore.QSize(50, 37.5))
+        self.display_molecule_m.setMinimumSize(QtCore.QSize(50, 37))
         startscreen_m = Startscreen().image
         self.qim_m = ImageQt(startscreen_m)
         self.display_molecule_m.setPixmap(QtGui.QPixmap.fromImage(self.qim_m).scaled(self.display_molecule_m.size(), QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation))
@@ -344,7 +346,7 @@ class MainWindow(QMainWindow):
         # "Loops" Checkbox
         self.if_loops_m = QtWidgets.QCheckBox("Loops")
         self.if_loops_m.setChecked(True)
-        self.if_loops_m.setFixedWidth(65)
+        self.if_loops_m.setFixedWidth(68)
         self.minigrid6_m.addWidget(self.if_loops_m, 6, 0, 1, 1)
         # Combobox to choose a traversal
         self.traversals = QtWidgets.QComboBox(self.row6_m)

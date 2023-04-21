@@ -5,7 +5,8 @@ import io
 import matplotlib.pyplot as plt
 import networkx as nx
 from PIL import Image
-from mini_soliton_automata.soliton_classes.soliton_graph import SolitonGraph
+
+from soliton_automata.soliton_classes.soliton_graph import SolitonGraph
 
 
 class Visualisation:
