@@ -4,9 +4,8 @@ import copy
 
 import networkx as nx
 import numpy as np
-
-from soliton_automata.soliton_classes.soliton_graph import SolitonGraph
-from soliton_automata.soliton_classes.soliton_path import SolitonPath
+from soliton_classes.soliton_graph import SolitonGraph
+from soliton_classes.soliton_path import SolitonPath
 
 
 class SolitonAutomata:

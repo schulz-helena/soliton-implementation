@@ -7,21 +7,19 @@ import os
 import re
 
 import networkx as nx
+import res.resources
+from gui.startscreen import Startscreen
 from PIL.ImageQt import ImageQt
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QDialog, QMainWindow, QMessageBox, QScrollArea
-
-import soliton_automata.res.resources
-from soliton_automata.gui.startscreen import Startscreen
-from soliton_automata.soliton_classes.multiwave_soliton_automata import \
-    MultiwaveSolitonAutomata
-from soliton_automata.soliton_classes.soliton_automata import SolitonAutomata
-from soliton_automata.soliton_classes.soliton_graph import SolitonGraph
-from soliton_automata.soliton_classes.soliton_path import SolitonPath
-from soliton_automata.soliton_classes.traversal import Traversal
-from soliton_automata.visualisations.animation import Animation
-from soliton_automata.visualisations.visualisation import Visualisation
+from soliton_classes.multiwave_soliton_automata import MultiwaveSolitonAutomata
+from soliton_classes.soliton_automata import SolitonAutomata
+from soliton_classes.soliton_graph import SolitonGraph
+from soliton_classes.soliton_path import SolitonPath
+from soliton_classes.traversal import Traversal
+from visualisations.animation import Animation
+from visualisations.visualisation import Visualisation
 
 
 class MainWindow(QMainWindow):
@@ -65,6 +63,9 @@ class MainWindow(QMainWindow):
         self.change_window_button.setMinimumSize(QtCore.QSize(0, 20))
         self.gridLayout.addWidget(self.change_window_button, 0, 0, 1, 1)
         self.change_window_button.setStyleSheet("QPushButton {border-radius: 10px;}")
+        # "Mode" label
+        self.mode = QtWidgets.QLabel(self.wid_single)
+        self.gridLayout.addWidget(self.mode, 0, 1, 1, 1)
         # Row 1: -
         # Row 2:
         # "Traversal Mode" Checkbox
@@ -238,6 +239,9 @@ class MainWindow(QMainWindow):
         self.change_window_button_m.setMinimumSize(QtCore.QSize(0, 20))
         self.gridLayout_m.addWidget(self.change_window_button_m, 0, 0, 1, 1)
         self.change_window_button_m.setStyleSheet("QPushButton {border-radius: 10px;}")
+        # "Mode" label
+        self.mode_m = QtWidgets.QLabel(self.wid_mult)
+        self.gridLayout_m.addWidget(self.mode_m, 0, 1, 1, 1)
         # Row 1: -
         # Row 2:
         # "Traversal Mode" Checkbox
@@ -410,6 +414,7 @@ class MainWindow(QMainWindow):
         """
         _translate = QtCore.QCoreApplication.translate
         self.setWindowTitle(_translate("MainWindow", "Soliton Automata Software"))
+        self.mode.setText(_translate("MainWindow", "Single-Wave Mode"))
         self.mol_info.setText(_translate("MainWindow", "Info"))
         self.molecule_label.setText(_translate("MainWindow", "Molecule:"))
         self.stop_number_label.setText(_translate("MainWindow", "Stop:"))
@@ -422,6 +427,7 @@ class MainWindow(QMainWindow):
         self.show_end_result.setText(_translate("MainWindow", "Show end result"))
         self.show_animation.setText(_translate("MainWindow", "Show animation"))
 
+        self.mode_m.setText(_translate("MainWindow", "Multi-Wave Mode"))
         self.mol_info_m.setText(_translate("MainWindow", "Info"))
         self.molecule_label_m.setText(_translate("MainWindow", "Molecule:"))
         self.submit_molecule_m.setText(_translate("MainWindow", "Submit"))
@@ -1575,7 +1581,7 @@ class MainWindow(QMainWindow):
             else:
                 self.over_looppoint_count = 0 # how many times we passed the loop point
                 save_button.setStyleSheet("QPushButton {background-color: rgb(230, 230, 230); image: url(:/icons/save.svg);}")
-            pause_button.setStyleSheet("QPushButton {background-color: rgb(191, 207, 255); image: url(:/icons/pause.svg);} QPushButton::pressed {background-color : rgb(132, 145, 193);}")
+            pause_button.setStyleSheet("QPushButton {background-color: rgb(191, 207, 255); image: url(:/icons/play.svg);} QPushButton::pressed {background-color : rgb(132, 145, 193);}")
             next_button.setStyleSheet("QPushButton {background-color: rgb(191, 207, 255); image: url(:/icons/right-arrow.svg);} QPushButton::pressed {background-color : rgb(132, 145, 193);}")
             prev_button.setStyleSheet("QPushButton {background-color: rgb(191, 207, 255); image: url(:/icons/left-arrow.svg);} QPushButton::pressed {background-color : rgb(132, 145, 193)}")
         else:
@@ -1585,7 +1591,7 @@ class MainWindow(QMainWindow):
             else:
                 self.over_looppoint_count = 0
                 save_button.setStyleSheet("QPushButton {background-color: rgb(230, 230, 230); image: url(:/icons/save.svg);}")
-            pause_button.setStyleSheet("QPushButton {background-color: rgb(149, 221, 185); image: url(:/icons/pause.svg);} QPushButton::pressed {background-color : rgb(90, 159, 123);}")
+            pause_button.setStyleSheet("QPushButton {background-color: rgb(149, 221, 185); image: url(:/icons/play.svg);} QPushButton::pressed {background-color : rgb(90, 159, 123);}")
             next_button.setStyleSheet("QPushButton {background-color: rgb(149, 221, 185); image: url(:/icons/right-arrow.svg);} QPushButton::pressed {background-color : rgb(90, 159, 123);}")
             prev_button.setStyleSheet("QPushButton {background-color: rgb(149, 221, 185); image: url(:/icons/left-arrow.svg);} QPushButton::pressed {background-color : rgb(90, 159, 123)}")
 
@@ -1593,7 +1599,7 @@ class MainWindow(QMainWindow):
         self.timer = QtCore.QTimer(self)
         self.timer.timeout.connect(update_image) # timer calls `update_image` everytime event is triggered
         update_image()
-        self.timer.start(800) # triggers event every 800 millisecond
+        #self.timer.start(800) # triggers event every 800 millisecond
 
         dlg.setWindowTitle("Animation")
         dlg.setFixedSize(545, 410)
