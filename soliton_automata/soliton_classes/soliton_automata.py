@@ -263,3 +263,4 @@ class SolitonAutomata:
                 akt_path = [] # from next edge on it is a different path
 
         return imperv_paths
+    
