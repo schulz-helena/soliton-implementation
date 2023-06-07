@@ -332,9 +332,18 @@ class SolitonGraph:
         Returns:
             list: All rings with entrance node as first and last node.
         """
-        all_rings = nx.cycle_basis(self.graph)
-        for ring in all_rings:
-            entrance_node = ring[-1]
-            ring.insert(0, entrance_node) # have entrance node as first and last node in ring
+        found_rings = nx.cycle_basis(self.graph)
+        all_rings = []
+        for ring in found_rings:
+            for n, node in enumerate(ring):
+                if len(list(self.graph.neighbors(node))) == 3:
+                    entrance_index = n
+                    entrance = node
+                    break
+            before_entrance = ring[:entrance_index]
+            from_entrance_on = ring[entrance_index:]
+            ring = from_entrance_on + before_entrance
+            ring.append(entrance) # have entrance node as first and last node in ring
+            all_rings.append(ring)
         
-        return all_rings
+        return sorted(all_rings)

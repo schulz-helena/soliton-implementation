@@ -113,14 +113,18 @@ class Traversal:
                 pattern = [str(ring[1:])[1:-1], str(ring_backw[1:])[1:-1]]
                 regex = re.compile('|'.join(pattern)) # search for "forward" and "backward" ring (doesn't matter if soliton is going left or right when entering ring)
                 res = re.finditer(regex, str(path))
-                last_end_index = next(res).span()[1] # end index of first match
-                count = 1
-                for match in res:
-                    if match.span()[0] - last_end_index != 2: # if match is not directly behind last match (the two ring passages did not happen back to back)
-                        ring_passages[i][j].append(count) # append count of last found back to back ring passages, start again for current ring passage
-                        count = 1
-                    else:
-                        count += 1
-                    last_end_index = match.span()[1]
-                ring_passages[i][j].append(count)
+                if any(True for _ in res):
+                    res = re.finditer(regex, str(path))
+                    last_end_index = next(res).span()[1] # end index of first match
+                    count = 1
+                    for match in res:
+                        if match.span()[0] - last_end_index != 2: # if match is not directly behind last match (the two ring passages did not happen back to back)
+                            ring_passages[i][j].append(count) # append count of last found back to back ring passages, start again for current ring passage
+                            count = 1
+                        else:
+                            count += 1
+                        last_end_index = match.span()[1]
+                    ring_passages[i][j].append(count)
+                else:
+                    ring_passages[i][j].append(0)
         return ring_passages
