@@ -117,7 +117,7 @@ class MultiwaveSolitonAutomata:
         return bindings
 
     
-    def find_all_travs_given_burst (self, graph: nx.Graph, burst_dict: dict, t: int, s_pos_all_timesteps: list, bindings_all_timesteps: list, binds_all_timesteps: list, travs: list):
+    def find_all_travs_given_burst (self, graph: nx.Graph, burst_dict: dict, t: int, s_pos_all_timesteps: list, bindings_all_timesteps: list, binds_all_timesteps: list, poss_suc_combs_all_timesteps: list, travs: list):
         """Finds all possible traversals for a given burst by using a recursive backtracking algorithm.
 
         Args:
@@ -136,34 +136,6 @@ class MultiwaveSolitonAutomata:
         akt_bindings = bindings_all_timesteps[t-1]
         akt_binds = binds_all_timesteps[t-1]
         akt_positions = s_pos_all_timesteps[t-1]
-
-        finished = True
-        for soliton in akt_positions:
-            if (akt_positions[soliton] != burst_dict[soliton][1] and akt_positions[soliton] != -2) or s_pos_all_timesteps[t-2][soliton] == -1 or t < 2: # if not all solitons reached their end node or already left the graph
-                finished = False
-                break
-        # base case 1: if all solitons traversed the graph successfully
-        if finished == True:
-            trav = []
-            for i, pos in enumerate(s_pos_all_timesteps):
-                this_timestep = (pos, bindings_all_timesteps[i]) # for each timestep, add a tuple of the solitons' positions and the bindings
-                trav.append(this_timestep)
-            travs.append(trav) # trav = traversal of all solitons through the graph
-            return travs
-
-        # base case 2: if some solitons are stuck in an endless loop
-        count = 1
-        for k in range(0, len(bindings_all_timesteps)-1):
-            if akt_bindings == bindings_all_timesteps[k] and akt_positions == s_pos_all_timesteps[k]: # if we already had that exact graph and position map in this configuration trail
-                count += 1
-                if count == self.stop:
-                    trav = []
-                    for i, pos in enumerate(s_pos_all_timesteps):
-                        this_timestep = (pos, bindings_all_timesteps[i])
-                        trav.append(this_timestep)
-                    travs.append([trav, k+1]) # append the found trav plus the loop point/ timestep (+1, because otherwise in animation we would display the loop point twice)
-                    return travs
-        
 
         # in this timestep find possible edges for each soliton individually
         possible_edges = {} # possible edges for each soliton in this timestep
@@ -221,6 +193,34 @@ class MultiwaveSolitonAutomata:
                                 nodes_combs[j] = {}
         edges_combs = [elem for elem in edges_combs if elem != []]
         nodes_combs = [elem for elem in nodes_combs if elem]
+        print(nodes_combs)
+
+        finished = True
+        for soliton in akt_positions:
+            if (akt_positions[soliton] != burst_dict[soliton][1] and akt_positions[soliton] != -2) or s_pos_all_timesteps[t-2][soliton] == -1 or t < 2: # if not all solitons reached their end node or already left the graph
+                finished = False
+                break
+        # base case 1: if all solitons traversed the graph successfully
+        if finished == True:
+            trav = []
+            for i, pos in enumerate(s_pos_all_timesteps):
+                this_timestep = (pos, bindings_all_timesteps[i]) # for each timestep, add a tuple of the solitons' positions and the bindings
+                trav.append(this_timestep)
+            travs.append(trav) # trav = traversal of all solitons through the graph
+            return travs
+
+        # base case 2: if some solitons are stuck in an endless loop
+        count = 1
+        for k in range(0, len(bindings_all_timesteps)-1):
+            if akt_bindings == bindings_all_timesteps[k] and akt_positions == s_pos_all_timesteps[k] and nodes_combs == poss_suc_combs_all_timesteps[k] and -1 not in nodes_combs[0].values(): # and nodes_combs == poss_suc_combs_all_timesteps[k] # if we already had that exact graph, position map and successor position combinations (and all solitons already entered the graph) in this configuration trail
+                count += 1
+                if count == self.stop:
+                    trav = []
+                    for i, pos in enumerate(s_pos_all_timesteps):
+                        this_timestep = (pos, bindings_all_timesteps[i])
+                        trav.append(this_timestep)
+                    travs.append([trav, k+1]) # append the found trav plus the loop point/ timestep (+1, because otherwise in animation we would display the loop point twice)
+                    return travs
 
         # iterate over all possible combinations
         for i, comb in enumerate(nodes_combs):
@@ -233,12 +233,14 @@ class MultiwaveSolitonAutomata:
                     bindings = self.change_bindings(bindings, tuple(sorted(edge))) # change bindings
             bindings_all_timesteps.append(bindings)
             binds_all_timesteps.append(binds)
+            poss_suc_combs_all_timesteps.append(nodes_combs)
             # call function recursively: if eventually all solitons reach their end node if we go further with the decision we just made then travs is changed (new traversal added)
-            travs = self.find_all_travs_given_burst(graph, burst_dict, t, s_pos_all_timesteps, bindings_all_timesteps, binds_all_timesteps, travs)
+            travs = self.find_all_travs_given_burst(graph, burst_dict, t, s_pos_all_timesteps, bindings_all_timesteps, binds_all_timesteps, poss_suc_combs_all_timesteps, travs)
             # try different decisions next, so we need variables in the state before the last decision
             s_pos_all_timesteps.pop()
             bindings_all_timesteps.pop()
             binds_all_timesteps.pop()
+            poss_suc_combs_all_timesteps.pop()
 
         return travs # if at some point no other traversal could be added, then all possible traversals are found
 
@@ -268,9 +270,10 @@ class MultiwaveSolitonAutomata:
         # already add positions and binds for timestep 0
         s_pos_all_timesteps = [soliton_positions]
         binds_all_timesteps = [binds]
+        poss_suc_combs_all_timesteps = []
         travs = []
 
-        travs = self.find_all_travs_given_burst(graph, burst_dict, t, s_pos_all_timesteps, bindings_all_timesteps, binds_all_timesteps, travs)
+        travs = self.find_all_travs_given_burst(graph, burst_dict, t, s_pos_all_timesteps, bindings_all_timesteps, binds_all_timesteps, poss_suc_combs_all_timesteps, travs)
         traversals = self.build_traversals(travs, soliton_graph)
 
         return traversals

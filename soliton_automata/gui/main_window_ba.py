@@ -113,7 +113,7 @@ class MainWindow(QMainWindow):
         self.minigrid3_2.addWidget(self.stop_number_label, 0, 0, 1, 1)
         # Spinbox for "stop number"
         self.stop_number_spinbox = QtWidgets.QSpinBox(self.row3_2)
-        self.stop_number_spinbox.setValue(3)
+        self.stop_number_spinbox.setValue(2)
         self.stop_number_spinbox.setMinimum(2)
         self.minigrid3_2.addWidget(self.stop_number_spinbox, 0, 1, 1, 1)
         # Submit button for molecule
@@ -302,7 +302,7 @@ class MainWindow(QMainWindow):
         self.minigrid4_2_m.addWidget(self.stop_number_label_m, 0, 0, 1, 1)
         # Spinbox for "stop number"
         self.stop_number_spinbox_m = QtWidgets.QSpinBox(self.row4_2_m)
-        self.stop_number_spinbox_m.setValue(3)
+        self.stop_number_spinbox_m.setValue(2)
         self.stop_number_spinbox_m.setMinimum(2)
         self.minigrid4_2_m.addWidget(self.stop_number_spinbox_m, 0, 1, 1, 1)
         # Submit button for set of bursts
