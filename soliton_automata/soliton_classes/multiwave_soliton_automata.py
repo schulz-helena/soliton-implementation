@@ -193,7 +193,6 @@ class MultiwaveSolitonAutomata:
                                 nodes_combs[j] = {}
         edges_combs = [elem for elem in edges_combs if elem != []]
         nodes_combs = [elem for elem in nodes_combs if elem]
-        print(nodes_combs)
 
         finished = True
         for soliton in akt_positions:
