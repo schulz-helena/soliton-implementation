@@ -103,19 +103,6 @@ class MainWindow(QMainWindow):
         # Text field for molecule
         self.molecule_lineedit = QtWidgets.QLineEdit(self.row3)
         self.minigrid3.addWidget(self.molecule_lineedit, 0, 0, 1, 1)
-        # Groupbox containg "stop number" widgets
-        self.row3_2 = QtWidgets.QGroupBox()
-        self.minigrid3_2 = QtWidgets.QGridLayout(self.row3_2)
-        self.minigrid3_2.setContentsMargins(0, 0, 0, 0)
-        self.minigrid3.addWidget(self.row3_2, 0, 1, 1, 1)
-        # "Stop number" label
-        self.stop_number_label = QtWidgets.QLabel(self.row3_2)
-        self.minigrid3_2.addWidget(self.stop_number_label, 0, 0, 1, 1)
-        # Spinbox for "stop number"
-        self.stop_number_spinbox = QtWidgets.QSpinBox(self.row3_2)
-        self.stop_number_spinbox.setValue(2)
-        self.stop_number_spinbox.setMinimum(2)
-        self.minigrid3_2.addWidget(self.stop_number_spinbox, 0, 1, 1, 1)
         # Submit button for molecule
         self.submit_molecule = QtWidgets.QPushButton(self.wid_single)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Fixed)
@@ -292,19 +279,6 @@ class MainWindow(QMainWindow):
         # Text field for set of bursts
         self.set_of_bursts_lineedit = QtWidgets.QLineEdit(self.row4_m)
         self.minigrid4_m.addWidget(self.set_of_bursts_lineedit, 0, 0, 1, 1)
-        # Groupbox containg "stop number" widgets
-        self.row4_2_m = QtWidgets.QGroupBox()
-        self.minigrid4_2_m = QtWidgets.QGridLayout(self.row4_2_m)
-        self.minigrid4_2_m.setContentsMargins(0, 0, 0, 0)
-        self.minigrid4_m.addWidget(self.row4_2_m, 0, 1, 1, 1)
-        # "Stop number" label
-        self.stop_number_label_m = QtWidgets.QLabel(self.row4_2_m)
-        self.minigrid4_2_m.addWidget(self.stop_number_label_m, 0, 0, 1, 1)
-        # Spinbox for "stop number"
-        self.stop_number_spinbox_m = QtWidgets.QSpinBox(self.row4_2_m)
-        self.stop_number_spinbox_m.setValue(2)
-        self.stop_number_spinbox_m.setMinimum(2)
-        self.minigrid4_2_m.addWidget(self.stop_number_spinbox_m, 0, 1, 1, 1)
         # Submit button for set of bursts
         self.submit_set_of_bursts = QtWidgets.QPushButton(self.wid_mult)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Fixed)
@@ -390,8 +364,8 @@ class MainWindow(QMainWindow):
         self.show_end_result_m.clicked.connect(self.show_end_result_clicked_m)
         self.show_animation_m.clicked.connect(lambda:self.show_animation_clicked(self.show_animation_m))
         # Hide most widgets at the beginning (while retaining space)
-        self.hide_retain_space([self.traversal_mode_m, self.save_m, self.mol_info_m, self.set_of_bursts_label, self.row4_m, self.row4_2_m, self.submit_set_of_bursts, self.bursts_label, self.row5_m, self.submit_burst, self.traversals_label, self.traversals, self.if_loops_m, self.row6_m, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
-        self.hide_multiple([self.traversal_mode_m, self.save_m, self.mol_info_m, self.set_of_bursts_label, self.row4_m, self.row4_2_m, self.submit_set_of_bursts, self.bursts_label, self.row5_m, self.submit_burst, self.traversals_label, self.traversals, self.if_loops_m, self.row6_m, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
+        self.hide_retain_space([self.traversal_mode_m, self.save_m, self.mol_info_m, self.set_of_bursts_label, self.row4_m, self.submit_set_of_bursts, self.bursts_label, self.row5_m, self.submit_burst, self.traversals_label, self.traversals, self.if_loops_m, self.row6_m, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
+        self.hide_multiple([self.traversal_mode_m, self.save_m, self.mol_info_m, self.set_of_bursts_label, self.row4_m, self.submit_set_of_bursts, self.bursts_label, self.row5_m, self.submit_burst, self.traversals_label, self.traversals, self.if_loops_m, self.row6_m, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
         # Stylesheet:
         readme_path_m = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../styles_m.css')
         with open(readme_path_m, "r", encoding="utf-8") as fh_m:
@@ -417,7 +391,6 @@ class MainWindow(QMainWindow):
         self.mode.setText(_translate("MainWindow", "Single-Wave Mode"))
         self.mol_info.setText(_translate("MainWindow", "Info"))
         self.molecule_label.setText(_translate("MainWindow", "Molecule:"))
-        self.stop_number_label.setText(_translate("MainWindow", "Stop:"))
         self.submit_molecule.setText(_translate("MainWindow", "Submit"))
         self.exterior_nodes_label.setText(_translate("MainWindow", "Exterior nodes:"))
         self.exterior_nodes_label2.setText(_translate("MainWindow", "&"))
@@ -434,7 +407,6 @@ class MainWindow(QMainWindow):
         self.set_of_bursts_label.setText(_translate("MainWindow", "Set of bursts:"))
         self.submit_set_of_bursts.setText(_translate("MainWindow", "Submit"))
         self.bursts_label.setText(_translate("MainWindow", "Bursts:"))
-        self.stop_number_label_m.setText(_translate("MainWindow", "Stop:"))
         self.submit_burst.setText(_translate("MainWindow", "Submit"))
         self.traversals_label.setText(_translate("MainWindow", "Sets of paths:"))
         self.show_matrices_m.setText(_translate("MainWindow", "Show matrices"))
@@ -468,8 +440,6 @@ class MainWindow(QMainWindow):
             self.molecule_lineedit.setReadOnly(True)
             self.molecule_lineedit.setStyleSheet("QLineEdit {border: 2px solid rgb(230, 230, 230);border-radius: 10px;padding: 0 8px;}")
             self.molecule_label.setText("Original molecule:")
-            self.stop_number_spinbox.setReadOnly(True)
-            self.stop_number_spinbox.setStyleSheet("QSpinBox {border: 1px solid rgb(230, 230, 230);border-radius: 10px;padding-right: 15px;}")
         else:
             self.submit_molecule.clicked.connect(self.submit_molecule_clicked)
             self.submit_molecule.setStyleSheet("QPushButton {background-color: rgb(191, 207, 255);} QPushButton::pressed {background-color : rgb(132, 145, 193);}")
@@ -477,8 +447,6 @@ class MainWindow(QMainWindow):
             self.molecule_lineedit.setStyleSheet("QLineEdit {border: 2px solid rgb(191, 207, 255);border-radius: 10px;padding: 0 8px;}")
             self.molecule_label.setText("Molecule:")
             self.submit_molecule_clicked()
-            self.stop_number_spinbox.setReadOnly(False)
-            self.stop_number_spinbox.setStyleSheet("QSpinBox {border: 1px solid rgb(191, 207, 255);border-radius: 10px;padding-right: 15px;}")
 
     
     def change_mode_m(self, checkbox: QtWidgets.QCheckBox):
@@ -500,8 +468,6 @@ class MainWindow(QMainWindow):
             self.submit_set_of_bursts.setStyleSheet("QPushButton {background-color: rgb(230, 230, 230);}")
             self.set_of_bursts_lineedit.setReadOnly(True)
             self.set_of_bursts_lineedit.setStyleSheet("QLineEdit {border: 2px solid rgb(230, 230, 230);border-radius: 10px;padding: 0 8px;}")
-            self.stop_number_spinbox_m.setReadOnly(True)
-            self.stop_number_spinbox_m.setStyleSheet("QSpinBox {border: 1px solid rgb(230, 230, 230);border-radius: 10px;padding-right: 15px;}")
         else:
             self.submit_molecule_m.clicked.connect(self.submit_molecule_clicked_m)
             self.submit_molecule_m.setStyleSheet("QPushButton {background-color: rgb(149, 221, 185);} QPushButton::pressed {background-color : rgb(90, 159, 123);}")
@@ -513,8 +479,6 @@ class MainWindow(QMainWindow):
             self.submit_set_of_bursts.setStyleSheet("QPushButton {background-color: rgb(149, 221, 185);} QPushButton::pressed {background-color : rgb(90, 159, 123);}")
             self.set_of_bursts_lineedit.setReadOnly(False)
             self.set_of_bursts_lineedit.setStyleSheet("QLineEdit {border: 2px solid rgb(149, 221, 185);border-radius: 10px;padding: 0 8px;}")
-            self.stop_number_spinbox_m.setReadOnly(False)
-            self.stop_number_spinbox_m.setStyleSheet("QSpinBox {border: 1px solid rgb(149, 221, 185);border-radius: 10px;padding-right: 15px;}")
 
 
     def submit_molecule_clicked(self):
@@ -526,11 +490,10 @@ class MainWindow(QMainWindow):
         self.node_1.clear()
         self.node_2.clear()
         self.smiles_string = self.molecule_lineedit.text()
-        self.stop_number = self.stop_number_spinbox.value()
         try:
             self.my_graph = SolitonGraph(self.smiles_string)
             errors = self.my_graph.validate_soliton_graph()
-            self.automata = SolitonAutomata(self.my_graph, self.stop_number)
+            self.automata = SolitonAutomata(self.my_graph)
             self.graph_pic = Visualisation.visualize_soliton_graph(self.my_graph, self.my_graph.bindings, False, True)
             self.qim = ImageQt(self.graph_pic)
             self.display_molecule.setPixmap(QtGui.QPixmap.fromImage(self.qim).scaled(self.display_molecule.size(), QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation))
@@ -601,7 +564,7 @@ class MainWindow(QMainWindow):
             self.display_molecule_m.setPixmap(QtGui.QPixmap.fromImage(self.qim_m).scaled(self.display_molecule_m.size(), QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation))
             self.set_of_bursts_lineedit.clear()
             if errors != []:
-                self.hide_multiple([self.traversal_mode_m, self.save_m, self.mol_info_m, self.set_of_bursts_label, self.row4_m, self.row4_2_m, self.submit_set_of_bursts, self.bursts_label, self.row5_m, self.submit_burst, self.traversals_label, self.traversals, self.if_loops_m, self.row6_m, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
+                self.hide_multiple([self.traversal_mode_m, self.save_m, self.mol_info_m, self.set_of_bursts_label, self.row4_m, self.submit_set_of_bursts, self.bursts_label, self.row5_m, self.submit_burst, self.traversals_label, self.traversals, self.if_loops_m, self.row6_m, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
                 msg = QMessageBox(self.wid_mult)
                 msg.setStyleSheet(" QPushButton{ height: 32px; width: 130px}")
                 msg.setWindowTitle("No soliton graph")
@@ -618,7 +581,7 @@ class MainWindow(QMainWindow):
                 msg.setDetailedText(details)
                 x = msg.exec_() # show messagebox
             elif self.my_graph_m.exterior_nodes_name_collision() == True:
-                self.hide_multiple([self.traversal_mode_m, self.save_m, self.mol_info_m, self.set_of_bursts_label, self.row4_m, self.row4_2_m, self.submit_set_of_bursts, self.bursts_label, self.row5_m, self.submit_burst, self.traversals_label, self.traversals, self.if_loops_m, self.row6_m, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
+                self.hide_multiple([self.traversal_mode_m, self.save_m, self.mol_info_m, self.set_of_bursts_label, self.row4_m, self.submit_set_of_bursts, self.bursts_label, self.row5_m, self.submit_burst, self.traversals_label, self.traversals, self.if_loops_m, self.row6_m, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
                 msg = QMessageBox(self.wid_mult)
                 msg.setStyleSheet(" QPushButton{ height: 32px; width: 130px}")
                 msg.setWindowTitle("Name collision")
@@ -627,10 +590,10 @@ class MainWindow(QMainWindow):
                 msg.setStandardButtons(QMessageBox.Retry)
                 x = msg.exec_()
             else:
-                self.show_multiple([self.traversal_mode_m, self.save_m, self.set_of_bursts_label, self.row4_m, self.row4_2_m, self.submit_set_of_bursts])
+                self.show_multiple([self.traversal_mode_m, self.save_m, self.set_of_bursts_label, self.row4_m, self.submit_set_of_bursts])
                 self.hide_multiple([self.mol_info_m, self.bursts_label, self.row5_m, self.submit_burst, self.traversals_label, self.traversals, self.if_loops_m, self.row6_m, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
         except:
-            self.hide_multiple([self.traversal_mode_m, self.save_m, self.mol_info_m, self.set_of_bursts_label, self.row4_m, self.row4_2_m, self.submit_set_of_bursts, self.mol_info_m, self.bursts_label, self.row5_m, self.submit_burst, self.traversals_label, self.traversals, self.if_loops_m, self.row6_m, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
+            self.hide_multiple([self.traversal_mode_m, self.save_m, self.mol_info_m, self.set_of_bursts_label, self.row4_m, self.submit_set_of_bursts, self.mol_info_m, self.bursts_label, self.row5_m, self.submit_burst, self.traversals_label, self.traversals, self.if_loops_m, self.row6_m, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
             msg = QMessageBox(self.wid_mult)
             msg.setStyleSheet(" QPushButton{ height: 32px; width: 130px}")
             msg.setWindowTitle("Incorrect input")
@@ -667,8 +630,7 @@ class MainWindow(QMainWindow):
                 file.write(txt_text)
                 file.close()
         
-        txt_text = f"Soliton graph: {self.smiles_string} \n"
-        txt_text = txt_text + f"Stop number: {self.stop_number} \n\n"
+        txt_text = f"Soliton graph: {self.smiles_string} \n\n"
         dlg = QDialog(self.wid_single)
         grid = QtWidgets.QGridLayout(dlg)
         label_det = QtWidgets.QLabel(dlg)
@@ -743,8 +705,7 @@ class MainWindow(QMainWindow):
         grid = QtWidgets.QGridLayout(dlg)
         label_det = QtWidgets.QLabel(dlg)
         txt_text = f"Soliton graph: {self.smiles_string_m} \n"
-        txt_text = txt_text + f"Set of bursts: {self.bursts} \n"
-        txt_text = txt_text + f"Stop number: {self.stop_number_m} \n\n"
+        txt_text = txt_text + f"Set of bursts: {self.bursts} \n\n"
         label_det.setText("Deterministic:")
         txt_text = txt_text + f"Deterministic: "
         grid.addWidget(label_det, 0, 0, 1, 1)
@@ -821,9 +782,8 @@ class MainWindow(QMainWindow):
         bursts = self.set_of_bursts_lineedit.text()
         self.bursts = bursts
         self.burst.clear()
-        self.stop_number_m = self.stop_number_spinbox_m.value()
         try:
-            self.multi_automata = MultiwaveSolitonAutomata(self.my_graph_m, bursts, self.stop_number_m)
+            self.multi_automata = MultiwaveSolitonAutomata(self.my_graph_m, bursts)
             bursts = bursts.split(";")
             for burst in bursts:
                 burst = re.sub(r"[{}]+", "", burst)

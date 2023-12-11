@@ -12,13 +12,11 @@ class SolitonAutomata:
     """Representation of a soliton automata, which finds all soliton paths between all pairs of exterior nodes.
     """
 
-    def __init__(self, soliton_graph: SolitonGraph, stop: int):
+    def __init__(self, soliton_graph: SolitonGraph):
         """Initializes a `SolitonAutomata` object by using a soliton graph and a stop number.
         """
         self.soliton_graph: SolitonGraph = soliton_graph
         """Soliton graph the automata is based on."""
-        self.stop = stop
-        """After how many equal soliton graph + soliton position to stop searching for traversals on current path in search tree."""
         self.deterministic: bool
         """Whether the soliton automata is deterministic."""
         self.strongly_deterministic: bool
@@ -121,7 +119,7 @@ class SolitonAutomata:
         for k in range(0, len(bindings_all_timesteps)-1):
             if bindings == bindings_all_timesteps[k] and akt == path[k] and possible_suc_nodes == poss_sucs_all_timesteps[k]: # and possible_suc_nodes == poss_sucs_all_timesteps[k] # if we already had that exact graph, position map and successor positions in this configuration trail
                 count += 1
-                if count == self.stop:
+                if count == 2:
                     paths.append([path, k+1]) # append the found trav plus the loop point/ timestep (+1, because otherwise in animation we would display the loop point twice)
                     return paths
 

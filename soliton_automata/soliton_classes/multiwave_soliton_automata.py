@@ -13,15 +13,13 @@ class MultiwaveSolitonAutomata:
     """Representation of a multiwave soliton automata, which finds all traversals for a burst.
     """
 
-    def __init__(self, soliton_graph: SolitonGraph, bursts: str, stop: int):
+    def __init__(self, soliton_graph: SolitonGraph, bursts: str):
         """Initializes a `MultiwaveSolitonAutomata` object by using a soliton graph, a burst and a stop number.
         """
         self.soliton_graph: SolitonGraph = soliton_graph
         """Soliton graph the automata is based on."""
         self.bursts = bursts
         """The set of input burst."""
-        self.stop = stop
-        """After how many equal soliton graph + soliton positions to stop searching for traversals on current path in search tree."""
         self.bursts_dicts: list = self.build_bursts_dicts()
         """List of the bursts as dictionaries (soliton number as key and a list containing exterior nodes and entry time as value)."""
         self.deterministic: bool
@@ -213,7 +211,7 @@ class MultiwaveSolitonAutomata:
         for k in range(0, len(bindings_all_timesteps)-1):
             if akt_bindings == bindings_all_timesteps[k] and akt_positions == s_pos_all_timesteps[k] and nodes_combs == poss_suc_combs_all_timesteps[k] and -1 not in nodes_combs[0].values(): # and nodes_combs == poss_suc_combs_all_timesteps[k] # if we already had that exact graph, position map and successor position combinations (and all solitons already entered the graph) in this configuration trail
                 count += 1
-                if count == self.stop:
+                if count == 2:
                     trav = []
                     for i, pos in enumerate(s_pos_all_timesteps):
                         this_timestep = (pos, bindings_all_timesteps[i])
