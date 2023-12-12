@@ -4,22 +4,19 @@ import copy
 
 import networkx as nx
 import numpy as np
-
-from soliton_automata.soliton_classes.soliton_graph import SolitonGraph
-from soliton_automata.soliton_classes.soliton_path import SolitonPath
+from soliton_classes.soliton_graph import SolitonGraph
+from soliton_classes.soliton_path import SolitonPath
 
 
 class SolitonAutomata:
     """Representation of a soliton automata, which finds all soliton paths between all pairs of exterior nodes.
     """
 
-    def __init__(self, soliton_graph: SolitonGraph, stop: int):
+    def __init__(self, soliton_graph: SolitonGraph):
         """Initializes a `SolitonAutomata` object by using a soliton graph and a stop number.
         """
         self.soliton_graph: SolitonGraph = soliton_graph
         """Soliton graph the automata is based on."""
-        self.stop = stop
-        """After how many equal soliton graph + soliton position to stop searching for traversals on current path in search tree."""
         self.deterministic: bool
         """Whether the soliton automata is deterministic."""
         self.strongly_deterministic: bool
@@ -93,7 +90,7 @@ class SolitonAutomata:
         return akt_copy, path_copy, bindings_copy, bind_copy
 
     
-    def find_all_paths_given_nodes(self, graph: nx.Graph, bindings: dict, end: int, path: list, akt: int, bind: int, paths: list, bindings_all_timesteps: list):
+    def find_all_paths_given_nodes(self, graph: nx.Graph, bindings: dict, end: int, path: list, akt: int, bind: int, paths: list, bindings_all_timesteps: list, poss_sucs_all_timesteps: list):
         """Finds all possible soliton paths between two given exterior nodes by using a recursive backtracking algorithm.
             A path can only be a soliton path if the edges traversed by the soliton have alternating binding types (1,2,1,2,...).
 
@@ -106,10 +103,12 @@ class SolitonAutomata:
             bind (int): Binding type of the last edge that was traversed.
             paths (list): All currently found paths.
             bindings_all_timesteps (list): Binding types of all edges in the graph for all past timesteps.
+            poss_sucs_all_timesteps (list): Possible successor nodes for all past timesteps.
 
         Returns:
             list: All found paths (is empty if no path exists).
         """
+        possible_suc_nodes = [node for node in list(nx.neighbors(graph, akt)) if node != path[len(path)-2] and bindings[tuple(sorted((akt, node)))] != bind and (node == end or node not in self.soliton_graph.exterior_nodes)] # soliton is not allowed to make a direct turnaround and edge to next node has to have the right binding type
         # base case 1: if end node is reached then finished path to paths
         if end == akt and len(path) >= 3:
             paths.append(path)
@@ -118,30 +117,31 @@ class SolitonAutomata:
         # base case 2: if soliton is stuck in endless loop
         count = 1
         for k in range(0, len(bindings_all_timesteps)-1):
-            if bindings == bindings_all_timesteps[k] and akt == path[k]: # if we already had that exact graph and position map in this configuration trail
+            if bindings == bindings_all_timesteps[k] and akt == path[k] and possible_suc_nodes == poss_sucs_all_timesteps[k]: # and possible_suc_nodes == poss_sucs_all_timesteps[k] # if we already had that exact graph, position map and successor positions in this configuration trail
                 count += 1
-                if count == self.stop:
+                if count == 2:
                     paths.append([path, k+1]) # append the found trav plus the loop point/ timestep (+1, because otherwise in animation we would display the loop point twice)
                     return paths
 
         # iterate over all nodes that are adjacent to latest node in path
-        for node in list(nx.neighbors(graph, akt)):
-            if node != path[len(path)-2] and bindings[tuple(sorted((akt, node)))] != bind and (node == end or node not in self.soliton_graph.exterior_nodes): # soliton is not allowed to make a direct turnaround and edge to next node has to have the right binding type
-                akt_copy, path_copy, bindings_copy, bind_copy = self.build_copies(akt, path, bindings, bind) # make copies so we can backtrack later
-                path.append(node)
-                bind = bindings[tuple(sorted((akt, node)))] # change bind to binding type of edge that was just traversed
-                bindings = self.change_bindings(bindings, tuple(sorted((akt, node))))
-                bindings_copy2 = copy.deepcopy(bindings)
-                akt = node
-                bindings_all_timesteps.append(bindings_copy2)
-                # call function recursively: if we can find a path if we go further with the decision we just made (with the node we just added) then paths is changed (new path added)
-                paths = self.find_all_paths_given_nodes(graph, bindings, end, path, akt, bind, paths, bindings_all_timesteps)
-                # try different decisions (nodes) next, so we need variables in the state before the last decision
-                akt = akt_copy
-                path = path_copy
-                bindings = bindings_copy
-                bind = bind_copy
-                bindings_all_timesteps.pop()
+        for node in possible_suc_nodes:
+            akt_copy, path_copy, bindings_copy, bind_copy = self.build_copies(akt, path, bindings, bind) # make copies so we can backtrack later
+            path.append(node)
+            bind = bindings[tuple(sorted((akt, node)))] # change bind to binding type of edge that was just traversed
+            bindings = self.change_bindings(bindings, tuple(sorted((akt, node))))
+            bindings_copy2 = copy.deepcopy(bindings)
+            akt = node
+            bindings_all_timesteps.append(bindings_copy2)
+            poss_sucs_all_timesteps.append(possible_suc_nodes)
+            # call function recursively: if we can find a path if we go further with the decision we just made (with the node we just added) then paths is changed (new path added)
+            paths = self.find_all_paths_given_nodes(graph, bindings, end, path, akt, bind, paths, bindings_all_timesteps, poss_sucs_all_timesteps)
+            # try different decisions (nodes) next, so we need variables in the state before the last decision
+            akt = akt_copy
+            path = path_copy
+            bindings = bindings_copy
+            bind = bind_copy
+            bindings_all_timesteps.pop()
+            poss_sucs_all_timesteps.pop()
 
         return paths # if at some point no new node could be added, then all possible paths are found
     
@@ -165,7 +165,8 @@ class SolitonAutomata:
         akt = start
         bind = 0
         bindings_all_timesteps = [soliton_graph_copy.bindings] # already add bindings for timestep 0
-        paths = self.find_all_paths_given_nodes(graph, bindings, end, path, akt, bind, paths, bindings_all_timesteps)
+        poss_sucs_all_timesteps = []
+        paths = self.find_all_paths_given_nodes(graph, bindings, end, path, akt, bind, paths, bindings_all_timesteps, poss_sucs_all_timesteps)
         soliton_paths = self.build_soliton_paths(paths, soliton_graph)
         
         return soliton_paths
@@ -264,3 +265,4 @@ class SolitonAutomata:
                 akt_path = [] # from next edge on it is a different path
 
         return imperv_paths
+    

@@ -34,6 +34,8 @@ class SolitonGraph:
         """Node labels (node id as key, node label as value)."""
         self.way: str = user_input
         """Way that led to the soliton graph (consists of user input of initial soliton graph of a soliton automata and soliton paths)."""
+        self.rings: list = self.find_rings()
+        """All rings with entrance node as first and last node."""
 
 
     def set_bindings(self, bindings: dict):
@@ -322,3 +324,26 @@ class SolitonGraph:
             errors.append("You must have at least one exterior node")
 
         return errors
+
+
+    def find_rings(self):
+        """Finds all rings in the soliton graph.
+
+        Returns:
+            list: All rings with entrance node as first and last node.
+        """
+        found_rings = nx.cycle_basis(self.graph)
+        all_rings = []
+        for ring in found_rings:
+            for n, node in enumerate(ring):
+                if len(list(self.graph.neighbors(node))) == 3:
+                    entrance_index = n
+                    entrance = node
+                    break
+            before_entrance = ring[:entrance_index]
+            from_entrance_on = ring[entrance_index:]
+            ring = from_entrance_on + before_entrance
+            ring.append(entrance) # have entrance node as first and last node in ring
+            all_rings.append(ring)
+        
+        return sorted(all_rings)

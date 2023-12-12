@@ -3,3 +3,4 @@ networkx>=2.7.1
 pysmiles>=1.0.1
 matplotlib>=3.5.1
 Pyqt5>=5.15.4
+pillow==9.0.1
