@@ -21,10 +21,12 @@ class SolitonAutomata:
         """Whether the soliton automata is deterministic."""
         self.strongly_deterministic: bool
         """Whether the soliton automata is strongly deterministic."""
+        self.degree_of_nondeterminism: int
+        """The degree of non-determinism of the soliton automaton"""
         self.states_plus_soliton_paths: dict
         """All states of the soliton automata plus all soliton paths that can be found in each state
         (Id/ string of the states adjacency matrix as key and state and soliton paths as values)."""
-        self.deterministic, self.strongly_deterministic, self.states_plus_soliton_paths = self.all_paths_and_determinism()
+        self.deterministic, self.strongly_deterministic, self.degree_of_nondeterminism, self.states_plus_soliton_paths = self.all_paths_and_determinism()
 
 
     def build_soliton_paths(self, paths: list, soliton_graph: SolitonGraph):
@@ -117,7 +119,7 @@ class SolitonAutomata:
         # base case 2: if soliton is stuck in endless loop
         count = 1
         for k in range(0, len(bindings_all_timesteps)-1):
-            if bindings == bindings_all_timesteps[k] and akt == path[k] and possible_suc_nodes == poss_sucs_all_timesteps[k]: # and possible_suc_nodes == poss_sucs_all_timesteps[k] # if we already had that exact graph, position map and successor positions in this configuration trail
+            if bindings == bindings_all_timesteps[k] and akt == path[k] and possible_suc_nodes == poss_sucs_all_timesteps[k]: # if we already had that exact graph, position map and successor positions in this configuration trail
                 count += 1
                 if count == 2:
                     paths.append([path, k+1]) # append the found trav plus the loop point/ timestep (+1, because otherwise in animation we would display the loop point twice)
@@ -187,6 +189,8 @@ class SolitonAutomata:
         states_plus_soliton_paths = {self.matrix_to_string(initial_matrix): [self.soliton_graph, []]} # stores all states plus all soliton paths that can be found in that state
         deterministic = True
         strongly_deterministic = True
+        reachability_deterministic = True
+        degree_of_nondeterminism = 1
         for key in self.soliton_graph.exterior_nodes:
             ext_nodes.append(key)
         for state in states: # for all states/ soliton graphs of the automata
@@ -194,6 +198,7 @@ class SolitonAutomata:
             all_paths = []
             for i in range(0, len(ext_nodes)):
                 for j in range(0, len(ext_nodes)): # loop over all pairs of exterior nodes 
+                    suc_states_matrix_ids = []
                     paths = self.call_find_all_paths_given_nodes(ext_nodes[i], ext_nodes[j], state) # find soliton paths with all pairs of exterior nodes
                     loops_num = 0
                     first_real_path = -1
@@ -207,14 +212,19 @@ class SolitonAutomata:
                             if resulting_matrix_id not in states_plus_soliton_paths: # if we found a new state
                                 states_plus_soliton_paths[resulting_matrix_id] = [path.resulting_soliton_graph, []] # add it to the dictionary
                                 states.append(path.resulting_soliton_graph)
+                            if resulting_matrix_id not in suc_states_matrix_ids: # if we found a new state
+                                suc_states_matrix_ids.append(resulting_matrix_id)
+                                if len(suc_states_matrix_ids) > degree_of_nondeterminism:
+                                    degree_of_nondeterminism = len(suc_states_matrix_ids)
                             if np.array_equal(resulting_matrix, paths[first_real_path].adjacency_matrices_list[len(paths[first_real_path].adjacency_matrices_list)-1]) == False:
                                 deterministic = False # two or more different soliton graphs have emerged although the same pair of exterior nodes was used
-                        else: loops_num += 1
+                        else:
+                            loops_num += 1
                     if (len(paths) - loops_num) > 1:
                         strongly_deterministic = False # more than one soliton path was found between one pair of exterior nodes
             states_plus_soliton_paths[state_matrix_id][1] = all_paths # add all found soliton paths in this state
 
-        return deterministic, strongly_deterministic, states_plus_soliton_paths
+        return deterministic, strongly_deterministic, degree_of_nondeterminism, states_plus_soliton_paths
 
 
     def matrix_to_string(self, matrix: np.ndarray):

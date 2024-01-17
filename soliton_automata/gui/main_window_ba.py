@@ -657,14 +657,33 @@ class MainWindow(QMainWindow):
             strong_det_bool.setText("No")
             txt_text = txt_text + f"No \n"
         grid.addWidget(strong_det_bool, 1, 1, 1, 1)
+
+        label_reach_det = QtWidgets.QLabel(dlg)
+        label_reach_det.setText("Reachability-deterministic:")
+        txt_text = txt_text + f"Reachability-deterministic: "
+        grid.addWidget(label_reach_det, 2, 0, 1, 1)
+        reach_det_bool = QtWidgets.QLabel(dlg)
+        reach_det_bool.setText("X")
+        txt_text = txt_text + f"X \n"
+        grid.addWidget(reach_det_bool, 2, 1, 1, 1)
+
+        label_degree = QtWidgets.QLabel(dlg)
+        label_degree.setText("Degree of non-determinism:")
+        txt_text = txt_text + f"Degree of non-determinism: "
+        grid.addWidget(label_degree, 3, 0, 1, 1)
+        degree = QtWidgets.QLabel(dlg)
+        degree.setText(str(self.automata.degree_of_nondeterminism))
+        txt_text = txt_text + f"{self.automata.degree_of_nondeterminism} \n"
+        grid.addWidget(degree, 3, 1, 1, 1)
+
         label_imp_paths = QtWidgets.QLabel(dlg)
         label_imp_paths.setText("Impervious path(s):")
         txt_text = txt_text + f"Impervious path(s): "
-        grid.addWidget(label_imp_paths, 2, 0, 1, 1, alignment = QtCore.Qt.AlignTop)
+        grid.addWidget(label_imp_paths, 4, 0, 1, 1, alignment = QtCore.Qt.AlignTop)
         save_button = QtWidgets.QPushButton(dlg)
         save_button.setStyleSheet("QPushButton {background-color: rgb(191, 207, 255); image: url(:/icons/save.svg);} QPushButton::pressed {background-color : rgb(132, 145, 193);}")
         save_button.setMinimumSize(QtCore.QSize(0, 32))
-        grid.addWidget(save_button, 3, 1, 1, 1)
+        grid.addWidget(save_button, 5, 1, 1, 1)
         save_button.clicked.connect(save_info)
         group = QtWidgets.QGroupBox()
         layout = QtWidgets.QGridLayout(group)
@@ -678,7 +697,7 @@ class MainWindow(QMainWindow):
             txt_text = txt_text + f"{path}"
             if i != len(impervs)-1:
                 txt_text = txt_text + f", "
-        grid.addWidget(group, 2, 1, 1, 1, alignment = QtCore.Qt.AlignTop)
+        grid.addWidget(group, 4, 1, 1, 1, alignment = QtCore.Qt.AlignTop)
         dlg.setWindowTitle("Info")
         dlg.exec_()
 
@@ -729,10 +748,29 @@ class MainWindow(QMainWindow):
             strong_det_bool.setText("No")
             txt_text = txt_text + f"No \n"
         grid.addWidget(strong_det_bool, 1, 1, 1, 1)
+
+        label_reach_det = QtWidgets.QLabel(dlg)
+        label_reach_det.setText("Reachability-deterministic:")
+        txt_text = txt_text + f"Reachability-deterministic: "
+        grid.addWidget(label_reach_det, 2, 0, 1, 1)
+        reach_det_bool = QtWidgets.QLabel(dlg)
+        reach_det_bool.setText("X")
+        txt_text = txt_text + f"X \n"
+        grid.addWidget(reach_det_bool, 2, 1, 1, 1)
+
+        label_degree = QtWidgets.QLabel(dlg)
+        label_degree.setText("Degree of non-determinism:")
+        txt_text = txt_text + f"Degree of non-determinism: "
+        grid.addWidget(label_degree, 3, 0, 1, 1)
+        degree = QtWidgets.QLabel(dlg)
+        degree.setText(str(self.multi_automata.degree_of_nondeterminism))
+        txt_text = txt_text + f"{self.multi_automata.degree_of_nondeterminism} \n"
+        grid.addWidget(degree, 3, 1, 1, 1)
+
         save_button = QtWidgets.QPushButton(dlg)
         save_button.setStyleSheet("QPushButton {background-color: rgb(149, 221, 185); image: url(:/icons/save.svg);} QPushButton::pressed {background-color : rgb(90, 159, 123);}")
         save_button.setMinimumSize(QtCore.QSize(0, 32))
-        grid.addWidget(save_button, 3, 1, 1, 1)
+        grid.addWidget(save_button, 4, 1, 1, 1)
         save_button.clicked.connect(save_info)
         dlg.setWindowTitle("Info")
         dlg.exec_()
