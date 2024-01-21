@@ -12,7 +12,7 @@ from gui.startscreen import Startscreen
 from PIL.ImageQt import ImageQt
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QDialog, QMainWindow, QMessageBox, QScrollArea
+from PyQt5.QtWidgets import QDialog, QMainWindow, QMessageBox, QScrollArea, QFrame
 from soliton_classes.multiwave_soliton_automata import MultiwaveSolitonAutomata
 from soliton_classes.soliton_automata import SolitonAutomata
 from soliton_classes.soliton_graph import SolitonGraph
@@ -20,6 +20,19 @@ from soliton_classes.soliton_path import SolitonPath
 from soliton_classes.traversal import Traversal
 from visualisations.animation import Animation
 from visualisations.visualisation import Visualisation
+
+class QHLine(QFrame):
+    def __init__(self, mode: str):
+        super(QHLine, self).__init__()
+        self.setMinimumWidth(1)
+        self.setFixedHeight(1)
+        self.setFrameShape(QFrame.HLine)
+        self.setFrameShadow(QFrame.Sunken)
+        self.setSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Minimum)
+        if mode == "single":
+            self.setStyleSheet("background-color: rgb(191, 207, 255); color: rgb(191, 207, 255);")
+        elif mode == "multi":
+            self.setStyleSheet("background-color: rgb(149, 221, 185); color: rgb(149, 221, 185);")
 
 
 class MainWindow(QMainWindow):
@@ -114,42 +127,48 @@ class MainWindow(QMainWindow):
         self.submit_molecule.setSizePolicy(sizePolicy)
         self.submit_molecule.setMinimumSize(QtCore.QSize(0, 32))
         self.gridLayout.addWidget(self.submit_molecule, 3, 3, 1, 1)
+        # Parting line
+        self.parting_line1 = QHLine("single")
+        self.gridLayout.addWidget(self.parting_line1, 4, 0, 1, 4)
         # Row 4: 
         # "Exterior nodes" label
         self.exterior_nodes_label = QtWidgets.QLabel(self.wid_single)
-        self.gridLayout.addWidget(self.exterior_nodes_label, 4, 0, 1, 1)
+        self.gridLayout.addWidget(self.exterior_nodes_label, 5, 0, 1, 1)
         # Groupbox containg middle elements of row 4
         self.row4 = QtWidgets.QGroupBox()
         self.minigrid4 = QtWidgets.QGridLayout(self.row4)
         self.minigrid4.setContentsMargins(0, 0, 0, 0)
-        self.gridLayout.addWidget(self.row4, 4, 1, 1, 2)
+        self.gridLayout.addWidget(self.row4, 5, 1, 1, 2)
         # "All" Checkbox
         self.all_exterior_nodes = QtWidgets.QCheckBox("All")
         self.all_exterior_nodes.setChecked(False)
-        self.minigrid4.addWidget(self.all_exterior_nodes, 4, 0, 1, 1)
+        self.minigrid4.addWidget(self.all_exterior_nodes, 5, 0, 1, 1)
         # Combobox to choose first exterior node
         self.node_1 = QtWidgets.QComboBox(self.row4)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
         self.node_1.setSizePolicy(sizePolicy)
-        self.minigrid4.addWidget(self.node_1, 4, 1, 1, 1)
+        self.minigrid4.addWidget(self.node_1, 5, 1, 1, 1)
         # "&" label
         self.exterior_nodes_label2 = QtWidgets.QLabel(self.row4)
-        self.minigrid4.addWidget(self.exterior_nodes_label2, 4, 2, 1, 1)
+        self.minigrid4.addWidget(self.exterior_nodes_label2, 5, 2, 1, 1)
         # Combobox to choose second exterior node
         self.node_2 = QtWidgets.QComboBox(self.row4)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
         self.node_2.setSizePolicy(sizePolicy)
-        self.minigrid4.addWidget(self.node_2, 4, 3, 1, 1)
+        self.minigrid4.addWidget(self.node_2, 5, 3, 1, 1)
         # Submit button for exterior nodes
         self.submit_exterior_nodes = QtWidgets.QPushButton(self.wid_single)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Fixed)
         self.submit_exterior_nodes.setSizePolicy(sizePolicy)
         self.submit_exterior_nodes.setMinimumSize(QtCore.QSize(0, 32))
-        self.gridLayout.addWidget(self.submit_exterior_nodes, 4, 3, 1, 1)
+        self.gridLayout.addWidget(self.submit_exterior_nodes, 5, 3, 1, 1)
+        # Parting line
+        self.parting_line2 = QHLine("single")
+        self.gridLayout.addWidget(self.parting_line2, 6, 0, 1, 4)
         # Row 5:
         # "Soliton paths" label
         self.soliton_paths_label = QtWidgets.QLabel(self.wid_single)
-        self.gridLayout.addWidget(self.soliton_paths_label, 5, 0, 1, 1)
+        self.gridLayout.addWidget(self.soliton_paths_label, 7, 0, 1, 1)
         # Groupbox containg middle elements of row 5
         self.row5 = QtWidgets.QGroupBox()
         self.minigrid5 = QtWidgets.QGridLayout(self.row5)
@@ -157,29 +176,29 @@ class MainWindow(QMainWindow):
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
         self.row5.setSizePolicy(sizePolicy)
         self.row5.setMinimumSize(QtCore.QSize(0, 32))
-        self.gridLayout.addWidget(self.row5, 5, 1, 1, 3)
+        self.gridLayout.addWidget(self.row5, 7, 1, 1, 3)
         # Combobox to choose a soliton path
         self.paths = QtWidgets.QComboBox(self.row5)
-        self.minigrid5.addWidget(self.paths, 5, 1, 1, 2)
+        self.minigrid5.addWidget(self.paths, 7, 1, 1, 2)
         # Row 6:
         # "Show matrices" button
         self.show_matrices = QtWidgets.QPushButton(self.wid_single)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
         self.show_matrices.setSizePolicy(sizePolicy)
         self.show_matrices.setMinimumSize(QtCore.QSize(0, 32))
-        self.gridLayout.addWidget(self.show_matrices, 6, 1, 1, 1)
+        self.gridLayout.addWidget(self.show_matrices, 8, 1, 1, 1)
         # "Show end result" button
         self.show_end_result = QtWidgets.QPushButton(self.wid_single)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
         self.show_end_result.setSizePolicy(sizePolicy)
         self.show_end_result.setMinimumSize(QtCore.QSize(0, 32))
-        self.gridLayout.addWidget(self.show_end_result, 6, 2, 1, 1)
+        self.gridLayout.addWidget(self.show_end_result, 8, 2, 1, 1)
         # "Show animation" button
         self.show_animation = QtWidgets.QPushButton(self.wid_single)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
         self.show_animation.setSizePolicy(sizePolicy)
         self.show_animation.setMinimumSize(QtCore.QSize(0, 32))
-        self.gridLayout.addWidget(self.show_animation, 6, 3, 1, 1)
+        self.gridLayout.addWidget(self.show_animation, 8, 3, 1, 1)
         # Menubar:
         self.menubar = QtWidgets.QMenuBar(self)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 564, 24))
@@ -199,8 +218,8 @@ class MainWindow(QMainWindow):
         self.show_end_result.clicked.connect(self.show_end_result_clicked)
         self.show_animation.clicked.connect(lambda:self.show_animation_clicked(self.show_animation))
         # Hide most widgets at the beginning (while retaining space) 
-        self.hide_retain_space([self.traversal_mode, self.row2, self.exterior_nodes_label, self.row4, self.submit_exterior_nodes, self.soliton_paths_label, self.paths, self.row5, self.show_matrices, self.show_end_result, self.show_animation])
-        self.hide_multiple([self.traversal_mode, self.row2, self.exterior_nodes_label, self.row4, self.submit_exterior_nodes, self.soliton_paths_label, self.paths, self.row5, self.show_matrices, self.show_end_result, self.show_animation])
+        self.hide_retain_space([self.traversal_mode, self.row2, self.parting_line1, self.exterior_nodes_label, self.row4, self.submit_exterior_nodes, self.parting_line2, self.soliton_paths_label, self.paths, self.row5, self.show_matrices, self.show_end_result, self.show_animation])
+        self.hide_multiple([self.traversal_mode, self.row2, self.parting_line1, self.exterior_nodes_label, self.row4, self.submit_exterior_nodes, self.parting_line2, self.soliton_paths_label, self.paths, self.row5, self.show_matrices, self.show_end_result, self.show_animation])
         # Stylesheet:
         readme_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../styles.css')
         with open(readme_path, "r", encoding="utf-8") as fh:
@@ -274,15 +293,18 @@ class MainWindow(QMainWindow):
         self.submit_molecule_m.setSizePolicy(sizePolicy)
         self.submit_molecule_m.setMinimumSize(QtCore.QSize(0, 32))
         self.gridLayout_m.addWidget(self.submit_molecule_m, 3, 3, 1, 1)
+        # Parting line
+        self.parting_line1_m = QHLine("multi")
+        self.gridLayout_m.addWidget(self.parting_line1_m, 4, 0, 1, 4)
         # Row 4: 
         # "Set of bursts" label
         self.set_of_bursts_label = QtWidgets.QLabel(self.wid_mult)
-        self.gridLayout_m.addWidget(self.set_of_bursts_label, 4, 0, 1, 1)
+        self.gridLayout_m.addWidget(self.set_of_bursts_label, 5, 0, 1, 1)
         # Groupbox containg middle two elements of row 4
         self.row4_m = QtWidgets.QGroupBox()
         self.minigrid4_m = QtWidgets.QGridLayout(self.row4_m)
         self.minigrid4_m.setContentsMargins(0, 0, 0, 0)
-        self.gridLayout_m.addWidget(self.row4_m, 4, 1, 1, 2)
+        self.gridLayout_m.addWidget(self.row4_m, 5, 1, 1, 2)
         # Text field for set of bursts
         self.set_of_bursts_lineedit = QtWidgets.QLineEdit(self.row4_m)
         self.minigrid4_m.addWidget(self.set_of_bursts_lineedit, 0, 0, 1, 1)
@@ -291,35 +313,41 @@ class MainWindow(QMainWindow):
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Fixed)
         self.submit_set_of_bursts.setSizePolicy(sizePolicy)
         self.submit_set_of_bursts.setMinimumSize(QtCore.QSize(0, 32))
-        self.gridLayout_m.addWidget(self.submit_set_of_bursts, 4, 3, 1, 1)
+        self.gridLayout_m.addWidget(self.submit_set_of_bursts, 5, 3, 1, 1)
+        # Parting line
+        self.parting_line2_m = QHLine("multi")
+        self.gridLayout_m.addWidget(self.parting_line2_m, 6, 0, 1, 4)
         # Row 5:
         # "Bursts" label
         self.bursts_label = QtWidgets.QLabel(self.wid_mult)
-        self.gridLayout_m.addWidget(self.bursts_label, 5, 0, 1, 1)
+        self.gridLayout_m.addWidget(self.bursts_label, 7, 0, 1, 1)
         # Groupbox containg middle elements of row 5
         self.row5_m = QtWidgets.QGroupBox()
         self.minigrid4_m = QtWidgets.QGridLayout(self.row5_m)
         self.minigrid4_m.setContentsMargins(0, 0, 0, 0)
-        self.gridLayout_m.addWidget(self.row5_m, 5, 1, 1, 2)
+        self.gridLayout_m.addWidget(self.row5_m, 7, 1, 1, 2)
         # "All" checkbox
         self.all_bursts = QtWidgets.QCheckBox("All")
         self.all_bursts.setChecked(False)
-        self.minigrid4_m.addWidget(self.all_bursts, 5, 0, 1, 1)
+        self.minigrid4_m.addWidget(self.all_bursts, 7, 0, 1, 1)
         # Combobox to choose burst
         self.burst = QtWidgets.QComboBox(self.row5_m)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
         self.burst.setSizePolicy(sizePolicy)
-        self.minigrid4_m.addWidget(self.burst, 5, 1, 1, 1)
+        self.minigrid4_m.addWidget(self.burst, 7, 1, 1, 1)
         # Submit button for burst
         self.submit_burst = QtWidgets.QPushButton(self.wid_mult)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Fixed)
         self.submit_burst.setSizePolicy(sizePolicy)
         self.submit_burst.setMinimumSize(QtCore.QSize(0, 32))
-        self.gridLayout_m.addWidget(self.submit_burst, 5, 3, 1, 1)
+        self.gridLayout_m.addWidget(self.submit_burst, 7, 3, 1, 1)
+        # Parting line
+        self.parting_line3_m = QHLine("multi")
+        self.gridLayout_m.addWidget(self.parting_line3_m, 8, 0, 1, 4)
         # Row 6:
         # "Traversals" label
         self.traversals_label = QtWidgets.QLabel(self.wid_mult)
-        self.gridLayout_m.addWidget(self.traversals_label, 6, 0, 1, 1)
+        self.gridLayout_m.addWidget(self.traversals_label, 9, 0, 1, 1)
         # Groupbox containg middle elements of row 6
         self.row6_m = QtWidgets.QGroupBox()
         self.minigrid6_m = QtWidgets.QGridLayout(self.row6_m)
@@ -327,29 +355,29 @@ class MainWindow(QMainWindow):
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
         self.row6_m.setSizePolicy(sizePolicy)
         self.row6_m.setMinimumSize(QtCore.QSize(0, 32))
-        self.gridLayout_m.addWidget(self.row6_m, 6, 1, 1, 3)
+        self.gridLayout_m.addWidget(self.row6_m, 9, 1, 1, 3)
         # Combobox to choose a traversal
         self.traversals = QtWidgets.QComboBox(self.row6_m)
-        self.minigrid6_m.addWidget(self.traversals, 6, 1, 1, 2)
+        self.minigrid6_m.addWidget(self.traversals, 9, 1, 1, 2)
         # Row 7:
         # "Show matrices" button
         self.show_matrices_m = QtWidgets.QPushButton(self.wid_mult)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
         self.show_matrices_m.setSizePolicy(sizePolicy)
         self.show_matrices_m.setMinimumSize(QtCore.QSize(0, 32))
-        self.gridLayout_m.addWidget(self.show_matrices_m, 7, 1, 1, 1)
+        self.gridLayout_m.addWidget(self.show_matrices_m, 10, 1, 1, 1)
         # "Show end result" button
         self.show_end_result_m = QtWidgets.QPushButton(self.wid_mult)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
         self.show_end_result_m.setSizePolicy(sizePolicy)
         self.show_end_result_m.setMinimumSize(QtCore.QSize(0, 32))
-        self.gridLayout_m.addWidget(self.show_end_result_m, 7, 2, 1, 1)
+        self.gridLayout_m.addWidget(self.show_end_result_m, 10, 2, 1, 1)
         # "Show animation" button
         self.show_animation_m = QtWidgets.QPushButton(self.wid_mult)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
         self.show_animation_m.setSizePolicy(sizePolicy)
         self.show_animation_m.setMinimumSize(QtCore.QSize(0, 32))
-        self.gridLayout_m.addWidget(self.show_animation_m, 7, 3, 1, 1)
+        self.gridLayout_m.addWidget(self.show_animation_m, 10, 3, 1, 1)
 
         # Function connections of different widgets:
         self.change_window_button_m.clicked.connect(self.change_window)
@@ -366,8 +394,8 @@ class MainWindow(QMainWindow):
         self.show_end_result_m.clicked.connect(self.show_end_result_clicked_m)
         self.show_animation_m.clicked.connect(lambda:self.show_animation_clicked(self.show_animation_m))
         # Hide most widgets at the beginning (while retaining space)
-        self.hide_retain_space([self.traversal_mode_m, self.save_m, self.mol_info_m, self.set_of_bursts_label, self.row4_m, self.submit_set_of_bursts, self.bursts_label, self.row5_m, self.submit_burst, self.traversals_label, self.traversals, self.row6_m, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
-        self.hide_multiple([self.traversal_mode_m, self.save_m, self.mol_info_m, self.set_of_bursts_label, self.row4_m, self.submit_set_of_bursts, self.bursts_label, self.row5_m, self.submit_burst, self.traversals_label, self.traversals, self.row6_m, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
+        self.hide_retain_space([self.traversal_mode_m, self.save_m, self.mol_info_m, self.parting_line1_m, self.set_of_bursts_label, self.row4_m, self.submit_set_of_bursts, self.parting_line2_m, self.bursts_label, self.row5_m, self.submit_burst, self.parting_line3_m, self.traversals_label, self.traversals, self.row6_m, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
+        self.hide_multiple([self.traversal_mode_m, self.save_m, self.mol_info_m, self.parting_line1_m, self.set_of_bursts_label, self.row4_m, self.submit_set_of_bursts, self.parting_line2_m, self.bursts_label, self.row5_m, self.submit_burst, self.parting_line3_m, self.traversals_label, self.traversals, self.row6_m, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
         # Stylesheet:
         readme_path_m = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../styles_m.css')
         with open(readme_path_m, "r", encoding="utf-8") as fh_m:
@@ -594,7 +622,7 @@ class MainWindow(QMainWindow):
             self.qim = ImageQt(self.graph_pic)
             self.display_molecule.setPixmap(QtGui.QPixmap.fromImage(self.qim).scaled(self.display_molecule.size(), QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation))
             if errors != []:
-                self.hide_multiple([self.traversal_mode, self.row2, self.exterior_nodes_label, self.row4, self.submit_exterior_nodes, self.soliton_paths_label, self.paths, self.row5, self.show_matrices, self.show_end_result, self.show_animation])
+                self.hide_multiple([self.traversal_mode, self.row2, self.parting_line1, self.exterior_nodes_label, self.row4, self.submit_exterior_nodes, self.parting_line2, self.soliton_paths_label, self.paths, self.row5, self.show_matrices, self.show_end_result, self.show_animation])
                 self.status = 1
                 msg = QMessageBox(self.wid_single)
                 msg.setStyleSheet(" QPushButton{ height: 32px; width: 130px;}")
@@ -612,7 +640,7 @@ class MainWindow(QMainWindow):
                 msg.setDetailedText(details)
                 x = msg.exec_() # show messagebox
             elif self.my_graph.exterior_nodes_name_collision() == True:
-                self.hide_multiple([self.traversal_mode, self.row2, self.exterior_nodes_label, self.row4, self.submit_exterior_nodes, self.soliton_paths_label, self.paths, self.row5, self.show_matrices, self.show_end_result, self.show_animation])
+                self.hide_multiple([self.traversal_mode, self.row2, self.parting_line1, self.exterior_nodes_label, self.row4, self.submit_exterior_nodes, self.parting_line2, self.soliton_paths_label, self.paths, self.row5, self.show_matrices, self.show_end_result, self.show_animation])
                 self.status = 1
                 msg = QMessageBox(self.wid_single)
                 msg.setStyleSheet(" QPushButton{ height: 32px; width: 130px}")
@@ -622,14 +650,14 @@ class MainWindow(QMainWindow):
                 msg.setStandardButtons(QMessageBox.Retry)
                 x = msg.exec_()
             else:
-                self.show_multiple([self.traversal_mode, self.row2, self.exterior_nodes_label, self.row4, self.submit_exterior_nodes])
-                self.hide_multiple([self.soliton_paths_label, self.paths, self.row5, self.show_matrices, self.show_end_result, self.show_animation])
+                self.show_multiple([self.traversal_mode, self.row2, self.parting_line1, self.exterior_nodes_label, self.row4, self.submit_exterior_nodes])
+                self.hide_multiple([self.parting_line2, self.soliton_paths_label, self.paths, self.row5, self.show_matrices, self.show_end_result, self.show_animation])
                 self.status = 2
                 for key in self.my_graph.exterior_nodes_reverse:
                     self.node_1.addItem(key)
                     self.node_2.addItem(key)
         except:
-            self.hide_multiple([self.traversal_mode, self.row2, self.exterior_nodes_label, self.row4, self.submit_exterior_nodes, self.soliton_paths_label, self.paths, self.row5, self.show_matrices, self.show_end_result, self.show_animation])
+            self.hide_multiple([self.traversal_mode, self.row2, self.parting_line1, self.exterior_nodes_label, self.row4, self.submit_exterior_nodes, self.parting_line2, self.soliton_paths_label, self.paths, self.row5, self.show_matrices, self.show_end_result, self.show_animation])
             self.status = 1
             msg = QMessageBox(self.wid_single)
             msg.setStyleSheet(" QPushButton{ height: 32px; width: 130px}")
@@ -664,7 +692,7 @@ class MainWindow(QMainWindow):
             self.display_molecule_m.setPixmap(QtGui.QPixmap.fromImage(self.qim_m).scaled(self.display_molecule_m.size(), QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation))
             self.set_of_bursts_lineedit.clear()
             if errors != []:
-                self.hide_multiple([self.traversal_mode_m, self.save_m, self.mol_info_m, self.set_of_bursts_label, self.row4_m, self.submit_set_of_bursts, self.bursts_label, self.row5_m, self.submit_burst, self.traversals_label, self.traversals, self.row6_m, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
+                self.hide_multiple([self.traversal_mode_m, self.save_m, self.mol_info_m, self.parting_line1_m, self.set_of_bursts_label, self.row4_m, self.submit_set_of_bursts, self.parting_line2_m, self.bursts_label, self.row5_m, self.submit_burst, self.parting_line3_m, self.traversals_label, self.traversals, self.row6_m, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
                 self.status_m = 1
                 msg = QMessageBox(self.wid_mult)
                 msg.setStyleSheet(" QPushButton{ height: 32px; width: 130px}")
@@ -682,7 +710,7 @@ class MainWindow(QMainWindow):
                 msg.setDetailedText(details)
                 x = msg.exec_() # show messagebox
             elif self.my_graph_m.exterior_nodes_name_collision() == True:
-                self.hide_multiple([self.traversal_mode_m, self.save_m, self.mol_info_m, self.set_of_bursts_label, self.row4_m, self.submit_set_of_bursts, self.bursts_label, self.row5_m, self.submit_burst, self.traversals_label, self.traversals, self.row6_m, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
+                self.hide_multiple([self.traversal_mode_m, self.save_m, self.mol_info_m, self.parting_line1_m, self.set_of_bursts_label, self.row4_m, self.submit_set_of_bursts, self.parting_line2_m, self.bursts_label, self.row5_m, self.submit_burst, self.parting_line3_m, self.traversals_label, self.traversals, self.row6_m, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
                 self.status_m = 1
                 msg = QMessageBox(self.wid_mult)
                 msg.setStyleSheet(" QPushButton{ height: 32px; width: 130px}")
@@ -692,11 +720,11 @@ class MainWindow(QMainWindow):
                 msg.setStandardButtons(QMessageBox.Retry)
                 x = msg.exec_()
             else:
-                self.show_multiple([self.traversal_mode_m, self.save_m, self.set_of_bursts_label, self.row4_m, self.submit_set_of_bursts])
-                self.hide_multiple([self.mol_info_m, self.bursts_label, self.row5_m, self.submit_burst, self.traversals_label, self.traversals, self.row6_m, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
+                self.show_multiple([self.traversal_mode_m, self.save_m, self.parting_line1_m, self.set_of_bursts_label, self.row4_m, self.submit_set_of_bursts])
+                self.hide_multiple([self.parting_line2_m, self.mol_info_m, self.bursts_label, self.row5_m, self.submit_burst, self.parting_line3_m, self.traversals_label, self.traversals, self.row6_m, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
                 self.status_m = 2
         except:
-            self.hide_multiple([self.traversal_mode_m, self.save_m, self.mol_info_m, self.set_of_bursts_label, self.row4_m, self.submit_set_of_bursts, self.mol_info_m, self.bursts_label, self.row5_m, self.submit_burst, self.traversals_label, self.traversals, self.row6_m, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
+            self.hide_multiple([self.traversal_mode_m, self.save_m, self.parting_line1_m, self.mol_info_m, self.set_of_bursts_label, self.row4_m, self.submit_set_of_bursts, self.parting_line2_m, self.mol_info_m, self.bursts_label, self.row5_m, self.submit_burst, self.parting_line3_m, self.traversals_label, self.traversals, self.row6_m, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
             self.status_m = 1
             msg = QMessageBox(self.wid_mult)
             msg.setStyleSheet(" QPushButton{ height: 32px; width: 130px}")
@@ -930,11 +958,11 @@ class MainWindow(QMainWindow):
             for burst in bursts:
                 burst = re.sub(r"[{}]+", "", burst)
                 self.burst.addItem(burst)
-            self.show_multiple([self.mol_info_m, self.bursts_label, self.row5_m, self.submit_burst])
-            self.hide_multiple([self.traversals_label, self.traversals, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
+            self.show_multiple([self.parting_line2_m, self.mol_info_m, self.bursts_label, self.row5_m, self.submit_burst])
+            self.hide_multiple([self.parting_line3_m, self.traversals_label, self.traversals, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
             self.status_m = 3
         except:
-            self.hide_multiple([self.mol_info_m, self.bursts_label, self.row5_m, self.submit_burst, self.traversals_label, self.traversals, self.row6_m, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
+            self.hide_multiple([self.parting_line2_m, self.mol_info_m, self.bursts_label, self.row5_m, self.submit_burst, self.parting_line3_m, self.traversals_label, self.traversals, self.row6_m, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
             self.status_m = 2
             msg = QMessageBox(self.wid_mult)
             msg.setStyleSheet(" QPushButton{ height: 32px; width: 130px;}")
@@ -987,7 +1015,7 @@ class MainWindow(QMainWindow):
             node2 = self.my_graph.exterior_nodes_reverse[self.node_2.currentText()]
             self.found_paths = self.automata.call_find_all_paths_given_nodes(node1, node2, self.my_graph)
         if self.found_paths == []:
-            self.hide_multiple([self.soliton_paths_label, self.paths, self.row5, self.show_matrices, self.show_end_result, self.show_animation])
+            self.hide_multiple([self.parting_line2, self.soliton_paths_label, self.paths, self.row5, self.show_matrices, self.show_end_result, self.show_animation])
             self.status = 2
             msg = QMessageBox(self.wid_single)
             msg.setStyleSheet(" QPushButton{ height: 32px; width: 130px;}")
@@ -1011,7 +1039,7 @@ class MainWindow(QMainWindow):
                     endless_loops += 1
                     #self.loops_indices.append(p)
             self.soliton_paths_label.setText(f"Soliton paths ({len(self.found_paths) - endless_loops}):")
-            self.show_multiple([self.soliton_paths_label, self.paths, self.row5, self.show_matrices, self.show_end_result, self.show_animation])
+            self.show_multiple([self.parting_line2, self.soliton_paths_label, self.paths, self.row5, self.show_matrices, self.show_end_result, self.show_animation])
             self.status = 3
 
     
@@ -1032,7 +1060,7 @@ class MainWindow(QMainWindow):
             self.found_traversals = self.multi_automata.call_find_all_travs_given_burst(self.multi_automata.bursts_dicts[burst_index], self.my_graph_m)
             self.num_traversals_per_burst = None
         if self.found_traversals == []:
-            self.hide_multiple([self.traversals_label, self.traversals, self.row6_m, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
+            self.hide_multiple([self.parting_line3_m, self.traversals_label, self.traversals, self.row6_m, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
             self.status_m = 3
             msg = QMessageBox(self.wid_mult)
             msg.setStyleSheet(" QPushButton{ height: 32px; width: 130px;}")
@@ -1064,7 +1092,7 @@ class MainWindow(QMainWindow):
                     endless_loops += 1
                     #self.loops_indices_m.append(t)
             self.traversals_label.setText(f"Sets of paths ({len(self.found_traversals) - endless_loops}):")
-            self.show_multiple([self.traversals_label, self.traversals, self.row6_m, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
+            self.show_multiple([self.parting_line3_m, self.traversals_label, self.traversals, self.row6_m, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
             self.status_m = 4
             sep_index = 0
             if self.num_traversals_per_burst:
@@ -1299,7 +1327,7 @@ class MainWindow(QMainWindow):
             self.display_molecule.setPixmap(QtGui.QPixmap.fromImage(self.qim).scaled(self.display_molecule.size(), QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation))
 
             self.traversal_mode.setChecked(True)
-            self.hide_multiple([self.soliton_paths_label, self.paths, self.row5, self.show_matrices, self.show_end_result, self.show_animation])
+            self.hide_multiple([self.parting_line2, self.soliton_paths_label, self.paths, self.row5, self.show_matrices, self.show_end_result, self.show_animation])
             self.status = 2
             self.node_1.setCurrentIndex(0)
             self.node_2.setCurrentIndex(0)
@@ -1364,7 +1392,7 @@ class MainWindow(QMainWindow):
             self.display_molecule_m.setPixmap(QtGui.QPixmap.fromImage(self.qim_m).scaled(self.display_molecule_m.size(), QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation))
 
             self.traversal_mode_m.setChecked(True)
-            self.hide_multiple([self.traversals_label, self.traversals, self.row6_m, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
+            self.hide_multiple([self.parting_line3_m, self.traversals_label, self.traversals, self.row6_m, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
             self.status_m = 3
             self.burst.setCurrentIndex(0)
             dlg.close()
