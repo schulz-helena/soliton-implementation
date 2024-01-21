@@ -407,11 +407,11 @@ class MainWindow(QMainWindow):
         self.mode_m.setText(_translate("MainWindow", "Multi-Wave Mode"))
         self.mol_info_m.setText(_translate("MainWindow", "Info"))
         self.molecule_label_m.setText(_translate("MainWindow", "Molecule:"))
-        self.submit_molecule_m.setText(_translate("MainWindow", "Submit"))
+        self.submit_molecule_m.setText(_translate("MainWindow", "Change molecule"))
         self.set_of_bursts_label.setText(_translate("MainWindow", "Set of bursts:"))
-        self.submit_set_of_bursts.setText(_translate("MainWindow", "Submit"))
+        self.submit_set_of_bursts.setText(_translate("MainWindow", "Change bursts"))
         self.bursts_label.setText(_translate("MainWindow", "Bursts:"))
-        self.submit_burst.setText(_translate("MainWindow", "Submit"))
+        self.submit_burst.setText(_translate("MainWindow", "Choose burst(s)"))
         self.traversals_label.setText(_translate("MainWindow", "Sets of paths:"))
         self.show_matrices_m.setText(_translate("MainWindow", "Show matrices"))
         self.show_end_result_m.setText(_translate("MainWindow", "Show end result"))
@@ -532,13 +532,46 @@ class MainWindow(QMainWindow):
         grid.addWidget(label, 0, 0, 1, 1)
 
         if self.status_m == 1:
-            label.setText("Please now enter a molecule in the textbox.")
+            text = f"Please now enter a molecule behind \"Molecule: \"."
+            text = text + f"This is how you define one: \n"
+            text = text + f"- Carbon atoms are marked with 'C' \n"
+            text = text + f"- Single bonds are marked with '-' or no character at all \n"
+            text = text + f"- Double bonds are marked with '=' \n"
+            text = text + f"- Branches are embedded in round brackets (e.g. 'C(=CC=C)C')\n"
+            text = text + f"- The two connecting atoms of a ring are marked with the same number (e.g. 'C1' and 'C1') \n"
+            text = text + "- Exterior nodes are marked with braces and a number (e.g. '{=1}')\n\n"
+            text = text + "Submit by clicking \"Change molecule\"."
+            label.setText(text)
         elif self.status_m == 2:
-            label.setText("Please now enter a burst.")
+            text = f"Please now enter a set of bursts."
+            text = f"This is how you define one: \n"
+            text = text + f"- Starting and end node of a soliton are embedded in round brackets (e.g. (3, 2))\n"
+            text = text + f"- Solitons are seperated by '||'\n"
+            text = text + f"- The number in front of a soliton's pair of exterior nodes defines how many timesteps later than the previous soliton this soliton enters the graph\n"
+            text = text + f"- A set of bursts is embedded in braces, where individual bursts are seperated by ';'\n"
+            text = text + "- Example: " + "{(3,1)||1(1,2); (3,2)||4(2,1)}\n"
+            text = text + "Submit by clicking \"Change bursts\". \n\n"
+            text = text + f"You can also save the soliton graph with the save-button on the right."
+            label.setText(text)
         elif self.status_m == 3:
-            label.setText("Please choose a burst.")
+            text = f"Please now choose a burst. \n"
+            text = text + f"If you check \"All\", configuration trails for all bursts are displayed. \n"
+            text = text + f"Alternatively, you can choose a specific burst. \n"
+            text = text + "Submit by clicking \"Choose burst(s)\". \n\n"
+            text = text + f"The soliton automaton's determinism properties can be investigated by clicking on \"Info\"."
+            label.setText(text)
         elif self.status_m == 4:
-            label.setText("Please choose and investigate a path.")
+            text = f"Please choose a configuration trail from the drop-down menu. \n"
+            text = text + f"Configuration trails are displayed as a set of paths, where each path is marked with \"S\" and a number (e.g. \"S1\" for the first soliton). \n\n"
+            text = text + f"Each of the 3 buttons in the lower row will open a pop-up window with certain information. \n"
+            text = text + f"Clicking on \"Choose matrices\" will display the adjacency matrices of every timestep of the solitons' traversal. \n"
+            text = text + f"\"Show end result\" will show the resulting soliton graph after the traversal of the chosen configuration trail. \n"
+            text = text + f"In this window, you can click \"Use\", which will put the software in traversal mode. \n"
+            text = text + f"Traversal mode let's you use the resulting soliton graph as the new state of the soliton automaton. \n"
+            text = text + f"You will see that this mode locks the editing of the molecule and the set of bursts textboxes. \n"
+            text = text + f"It gives you the possibility to choose bursts from the entered set to then compute configuration trails in this new state. \n"
+            text = text + f"By clicking \"Show animation\" an animation visualising the traversal of the chosen configuration trail will be played."
+            label.setText(text)
 
         dlg.setWindowTitle("Help")
         dlg.exec_()
