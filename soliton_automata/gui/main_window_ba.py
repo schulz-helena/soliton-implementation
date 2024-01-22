@@ -547,7 +547,7 @@ class MainWindow(QMainWindow):
             text = text + f"Traversal mode let's you use the resulting soliton graph as the new state of the soliton automaton. \n"
             text = text + f"You will see that this mode locks the editing of the molecule textbox. \n"
             text = text + f"It gives you the possibility to choose exterior nodes to then compute paths in this new state. \n"
-            text = text + f"By clicking \"Show animation\" an animation visualising the traversal of the chosen path will be played. \n"
+            text = text + f"By clicking \"Show animation\" an animation visualising the traversal of the chosen path will be played."
             label.setText(text)
 
         dlg.setWindowTitle("Help")
@@ -1037,8 +1037,9 @@ class MainWindow(QMainWindow):
                     #this_path = this_path + soliton_path[0].path_for_user + " ..."
                     #self.paths.addItem(this_path)
                     endless_loops += 1
-                    #self.loops_indices.append(p)
-            self.soliton_paths_label.setText(f"Soliton paths ({len(self.found_paths) - endless_loops}):")
+                    self.loops_indices.append(p)
+            self.found_paths = [i for j, i in enumerate(self.found_paths) if j not in self.loops_indices]
+            self.soliton_paths_label.setText(f"Soliton paths ({len(self.found_paths)}):")
             self.show_multiple([self.parting_line2, self.soliton_paths_label, self.paths, self.row5, self.show_matrices, self.show_end_result, self.show_animation])
             self.status = 3
 
@@ -1071,7 +1072,7 @@ class MainWindow(QMainWindow):
             msg.setInformativeText("Please try again with different bursts.")
             x = msg.exec_()
         else:
-            endless_loops = 0
+            endless_loops_m = 0
             self.loops_indices_m = []
             for t, traversal in enumerate(self.found_traversals):
                 if isinstance(traversal, Traversal): # if traversal is a real traversal and no endless loop
@@ -1089,9 +1090,10 @@ class MainWindow(QMainWindow):
                         #if i != len(traversal[0].traversal_for_user)-1:
                             #this_traversal = this_traversal + ", "
                     #self.traversals.addItem(this_traversal)
-                    endless_loops += 1
-                    #self.loops_indices_m.append(t)
-            self.traversals_label.setText(f"Sets of paths ({len(self.found_traversals) - endless_loops}):")
+                    endless_loops_m += 1
+                    self.loops_indices_m.append(t)
+            self.found_traversals = [i for j, i in enumerate(self.found_traversals) if j not in self.loops_indices_m]
+            self.traversals_label.setText(f"Sets of paths ({len(self.found_traversals)}):")
             self.show_multiple([self.parting_line3_m, self.traversals_label, self.traversals, self.row6_m, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
             self.status_m = 4
             sep_index = 0
