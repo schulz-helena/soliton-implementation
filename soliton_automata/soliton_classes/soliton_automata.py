@@ -122,7 +122,8 @@ class SolitonAutomata:
             if bindings == bindings_all_timesteps[k] and akt == path[k] and possible_suc_nodes == poss_sucs_all_timesteps[k]: # if we already had that exact graph, position map and successor positions in this configuration trail
                 count += 1
                 if count == 2:
-                    paths.append([path, k+1]) # append the found trav plus the loop point/ timestep (+1, because otherwise in animation we would display the loop point twice)
+                    #paths.append([path, k+1]) # append the found trav plus the loop point/ timestep (+1, because otherwise in animation we would display the loop point twice)
+                    paths.append([path[:k+1], k]) # save path up to the first of the two successor-equivalent configurations and save index k
                     return paths
 
         # iterate over all nodes that are adjacent to latest node in path
@@ -200,11 +201,14 @@ class SolitonAutomata:
                 for j in range(0, len(ext_nodes)): # loop over all pairs of exterior nodes 
                     suc_states_matrix_ids = []
                     paths = self.call_find_all_paths_given_nodes(ext_nodes[i], ext_nodes[j], state) # find soliton paths with all pairs of exterior nodes
-                    loops_num = 0
                     first_real_path = -1
+                    maybe_imperf = []
+                    real_paths_this_nodepair = []
                     for p, path in enumerate(paths):
-                        all_paths.append(path)
+                        #all_paths.append(path)
                         if isinstance(path, SolitonPath): # if traversal is a real traversal and no endless loop
+                            all_paths.append(path)
+                            real_paths_this_nodepair.append(path)
                             if first_real_path == -1:
                                 first_real_path = p
                             resulting_matrix = path.adjacency_matrices_list[len(path.adjacency_matrices_list)-1] # adjacency matrix of the soliton graph the path results in
@@ -218,13 +222,27 @@ class SolitonAutomata:
                                     degree_of_nondeterminism = len(suc_states_matrix_ids)
                             if np.array_equal(resulting_matrix, paths[first_real_path].adjacency_matrices_list[len(paths[first_real_path].adjacency_matrices_list)-1]) == False:
                                 deterministic = False # two or more different soliton graphs have emerged although the same pair of exterior nodes was used
+                                reachability_deterministic = False
                         else:
-                            loops_num += 1
-                    if (len(paths) - loops_num) > 1:
+                            maybe_imperf.append(path)
+                    if (len(paths) - len(maybe_imperf)) > 1:
                         strongly_deterministic = False # more than one soliton path was found between one pair of exterior nodes
+                    elif (len(paths) - len(maybe_imperf)) == 1 and not self.identify_imperf_paths(real_paths_this_nodepair, maybe_imperf):
+                        strongly_deterministic = False # we have only one perfect soliton path but at least one imperfect soliton path as well
             states_plus_soliton_paths[state_matrix_id][1] = all_paths # add all found soliton paths in this state
 
         return deterministic, strongly_deterministic, degree_of_nondeterminism, states_plus_soliton_paths
+    
+
+    def identify_imperf_paths(self, real_paths: list, maybe_imperf: list):
+        for candidate in maybe_imperf:
+            for path in real_paths:
+                if candidate[0].path_labels == path.path_labels[0:len(candidate[0].path_labels)]:
+                    #print("Imperfect path found!")
+                    #print(candidate[0].path_for_user)
+                    #print(path.path_for_user)
+                    return False # we found an imperfect path
+        return True
 
 
     def matrix_to_string(self, matrix: np.ndarray):

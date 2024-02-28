@@ -218,7 +218,8 @@ class MultiwaveSolitonAutomata:
                     for i, pos in enumerate(s_pos_all_timesteps):
                         this_timestep = (pos, bindings_all_timesteps[i])
                         trav.append(this_timestep)
-                    travs.append([trav, k+1]) # append the found trav plus the loop point/ timestep (+1, because otherwise in animation we would display the loop point twice)
+                    #travs.append([trav, k+1]) # append the found trav plus the loop point/ timestep (+1, because otherwise in animation we would display the loop point twice)
+                    travs.append([trav[:k+1], k])
                     return travs
 
         # iterate over all possible combinations
@@ -302,11 +303,14 @@ class MultiwaveSolitonAutomata:
                 suc_states_matrix_ids = []
                 traversals = self.call_find_all_travs_given_burst(burst_dict, state) # find soliton paths with all bursts
                 num_traversals_per_burst.append(len(traversals))
-                loops_num = 0
                 first_real_trav = -1
+                maybe_imperf = []
+                real_travs_this_nodepair = []
                 for t, traversal in enumerate(traversals):
-                    all_traversals.append(traversal)
+                    #all_traversals.append(traversal)
                     if isinstance(traversal, Traversal): # if traversal is a real traversal and no endless loop
+                        all_traversals.append(traversal)
+                        real_travs_this_nodepair.append(traversal)
                         if first_real_trav == -1:
                             first_real_trav = t
                         resulting_matrix = traversal.adjacency_matrices_list[len(traversal.adjacency_matrices_list)-1] # adjacency matrix of the soliton graph the traversal results in
@@ -320,13 +324,27 @@ class MultiwaveSolitonAutomata:
                                     degree_of_nondeterminism = len(suc_states_matrix_ids)
                         if np.array_equal(resulting_matrix, traversals[first_real_trav].adjacency_matrices_list[len(traversals[first_real_trav].adjacency_matrices_list)-1]) == False:
                                 deterministic = False # two or more different soliton graphs have emerged although the same pair of exterior nodes was used
-                    else: loops_num += 1
-                if (len(traversals) - loops_num) > 1:
+                                reachability_deterministic = False
+                    else:
+                        maybe_imperf.append(traversal)
+                if (len(traversals) - len(maybe_imperf)) > 1:
                         strongly_deterministic = False # more than one soliton path was found between one pair of exterior nodes
+                elif (len(traversals) - len(maybe_imperf)) == 1 and not self.identify_imperf_travs(real_travs_this_nodepair, maybe_imperf):
+                        strongly_deterministic = False # we have only one perfect soliton path but at least one imperfect soliton path as well
             states_plus_traversals[state_matrix_id][1] = all_traversals # add all found traversals in this state
             states_plus_traversals[state_matrix_id][2] = num_traversals_per_burst # add number of traversals found for each burst (in this state)
 
         return deterministic, strongly_deterministic, degree_of_nondeterminism, states_plus_traversals
+    
+    def identify_imperf_travs(self, real_travs: list, maybe_imperf: list):
+        for candidate in maybe_imperf:
+            for trav in real_travs:
+                if candidate[0].pos_and_bindings == trav.pos_and_bindings[0:len(candidate[0].pos_and_bindings)]:
+                    #print("Imperfect traversal found!")
+                    #print(candidate[0].traversal_for_user)
+                    #print(trav.traversal_for_user)
+                    return False # we found an imperfect path
+        return True
 
         
     def matrix_to_string(self, matrix: np.ndarray):
