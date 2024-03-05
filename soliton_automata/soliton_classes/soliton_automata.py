@@ -21,12 +21,14 @@ class SolitonAutomata:
         """Whether the soliton automata is deterministic."""
         self.strongly_deterministic: bool
         """Whether the soliton automata is strongly deterministic."""
+        self.reachability_deterministic: bool
+        """Whether the soliton automata is reachability-deterministic."""
         self.degree_of_nondeterminism: int
         """The degree of non-determinism of the soliton automaton"""
         self.states_plus_soliton_paths: dict
         """All states of the soliton automata plus all soliton paths that can be found in each state
         (Id/ string of the states adjacency matrix as key and state and soliton paths as values)."""
-        self.deterministic, self.strongly_deterministic, self.degree_of_nondeterminism, self.states_plus_soliton_paths = self.all_paths_and_determinism()
+        self.deterministic, self.strongly_deterministic, self.reachability_deterministic, self.degree_of_nondeterminism, self.states_plus_soliton_paths = self.all_paths_and_determinism()
 
 
     def build_soliton_paths(self, paths: list, soliton_graph: SolitonGraph):
@@ -192,6 +194,8 @@ class SolitonAutomata:
         strongly_deterministic = True
         reachability_deterministic = True
         degree_of_nondeterminism = 1
+        state_sucstate_pair = dict() # dictionary with number of found paths for each state + successor state + pair of exterior nodes
+        state_sucstate = dict() # dictionary with bool for each state + successor state (first set to False and then only set to True if there is a burst such that there is only one path between these states)
         for key in self.soliton_graph.exterior_nodes:
             ext_nodes.append(key)
         for state in states: # for all states/ soliton graphs of the automata
@@ -205,7 +209,6 @@ class SolitonAutomata:
                     maybe_imperf = []
                     real_paths_this_nodepair = []
                     for p, path in enumerate(paths):
-                        #all_paths.append(path)
                         if isinstance(path, SolitonPath): # if traversal is a real traversal and no endless loop
                             all_paths.append(path)
                             real_paths_this_nodepair.append(path)
@@ -223,26 +226,44 @@ class SolitonAutomata:
                             if np.array_equal(resulting_matrix, paths[first_real_path].adjacency_matrices_list[len(paths[first_real_path].adjacency_matrices_list)-1]) == False:
                                 deterministic = False # two or more different soliton graphs have emerged although the same pair of exterior nodes was used
                                 reachability_deterministic = False
+                            if (state_matrix_id, resulting_matrix_id, (i,j)) not in state_sucstate_pair:
+                                state_sucstate_pair[(state_matrix_id, resulting_matrix_id, (i,j))] = 1
+                            else: state_sucstate_pair[(state_matrix_id, resulting_matrix_id, (i,j))] += 1
+                            state_sucstate[(state_matrix_id, resulting_matrix_id)] = False # put in an entry in the dictionary for these two states
                         else:
-                            maybe_imperf.append(path)
+                            maybe_imperf.append([path, state_matrix_id, (i,j)]) # this uncompleted path between these two states and these two exterior nodes may be an imperfect path (or no path at all)
+                    imperf_found, state_sucstate_pair = self.identify_imperf_paths(real_paths_this_nodepair, maybe_imperf, state_sucstate_pair)
                     if (len(paths) - len(maybe_imperf)) > 1:
                         strongly_deterministic = False # more than one soliton path was found between one pair of exterior nodes
-                    elif (len(paths) - len(maybe_imperf)) == 1 and not self.identify_imperf_paths(real_paths_this_nodepair, maybe_imperf):
+                    elif (len(paths) - len(maybe_imperf)) == 1 and imperf_found:
                         strongly_deterministic = False # we have only one perfect soliton path but at least one imperfect soliton path as well
             states_plus_soliton_paths[state_matrix_id][1] = all_paths # add all found soliton paths in this state
+        
+        for key in state_sucstate_pair:
+            if state_sucstate_pair[key] == 1:
+                state_sucstate[key[0], key[1]] = True # there is a pair of exterior nodes such that these is only one path between this state and this successor state
+        for key in state_sucstate:
+            if state_sucstate[key] == False: # no such pair of exterior nodes exists for these two states
+                reachability_deterministic = False
+                break
 
-        return deterministic, strongly_deterministic, degree_of_nondeterminism, states_plus_soliton_paths
+
+        return deterministic, strongly_deterministic, reachability_deterministic, degree_of_nondeterminism, states_plus_soliton_paths
     
 
-    def identify_imperf_paths(self, real_paths: list, maybe_imperf: list):
+    def identify_imperf_paths(self, real_paths: list, maybe_imperf: list, state_sucstate_pair: dict):
+        imperf_found = False
         for candidate in maybe_imperf:
             for path in real_paths:
-                if candidate[0].path_labels == path.path_labels[0:len(candidate[0].path_labels)]:
+                if candidate[0][0].path_labels == path.path_labels[0:len(candidate[0][0].path_labels)]: # [0][0] since only the first element in an element in maybe_imperf is the candidate and only the first element of the candidate is a path 
                     #print("Imperfect path found!")
                     #print(candidate[0].path_for_user)
                     #print(path.path_for_user)
-                    return False # we found an imperfect path
-        return True
+                    imperf_found = True # we found an imperfect path
+                    resulting_matrix = path.adjacency_matrices_list[len(path.adjacency_matrices_list)-1] # adjacency matrix of the soliton graph the path results in
+                    resulting_matrix_id = self.matrix_to_string(resulting_matrix)
+                    state_sucstate_pair[(candidate[1], resulting_matrix_id, candidate[2])] += 1 # an imperfect path between these two states and with this pair of exterior nodes was found
+        return imperf_found, state_sucstate_pair
 
 
     def matrix_to_string(self, matrix: np.ndarray):

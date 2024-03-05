@@ -905,8 +905,12 @@ class MainWindow(QMainWindow):
         txt_text = txt_text + f"Reachability-deterministic: "
         grid.addWidget(label_reach_det, 2, 0, 1, 1)
         reach_det_bool = QtWidgets.QLabel(dlg)
-        reach_det_bool.setText("X")
-        txt_text = txt_text + f"X \n"
+        if self.automata.reachability_deterministic:
+            reach_det_bool.setText("Yes")
+            txt_text = txt_text + f"Yes \n"
+        else: 
+            reach_det_bool.setText("No")
+            txt_text = txt_text + f"No \n"
         grid.addWidget(reach_det_bool, 2, 1, 1, 1)
 
         label_degree = QtWidgets.QLabel(dlg)
@@ -996,8 +1000,12 @@ class MainWindow(QMainWindow):
         txt_text = txt_text + f"Reachability-deterministic: "
         grid.addWidget(label_reach_det, 2, 0, 1, 1)
         reach_det_bool = QtWidgets.QLabel(dlg)
-        reach_det_bool.setText("X")
-        txt_text = txt_text + f"X \n"
+        if self.multi_automata.reachability_deterministic:
+            reach_det_bool.setText("Yes")
+            txt_text = txt_text + f"Yes \n"
+        else: 
+            reach_det_bool.setText("No")
+            txt_text = txt_text + f"No \n"
         grid.addWidget(reach_det_bool, 2, 1, 1, 1)
 
         label_degree = QtWidgets.QLabel(dlg)
