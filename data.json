@@ -1,0 +1,45 @@
+[
+    {
+        "input_string": "C1({1})=C({2})C1({=3})",
+        "last_used": "2024-03-05 18:42:40",
+        "sets_of_bursts": [
+            {
+                "set_of_bursts": "(3,3)",
+                "last_used": "2024-03-05 18:13:45"
+            },
+            {
+                "set_of_bursts": "(3,1)",
+                "last_used": "2024-03-05 18:17:36"
+            }
+        ]
+    },
+    {
+        "input_string": "C1=CC=CC=C1C=C({1})C=CC({2})=CC2=CC=CC=C2",
+        "last_used": "2024-03-05 18:05:14",
+        "sets_of_bursts": [
+            {
+                "set_of_bursts": "(1,1)",
+                "last_used": "2024-03-05 15:49:00"
+            },
+            {
+                "set_of_bursts": "(1,1)||1(1,1)",
+                "last_used": "2024-03-05 18:05:18"
+            }
+        ]
+    },
+    {
+        "input_string": "C1(=CC{=1})C=CC=CC=C1",
+        "last_used": "2024-03-05 18:16:26",
+        "sets_of_bursts": []
+    },
+    {
+        "input_string": "C1(=CC{=1})C=CC=CC=CC=CC=C1",
+        "last_used": "2024-03-05 18:16:45",
+        "sets_of_bursts": []
+    },
+    {
+        "input_string": "{1}=CC{=2}",
+        "last_used": "2024-03-05 18:45:51",
+        "sets_of_bursts": []
+    }
+]

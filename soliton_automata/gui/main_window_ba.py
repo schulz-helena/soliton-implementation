@@ -5,6 +5,9 @@ import io
 import math
 import os
 import re
+import json
+from json.decoder import JSONDecodeError
+from datetime import datetime
 
 import networkx as nx
 import res.resources
@@ -118,8 +121,22 @@ class MainWindow(QMainWindow):
         self.minigrid3 = QtWidgets.QGridLayout(self.row3)
         self.minigrid3.setContentsMargins(0, 0, 0, 0)
         self.gridLayout.addWidget(self.row3, 3, 1, 1, 2)
-        # Text field for molecule
-        self.molecule_lineedit = QtWidgets.QLineEdit(self.row3)
+        # Text field for molecule (combobox with a line edit)
+        self.molecule_lineedit = QtWidgets.QComboBox(self.row3)
+        try:
+            with open("data.json", "r") as json_file:
+                data = json.load(json_file)
+        except:
+            pass
+        sorted_data = sorted(data, key=lambda x: x["last_used"], reverse=True)
+        for molecule in sorted_data: # Fill combobox with input strings from history
+            self.molecule_lineedit.addItem(molecule["input_string"])
+        edit = QtWidgets.QLineEdit(self.row3)
+        self.molecule_lineedit.setLineEdit(edit)
+        # Do those two things to prevent long molecules from resizing the whole window:
+        self.molecule_lineedit.setSizeAdjustPolicy(QtWidgets.QComboBox.AdjustToMinimumContentsLength)
+        self.molecule_lineedit.setMinimumContentsLength(1)
+        self.molecule_lineedit.lineEdit().clear()
         self.minigrid3.addWidget(self.molecule_lineedit, 0, 0, 1, 1)
         # Submit button for molecule
         self.submit_molecule = QtWidgets.QPushButton(self.wid_single)
@@ -284,8 +301,22 @@ class MainWindow(QMainWindow):
         # "Molecule" label
         self.molecule_label_m = QtWidgets.QLabel(self.wid_mult)
         self.gridLayout_m.addWidget(self.molecule_label_m, 3, 0, 1, 1)
-        # Text field for molecule
-        self.molecule_lineedit_m = QtWidgets.QLineEdit(self.wid_mult)
+        # Text field for molecule (combobox with a line edit)
+        self.molecule_lineedit_m = QtWidgets.QComboBox(self.wid_mult)
+        try:
+            with open("data.json", "r") as json_file:
+                data = json.load(json_file)
+        except:
+            pass
+        sorted_data = sorted(data, key=lambda x: x["last_used"], reverse=True)
+        for molecule in sorted_data:
+            self.molecule_lineedit_m.addItem(molecule["input_string"])
+        edit = QtWidgets.QLineEdit(self.wid_mult)
+        self.molecule_lineedit_m.setLineEdit(edit)
+        # Do those two things to prevent long molecules from resizing the whole window:
+        self.molecule_lineedit_m.setSizeAdjustPolicy(QtWidgets.QComboBox.AdjustToMinimumContentsLength)
+        self.molecule_lineedit_m.setMinimumContentsLength(1)
+        self.molecule_lineedit_m.lineEdit().clear()
         self.gridLayout_m.addWidget(self.molecule_lineedit_m, 3, 1, 1, 2)
         # Submit button for molecule
         self.submit_molecule_m = QtWidgets.QPushButton(self.wid_mult)
@@ -305,8 +336,13 @@ class MainWindow(QMainWindow):
         self.minigrid4_m = QtWidgets.QGridLayout(self.row4_m)
         self.minigrid4_m.setContentsMargins(0, 0, 0, 0)
         self.gridLayout_m.addWidget(self.row4_m, 5, 1, 1, 2)
-        # Text field for set of bursts
-        self.set_of_bursts_lineedit = QtWidgets.QLineEdit(self.row4_m)
+        # Text field for set of bursts (combobox with a line edit)
+        self.set_of_bursts_lineedit = QtWidgets.QComboBox(self.row4_m)
+        edit = QtWidgets.QLineEdit(self.row4_m)
+        self.set_of_bursts_lineedit.setLineEdit(edit)
+        # Do those two things to prevent long molecules from resizing the whole window:
+        self.set_of_bursts_lineedit.setSizeAdjustPolicy(QtWidgets.QComboBox.AdjustToMinimumContentsLength)
+        self.set_of_bursts_lineedit.setMinimumContentsLength(1)
         self.minigrid4_m.addWidget(self.set_of_bursts_lineedit, 0, 0, 1, 1)
         # Submit button for set of bursts
         self.submit_set_of_bursts = QtWidgets.QPushButton(self.wid_mult)
@@ -613,7 +649,7 @@ class MainWindow(QMainWindow):
         """
         self.node_1.clear()
         self.node_2.clear()
-        self.smiles_string = self.molecule_lineedit.text()
+        self.smiles_string = self.molecule_lineedit.lineEdit().text()
         try:
             self.my_graph = SolitonGraph(self.smiles_string)
             errors = self.my_graph.validate_soliton_graph()
@@ -675,6 +711,39 @@ class MainWindow(QMainWindow):
             details = details + "- Exterior nodes are marked with braces and a number (e.g. '{=1}')"
             msg.setDetailedText(details)
             x = msg.exec_()
+        # Edit json file if input string was turned into a soliton graph successfully
+        if self.status == 2:
+            try:
+                with open("data.json", "r") as json_file:
+                    data = json.load(json_file)
+            except (FileNotFoundError, JSONDecodeError):
+                data = []
+            
+            # Check if input string already exists in the data
+            existing_molecule = next((m for m in data if m.get("input_string") == self.smiles_string), None)
+            if existing_molecule:
+                existing_molecule["last_used"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S") # If the molecule exists, update "last_used"
+            else: # If the molecule doesn't exist, add a new molecule
+                molecule = {
+                    "input_string": self.smiles_string,
+                    "last_used": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                    "sets_of_bursts": [
+                    ]
+                }
+                data.append(molecule)
+
+            with open("data.json", "w") as json_file:
+                json.dump(data, json_file, indent=4)
+
+            # Change combobox items so that entered molecule (which is now the last used molecule) is the first element in the comboboxes of both windows
+            sorted_data = sorted(data, key=lambda x: x["last_used"], reverse=True)
+            self.molecule_lineedit.clear()
+            current_molecule_m = self.molecule_lineedit_m.lineEdit().text() # Save current text of line edit in multiwave window to add it again later
+            self.molecule_lineedit_m.clear()
+            for molecule in sorted_data:
+                self.molecule_lineedit.addItem(molecule["input_string"])
+                self.molecule_lineedit_m.addItem(molecule["input_string"])
+            self.molecule_lineedit_m.lineEdit().setText(current_molecule_m)
 
 
     def submit_molecule_clicked_m(self):
@@ -683,7 +752,7 @@ class MainWindow(QMainWindow):
         If the user's molecule is valid it displays the graph of the molecule. It then also reveals a save button for the graph visualisation,
         an info button and all the necessary widgets for the user to specify a set of bursts and a stop number.
         """
-        self.smiles_string_m = self.molecule_lineedit_m.text()
+        self.smiles_string_m = self.molecule_lineedit_m.lineEdit().text()
         try:
             self.my_graph_m = SolitonGraph(self.smiles_string_m)
             errors = self.my_graph_m.validate_soliton_graph()
@@ -742,6 +811,47 @@ class MainWindow(QMainWindow):
             details = details + "- Exterior nodes are marked with braces and a number (e.g. '{=1}')"
             msg.setDetailedText(details)
             x = msg.exec_()
+        # Edit json file if input string was turned into a soliton graph successfully
+        if self.status_m == 2:
+            try:
+                with open("data.json", "r") as json_file:
+                    data = json.load(json_file)
+            except (FileNotFoundError, JSONDecodeError):
+                data = []
+            
+            # Check if input string already exists in the data
+            existing_molecule = next((m for m in data if m.get("input_string") == self.smiles_string_m), None)
+            if existing_molecule:
+                existing_molecule["last_used"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S") # If the molecule exists, update "last_used"
+            else: # If the molecule doesn't exist, add a new molecule
+                molecule = {
+                    "input_string": self.smiles_string_m,
+                    "last_used": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                    "sets_of_bursts": [
+                    ]
+                }
+                existing_molecule = molecule
+                data.append(molecule)
+
+            with open("data.json", "w") as json_file:
+                json.dump(data, json_file, indent=4)
+
+            # Change combobox items so that entered molecule (which is now the last used molecule) is the first element in the comboboxes of both windows
+            sorted_data = sorted(data, key=lambda x: x["last_used"], reverse=True)
+            self.molecule_lineedit_m.clear()
+            current_molecule = self.molecule_lineedit.lineEdit().text()
+            self.molecule_lineedit.clear()
+            for molecule in sorted_data:
+                self.molecule_lineedit_m.addItem(molecule["input_string"])
+                self.molecule_lineedit.addItem(molecule["input_string"])
+            self.molecule_lineedit.lineEdit().setText(current_molecule)
+
+            # Add all set of bursts from history of the current molecule
+            sorted_burstsets = sorted(existing_molecule["sets_of_bursts"], key=lambda x: x["last_used"], reverse=True)
+            self.set_of_bursts_lineedit.clear()
+            for burstset in sorted_burstsets:
+                self.set_of_bursts_lineedit.addItem(burstset["set_of_bursts"])
+            self.set_of_bursts_lineedit.lineEdit().clear()
 
 
     def mol_info_clicked(self):
@@ -949,7 +1059,7 @@ class MainWindow(QMainWindow):
         Catches errors if user used the wrong syntax.
         If the user's set of bursts is valid it all the necessary widgets for the user to choose a burst.
         """
-        bursts = self.set_of_bursts_lineedit.text()
+        bursts = self.set_of_bursts_lineedit.lineEdit().text()
         self.bursts = bursts
         self.burst.clear()
         try:
@@ -979,6 +1089,35 @@ class MainWindow(QMainWindow):
             details = details + "- Example: " + "{(3,1)||1(1,2); (3,2)||4(2,1)}\n"
             msg.setDetailedText(details)
             x = msg.exec_()
+        if self.status_m == 3:
+            try:
+                with open("data.json", "r") as json_file:
+                    data = json.load(json_file)
+            except (FileNotFoundError, JSONDecodeError):
+                data = []
+            
+            # Look for the current molecule in the data
+            index_of_molecule = next((i for i, m in enumerate(data) if m.get("input_string") == self.smiles_string_m), None)
+            if index_of_molecule is not None:
+                existing_burst = next((b for b in data[index_of_molecule]["sets_of_bursts"] if b["set_of_bursts"] == self.bursts), None)
+
+                if existing_burst: # If the set of bursts exists, update the "last_used" field
+                    existing_burst["last_used"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                else: # If the set of bursts doesn't exist, add a new object to the "sets_of_bursts" list
+                    burst_data = {
+                        "set_of_bursts": self.bursts,
+                        "last_used": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                    }
+                    data[index_of_molecule]["sets_of_bursts"].append(burst_data)
+
+            with open("data.json", "w") as json_file:
+                json.dump(data, json_file, indent=4)
+
+            # Change combobox items so that entered set of bursts (which is now the last used set of bursts) is the first element in the combobox
+            sorted_burstsets = sorted(data[index_of_molecule]["sets_of_bursts"], key=lambda x: x["last_used"], reverse=True)
+            self.set_of_bursts_lineedit.clear()
+            for burstset in sorted_burstsets:
+                self.set_of_bursts_lineedit.addItem(burstset["set_of_bursts"])
 
 
     def all_exterior_nodes_statechanged(self):
