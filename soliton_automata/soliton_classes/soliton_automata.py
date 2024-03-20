@@ -9,7 +9,7 @@ from soliton_classes.soliton_path import SolitonPath
 
 
 class SolitonAutomata:
-    """Representation of a soliton automata, which finds all soliton paths between all pairs of exterior nodes.
+    """Representation of a soliton automata, which contains all soliton paths between all pairs of exterior nodes.
     """
 
     def __init__(self, soliton_graph: SolitonGraph):
@@ -43,7 +43,7 @@ class SolitonAutomata:
         """
         soliton_paths = []
         for path in paths:
-            if isinstance(path[0], list): # if path is not a real soliton path but part of an endlessly looping path
+            if isinstance(path[0], list): # if path is not a real soliton path
                 soliton_path = SolitonPath(soliton_graph, path[0])
                 soliton_paths.append([soliton_path, path[1]])
             else:
@@ -118,13 +118,12 @@ class SolitonAutomata:
             paths.append(path)
             return paths
 
-        # base case 2: if soliton is stuck in endless loop
+        # base case 2: if we have two successor-equivalent configurations in the configuration trail
         count = 1
         for k in range(0, len(bindings_all_timesteps)-1):
-            if bindings == bindings_all_timesteps[k] and akt == path[k] and possible_suc_nodes == poss_sucs_all_timesteps[k]: # if we already had that exact graph, position map and successor positions in this configuration trail
+            if bindings == bindings_all_timesteps[k] and akt == path[k] and possible_suc_nodes == poss_sucs_all_timesteps[k]: # if we already had that exact graph, position and successor positions in this configuration trail
                 count += 1
                 if count == 2:
-                    #paths.append([path, k+1]) # append the found trav plus the loop point/ timestep (+1, because otherwise in animation we would display the loop point twice)
                     paths.append([path[:k+1], k]) # save path up to the first of the two successor-equivalent configurations and save index k
                     return paths
 
@@ -184,6 +183,8 @@ class SolitonAutomata:
         Returns:
             bool: Whether the soliton automata is deterministic or not.
             bool: Whether the soliton automata is strongly deterministic or not.
+            bool: Whether the soliton automata is reachability-deterministic or not.
+            int: The degree of non-determinism of the soliton automata.
             dict: All states of the soliton graph plus all soliton paths that can be found in each state.
         """
         ext_nodes = []
@@ -209,7 +210,7 @@ class SolitonAutomata:
                     maybe_imperf = []
                     real_paths_this_nodepair = []
                     for p, path in enumerate(paths):
-                        if isinstance(path, SolitonPath): # if traversal is a real traversal and no endless loop
+                        if isinstance(path, SolitonPath): # if path is a real path
                             all_paths.append(path)
                             real_paths_this_nodepair.append(path)
                             if first_real_path == -1:
@@ -252,13 +253,21 @@ class SolitonAutomata:
     
 
     def identify_imperf_paths(self, real_paths: list, maybe_imperf: list, state_sucstate_pair: dict):
+        """Uses the list of perfect paths and a list of possible imperfect paths for a state and a pair of nodes to identify which paths are actually imperfect paths. 
+
+        Args:
+            real_paths (list): All real/ perfect paths that were found.
+            maybe_imperf (list): All paths that might be imperfect paths.
+            state_sucstate_pair (dict): Dictionary that contains a triple of state, successor state and a pair of nodes as key and the number of found paths between the two states with the pair of nodes as value.
+
+        Returns:
+            bool: Whether an imperfect path was found.
+            dict: Modified `state_sucstate_pair`; if imperfect path was found then number of found paths for state, successor state and pair of nodes was raised.
+        """
         imperf_found = False
         for candidate in maybe_imperf:
             for path in real_paths:
                 if candidate[0][0].path_labels == path.path_labels[0:len(candidate[0][0].path_labels)]: # [0][0] since only the first element in an element in maybe_imperf is the candidate and only the first element of the candidate is a path 
-                    #print("Imperfect path found!")
-                    #print(candidate[0].path_for_user)
-                    #print(path.path_for_user)
                     imperf_found = True # we found an imperfect path
                     resulting_matrix = path.adjacency_matrices_list[len(path.adjacency_matrices_list)-1] # adjacency matrix of the soliton graph the path results in
                     resulting_matrix_id = self.matrix_to_string(resulting_matrix)

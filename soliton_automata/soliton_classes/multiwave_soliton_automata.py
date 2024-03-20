@@ -10,11 +10,11 @@ from soliton_classes.traversal import Traversal
 
 
 class MultiwaveSolitonAutomata:
-    """Representation of a multiwave soliton automata, which finds all traversals for a burst.
+    """Representation of a multiwave soliton automata, which contains all traversals for a burst.
     """
 
     def __init__(self, soliton_graph: SolitonGraph, bursts: str):
-        """Initializes a `MultiwaveSolitonAutomata` object by using a soliton graph, a burst and a stop number.
+        """Initializes a `MultiwaveSolitonAutomata` object by using a soliton graph and a burst.
         """
         self.soliton_graph: SolitonGraph = soliton_graph
         """Soliton graph the automata is based on."""
@@ -91,7 +91,7 @@ class MultiwaveSolitonAutomata:
         """
         traversals = []
         for trav in travs:
-            if isinstance(trav[len(trav)-1], int): # if trav is not a real traversal but part of an endlessly looping traversal
+            if isinstance(trav[len(trav)-1], int): # if trav is not a real traversal
                 traversal = Traversal(soliton_graph, trav[0])
                 traversals.append([traversal, trav[1]])
             else:
@@ -129,6 +129,7 @@ class MultiwaveSolitonAutomata:
             s_pos_all_timesteps (list): Soliton positions for all past timesteps.
             bindings_all_timesteps (list): Binding types of all edges in the graph for all past timesteps.
             binds_all_timesteps (list): Binding type of the last edge that was traversed by each soliton for all past timesteps.
+            poss_suc_combs_all_timesteps (list): Possible combinations of successor nodes for all past timesteps.
             travs (list): All currently found traversals.
 
         Returns:
@@ -210,17 +211,16 @@ class MultiwaveSolitonAutomata:
             travs.append(trav) # trav = traversal of all solitons through the graph
             return travs
 
-        # base case 2: if some solitons are stuck in an endless loop
+        # base case 2: if we have two successor-equivalent configurations in the configuration trail
         count = 1
         for k in range(0, len(bindings_all_timesteps)-1):
-            if akt_bindings == bindings_all_timesteps[k] and akt_positions == s_pos_all_timesteps[k] and nodes_combs == poss_suc_combs_all_timesteps[k] and -1 not in nodes_combs[0].values(): # and nodes_combs == poss_suc_combs_all_timesteps[k] # if we already had that exact graph, position map and successor position combinations (and all solitons already entered the graph) in this configuration trail
+            if akt_bindings == bindings_all_timesteps[k] and akt_positions == s_pos_all_timesteps[k] and nodes_combs == poss_suc_combs_all_timesteps[k] and -1 not in nodes_combs[0].values(): # if we already had that exact graph, position map and successor position combinations (and all solitons already entered the graph) in this configuration trail
                 count += 1
                 if count == 2:
                     trav = []
                     for i, pos in enumerate(s_pos_all_timesteps):
                         this_timestep = (pos, bindings_all_timesteps[i])
                         trav.append(this_timestep)
-                    #travs.append([trav, k+1]) # append the found trav plus the loop point/ timestep (+1, because otherwise in animation we would display the loop point twice)
                     travs.append([trav[:k+1], k])
                     return travs
 
@@ -287,6 +287,8 @@ class MultiwaveSolitonAutomata:
         Returns:
             bool: Whether the soliton automata is deterministic or not.
             bool: Whether the soliton automata is strongly deterministic or not.
+            bool: Whether the soliton automata is reachability-deterministic or not.
+            int: The degree of non-determinism of the soliton automata.
             dict: All states of the soliton graph plus all traversals that can be found in each state plus number of traversals found for each burst.
         """
         initial_matrix = nx.to_numpy_array(self.soliton_graph.graph)
@@ -311,7 +313,7 @@ class MultiwaveSolitonAutomata:
                 maybe_imperf = []
                 real_travs_this_nodepair = []
                 for t, traversal in enumerate(traversals):
-                    if isinstance(traversal, Traversal): # if traversal is a real traversal and no endless loop
+                    if isinstance(traversal, Traversal): # if traversal is a real traversal
                         all_traversals.append(traversal)
                         real_travs_this_nodepair.append(traversal)
                         if first_real_trav == -1:
@@ -352,14 +354,23 @@ class MultiwaveSolitonAutomata:
 
         return deterministic, strongly_deterministic, reachability_deterministic, degree_of_nondeterminism, states_plus_traversals
     
+
     def identify_imperf_travs(self, real_travs: list, maybe_imperf: list, state_sucstate_burst: dict):
+        """Uses the list of perfect traversals and a list of possible imperfect traversals for a state and a burst to identify which traversals are actually imperfect traversals. 
+
+        Args:
+            real_travs (list): All real/ perfect traversals that were found.
+            maybe_imperf (list): All traversals that might be imperfect configuration trails.
+            state_sucstate_burst (dict): Dictionary that contains a triple of state, successor state and a burst as key and the number of found traversals between the two states with the burst as value.
+
+        Returns:
+            bool: Whether an imperfect path was found.
+            dict: Modified `state_sucstate_burst`; if imperfect path was found then number of found traversals for state, successor state and burst was raised.
+        """
         imperf_found = False
         for candidate in maybe_imperf:
             for trav in real_travs:
                 if candidate[0][0].pos_and_bindings == trav.pos_and_bindings[0:len(candidate[0][0].pos_and_bindings)]:
-                    #print("Imperfect traversal found!")
-                    #print(candidate[0].traversal_for_user)
-                    #print(trav.traversal_for_user)
                     imperf_found = True # we found an imperfect path
                     resulting_matrix = trav.adjacency_matrices_list[len(trav.adjacency_matrices_list)-1] # adjacency matrix of the soliton graph the traversal results in
                     resulting_matrix_id = self.matrix_to_string(resulting_matrix)
