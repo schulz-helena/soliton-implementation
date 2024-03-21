@@ -11,7 +11,7 @@ with open(readme_path, "r", encoding="utf-8") as fh:
 
 setup(
     name = 'soliton-automata-software',
-    version = '2.0.0',
+    version = '2.1.0',
     description = 'Soliton Automata Software that computes soliton paths/ total legal configuration trails for a given soliton graph (and a given set of bursts)',
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -27,7 +27,7 @@ setup(
         'matplotlib>=3.5.1',
         'Pyqt5>=5.15.4',
     ],
-    package_data={'': ['styles.css', 'styles_m.css']},
+    package_data={'': ['styles.css', 'styles_m.css', 'data.json']},
     include_package_data=True,
     entry_points = {
         'console_scripts': [
