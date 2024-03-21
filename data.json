@@ -1,7 +1,7 @@
 [
     {
         "input_string": "C1({1})=C({2})C1({=3})",
-        "last_used": "2024-03-20 12:30:31",
+        "last_used": "2024-03-21 12:52:32",
         "sets_of_bursts": [
             {
                 "set_of_bursts": "(3,3)",
@@ -23,7 +23,7 @@
     },
     {
         "input_string": "C1=CC=CC=C1C=C({1})C=CC({2})=CC2=CC=CC=C2",
-        "last_used": "2024-03-20 11:41:34",
+        "last_used": "2024-03-21 12:52:50",
         "sets_of_bursts": [
             {
                 "set_of_bursts": "(1,1)",
@@ -35,7 +35,7 @@
             },
             {
                 "set_of_bursts": "{(1,1)||1(1,1); (1,1)||1(1,2)}",
-                "last_used": "2024-03-20 11:41:37"
+                "last_used": "2024-03-21 12:52:54"
             }
         ]
     },

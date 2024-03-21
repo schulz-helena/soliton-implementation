@@ -16,8 +16,8 @@ from PIL.ImageQt import ImageQt
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QDialog, QMainWindow, QMessageBox, QScrollArea, QFrame
-from soliton_classes.multiwave_soliton_automata import MultiwaveSolitonAutomata
-from soliton_classes.soliton_automata import SolitonAutomata
+from soliton_classes.multiwave_soliton_automata import MultiwaveSolitonAutomaton
+from soliton_classes.soliton_automata import SolitonAutomaton
 from soliton_classes.soliton_graph import SolitonGraph
 from soliton_classes.soliton_path import SolitonPath
 from soliton_classes.traversal import Traversal
@@ -64,7 +64,7 @@ class MainWindow(QMainWindow):
         self.resize(QtCore.QSize(600, 680))
 
 
-        # SOLITON AUTOMATA WIDGET
+        # SOLITON AUTOMATON WIDGET
         self.wid_single = QtWidgets.QWidget()
         self.gridLayout = QtWidgets.QGridLayout(self.wid_single)
         # Row 0:
@@ -266,7 +266,7 @@ class MainWindow(QMainWindow):
         self.status = 1 # What status the UI currently has (1: enter molecule, 2: choose exterior nodes, 3: investigate found paths)
 
 
-        # MULTI-WAVE SOLITON AUTOMATA WIDGET
+        # MULTI-WAVE SOLITON AUTOMATON WIDGET
         self.wid_mult = QtWidgets.QWidget()
         self.gridLayout_m = QtWidgets.QGridLayout(self.wid_mult)
         # Row 0:
@@ -535,7 +535,7 @@ class MainWindow(QMainWindow):
 
     def change_mode(self, checkbox: QtWidgets.QCheckBox):
         """Realizes the change between being in traversal mode and not being in traversal mode in single soliton widget.
-        In traversal mode, a soliton automata can be traversed by using an end result as the new soliton graph.
+        In traversal mode, a soliton automaton can be traversed by using an end result as the new soliton graph.
         When in traversal mode, the input molecule can't be edited.
 
         Args:
@@ -559,7 +559,7 @@ class MainWindow(QMainWindow):
     
     def change_mode_m(self, checkbox: QtWidgets.QCheckBox):
         """Realizes the change between being in traversal mode and not being in traversal mode in multi soliton widget.
-        In traversal mode, a soliton automata can be traversed by using an end result as the new soliton graph.
+        In traversal mode, a soliton automaton can be traversed by using an end result as the new soliton graph.
         When in traversal mode, the input molecule and the set of bursts can't be edited.
 
         Args:
@@ -728,7 +728,7 @@ class MainWindow(QMainWindow):
             # Try creating a soliton graph out of the entered molecule. Fails if the syntax is wrong.
             self.my_graph = SolitonGraph(self.smiles_string)
             errors = self.my_graph.validate_soliton_graph()
-            self.automata = SolitonAutomata(self.my_graph)
+            self.automaton = SolitonAutomaton(self.my_graph)
             self.graph_pic = Visualisation.visualize_soliton_graph(self.my_graph, self.my_graph.bindings, False, True)
             self.qim = ImageQt(self.graph_pic)
             self.display_molecule.setPixmap(QtGui.QPixmap.fromImage(self.qim).scaled(self.display_molecule.size(), QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation))
@@ -948,11 +948,11 @@ class MainWindow(QMainWindow):
 
     def mol_info_clicked(self):
         """Is called when "Info" button in single soliton widget is clicked. Opens a dialog window showing whether
-        the automata is deterministic, strongly deterministic and reachability-deterministic and displaying the degree of non-determinism and all impervious paths.
+        the automaton is deterministic, strongly deterministic and reachability-deterministic and displaying the degree of non-determinism and all impervious paths.
         """
 
         def save_info():
-            """Opens a file dialog in which user can specify a path where a text file with all info on soliton automata/ soliton graph should be saved.
+            """Opens a file dialog in which user can specify a path where a text file with all info on soliton automaton/ soliton graph should be saved.
             Text file also contains the input string representing the molecule.
             Only allows `.txt` file suffix.
             """
@@ -973,7 +973,7 @@ class MainWindow(QMainWindow):
         txt_text = txt_text + f"Deterministic: "
         grid.addWidget(label_det, 0, 0, 1, 1)
         det_bool = QtWidgets.QLabel(dlg)
-        if self.automata.deterministic:
+        if self.automaton.deterministic:
             det_bool.setText("Yes")
             txt_text = txt_text + f"Yes \n"
         else: 
@@ -986,7 +986,7 @@ class MainWindow(QMainWindow):
         txt_text = txt_text + f"Strongly deterministic: "
         grid.addWidget(label_strong_det, 1, 0, 1, 1)
         strong_det_bool = QtWidgets.QLabel(dlg)
-        if self.automata.strongly_deterministic:
+        if self.automaton.strongly_deterministic:
             strong_det_bool.setText("Yes")
             txt_text = txt_text + f"Yes \n"
         else: 
@@ -999,7 +999,7 @@ class MainWindow(QMainWindow):
         txt_text = txt_text + f"Reachability-deterministic: "
         grid.addWidget(label_reach_det, 2, 0, 1, 1)
         reach_det_bool = QtWidgets.QLabel(dlg)
-        if self.automata.reachability_deterministic:
+        if self.automaton.reachability_deterministic:
             reach_det_bool.setText("Yes")
             txt_text = txt_text + f"Yes \n"
         else: 
@@ -1012,8 +1012,8 @@ class MainWindow(QMainWindow):
         txt_text = txt_text + f"Degree of non-determinism: "
         grid.addWidget(label_degree, 3, 0, 1, 1)
         degree = QtWidgets.QLabel(dlg)
-        degree.setText(str(self.automata.degree_of_nondeterminism))
-        txt_text = txt_text + f"{self.automata.degree_of_nondeterminism} \n"
+        degree.setText(str(self.automaton.degree_of_nondeterminism))
+        txt_text = txt_text + f"{self.automaton.degree_of_nondeterminism} \n"
         grid.addWidget(degree, 3, 1, 1, 1)
         # Impervious paths
         label_imp_paths = QtWidgets.QLabel(dlg)
@@ -1028,7 +1028,7 @@ class MainWindow(QMainWindow):
         group = QtWidgets.QGroupBox()
         layout = QtWidgets.QGridLayout(group)
         layout.setContentsMargins(0, 0, 0, 0)
-        impervs = self.automata.find_impervious_paths()
+        impervs = self.automaton.find_impervious_paths()
         if impervs == []:
             layout.addWidget(QtWidgets.QLabel("-"))
             txt_text = txt_text + f"-"
@@ -1044,11 +1044,11 @@ class MainWindow(QMainWindow):
     
     def mol_info_clicked_m(self):
         """Is called when "Info" button in multi soliton widget is clicked. Opens a dialog window showing whether
-        the automata is deterministic, strongly deterministic, reachability-deterministic and displaying the degree of non-determinism.
+        the automaton is deterministic, strongly deterministic, reachability-deterministic and displaying the degree of non-determinism.
         """
 
         def save_info():
-            """Opens a file dialog in which user can specify a path where a text file with all info on soliton automata/ soliton graph should be saved.
+            """Opens a file dialog in which user can specify a path where a text file with all info on soliton automaton/ soliton graph should be saved.
             Text file also contains the input string representing the molecule.
             Only allows `.txt` file suffix.
             """
@@ -1069,7 +1069,7 @@ class MainWindow(QMainWindow):
         txt_text = txt_text + f"Deterministic: "
         grid.addWidget(label_det, 0, 0, 1, 1)
         det_bool = QtWidgets.QLabel(dlg)
-        if self.multi_automata.deterministic:
+        if self.multi_automaton.deterministic:
             det_bool.setText("Yes")
             txt_text = txt_text + f"Yes \n"
         else: 
@@ -1081,7 +1081,7 @@ class MainWindow(QMainWindow):
         txt_text = txt_text + f"Strongly deterministic: "
         grid.addWidget(label_strong_det, 1, 0, 1, 1)
         strong_det_bool = QtWidgets.QLabel(dlg)
-        if self.multi_automata.strongly_deterministic:
+        if self.multi_automaton.strongly_deterministic:
             strong_det_bool.setText("Yes")
             txt_text = txt_text + f"Yes \n"
         else: 
@@ -1094,7 +1094,7 @@ class MainWindow(QMainWindow):
         txt_text = txt_text + f"Reachability-deterministic: "
         grid.addWidget(label_reach_det, 2, 0, 1, 1)
         reach_det_bool = QtWidgets.QLabel(dlg)
-        if self.multi_automata.reachability_deterministic:
+        if self.multi_automaton.reachability_deterministic:
             reach_det_bool.setText("Yes")
             txt_text = txt_text + f"Yes \n"
         else: 
@@ -1107,8 +1107,8 @@ class MainWindow(QMainWindow):
         txt_text = txt_text + f"Degree of non-determinism: "
         grid.addWidget(label_degree, 3, 0, 1, 1)
         degree = QtWidgets.QLabel(dlg)
-        degree.setText(str(self.multi_automata.degree_of_nondeterminism))
-        txt_text = txt_text + f"{self.multi_automata.degree_of_nondeterminism} \n"
+        degree.setText(str(self.multi_automaton.degree_of_nondeterminism))
+        txt_text = txt_text + f"{self.multi_automaton.degree_of_nondeterminism} \n"
         grid.addWidget(degree, 3, 1, 1, 1)
 
         save_button = QtWidgets.QPushButton(dlg)
@@ -1166,7 +1166,7 @@ class MainWindow(QMainWindow):
         self.burst.clear()
         try:
             # Try creating a multi soliton automaton with the graph and the entered set of bursts. Fails if syntax of set of bursts is wrong.
-            self.multi_automata = MultiwaveSolitonAutomata(self.my_graph_m, bursts)
+            self.multi_automaton = MultiwaveSolitonAutomaton(self.my_graph_m, bursts)
             bursts = bursts.split(";")
             for burst in bursts:
                 burst = re.sub(r"[{}]+", "", burst)
@@ -1253,12 +1253,12 @@ class MainWindow(QMainWindow):
         self.path_index = None # we need this variable later in show_animation_clicked
         self.paths.clear()
         if self.all_exterior_nodes.isChecked(): # User wants to see all soliton paths between all pairs of exterior nodes
-            key = self.automata.matrix_to_string(nx.to_numpy_array(self.my_graph.graph))
-            self.found_paths = self.automata.states_plus_soliton_paths[key][1]
+            key = self.automaton.matrix_to_string(nx.to_numpy_array(self.my_graph.graph))
+            self.found_paths = self.automaton.states_plus_soliton_paths[key][1]
         else: # User selected a specific pair of exterior nodes
             node1 = self.my_graph.exterior_nodes_reverse[self.node_1.currentText()]
             node2 = self.my_graph.exterior_nodes_reverse[self.node_2.currentText()]
-            self.found_paths = self.automata.call_find_all_paths_given_nodes(node1, node2, self.my_graph)
+            self.found_paths = self.automaton.call_find_all_paths_given_nodes(node1, node2, self.my_graph)
         if self.found_paths == []: # No paths were found
             self.hide_multiple([self.parting_line2, self.soliton_paths_label, self.paths, self.row6, self.show_matrices, self.show_end_result, self.show_animation])
             self.status = 2
@@ -1269,7 +1269,7 @@ class MainWindow(QMainWindow):
             msg.setText("There exists no soliton path between these exterior nodes.")
             msg.setIcon(QMessageBox.Information)
             msg.setStandardButtons(QMessageBox.Retry)
-            msg.setInformativeText("Please try again with different exterior nodes or a different soliton automata.")
+            msg.setInformativeText("Please try again with different exterior nodes or a different soliton automaton.")
             x = msg.exec_()
         else: # Paths were found and are now added to combobox
             self.incomplete_paths_indices = []
@@ -1294,12 +1294,12 @@ class MainWindow(QMainWindow):
         self.traversal_index = None # we need this variable later in show_animation_clicked
         self.traversals.clear()
         if self.all_bursts.isChecked(): # User wants to see all configuration trails for all bursts in the set of bursts
-            key = self.multi_automata.matrix_to_string(nx.to_numpy_array(self.my_graph_m.graph))
-            self.found_traversals = self.multi_automata.states_plus_traversals[key][1]
-            self.num_traversals_per_burst = self.multi_automata.states_plus_traversals[key][2]
+            key = self.multi_automaton.matrix_to_string(nx.to_numpy_array(self.my_graph_m.graph))
+            self.found_traversals = self.multi_automaton.states_plus_traversals[key][1]
+            self.num_traversals_per_burst = self.multi_automaton.states_plus_traversals[key][2]
         else: # User selected a specific burst
             burst_index = int(self.burst.currentIndex())
-            self.found_traversals = self.multi_automata.call_find_all_travs_given_burst(self.multi_automata.bursts_dicts[burst_index], self.my_graph_m)
+            self.found_traversals = self.multi_automaton.call_find_all_travs_given_burst(self.multi_automaton.bursts_dicts[burst_index], self.my_graph_m)
             self.num_traversals_per_burst = None
         if self.found_traversals == []: # No configuration trails were found
             self.hide_multiple([self.parting_line3_m, self.traversals_label, self.traversals, self.row7_m, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])

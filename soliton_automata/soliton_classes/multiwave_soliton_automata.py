@@ -1,4 +1,4 @@
-"""Multiwave soliton automata.
+"""Multiwave soliton automaton.
 """
 import copy
 import re
@@ -9,21 +9,21 @@ from soliton_classes.soliton_graph import SolitonGraph
 from soliton_classes.traversal import Traversal
 
 
-class MultiwaveSolitonAutomata:
-    """Representation of a multiwave soliton automata, which contains all traversals for a burst.
+class MultiwaveSolitonAutomaton:
+    """Representation of a multiwave soliton automaton, which contains all traversals for a burst.
     """
 
     def __init__(self, soliton_graph: SolitonGraph, bursts: str):
-        """Initializes a `MultiwaveSolitonAutomata` object by using a soliton graph and a burst.
+        """Initializes a `MultiwaveSolitonAutomaton` object by using a soliton graph and a burst.
         """
         self.soliton_graph: SolitonGraph = soliton_graph
-        """Soliton graph the automata is based on."""
+        """Soliton graph the automaton is based on."""
         self.bursts = bursts
         """The set of input burst."""
         self.bursts_dicts: list = self.build_bursts_dicts()
         """List of the bursts as dictionaries (soliton number as key and a list containing exterior nodes and entry time as value)."""
         self.deterministic: bool
-        """Whether the multiwave soliton automata is deterministic."""
+        """Whether the multiwave soliton automaton is deterministic."""
         self.strongly_deterministic: bool
         """Whether the multiwave soliton graph is strongly deterministic."""
         self.reachability_deterministic: bool
@@ -31,7 +31,7 @@ class MultiwaveSolitonAutomata:
         self.degree_of_nondeterminism: int
         """The degree of non-determinism of the soliton automaton"""
         self.states_plus_traversals: dict
-        """All states of the soliton automata plus all traversals that can be found in each state plus number of traversals found for each burst
+        """All states of the soliton automaton plus all traversals that can be found in each state plus number of traversals found for each burst
         (Id/ string of the states adjacency matrix as key and state, traversals and list of numbers as values)."""
         self.deterministic, self.strongly_deterministic, self.reachability_deterministic, self.degree_of_nondeterminism, self.states_plus_traversals = self.all_traversals()
 
@@ -282,13 +282,13 @@ class MultiwaveSolitonAutomata:
 
 
     def all_traversals (self):
-        """Calls `call_find_all_travs_given_burst` for all states of the automata and all bursts in order to get all possible traversals in all states.
+        """Calls `call_find_all_travs_given_burst` for all states of the automaton and all bursts in order to get all possible traversals in all states.
 
         Returns:
-            bool: Whether the soliton automata is deterministic or not.
-            bool: Whether the soliton automata is strongly deterministic or not.
-            bool: Whether the soliton automata is reachability-deterministic or not.
-            int: The degree of non-determinism of the soliton automata.
+            bool: Whether the soliton automaton is deterministic or not.
+            bool: Whether the soliton automaton is strongly deterministic or not.
+            bool: Whether the soliton automaton is reachability-deterministic or not.
+            int: The degree of non-determinism of the soliton automaton.
             dict: All states of the soliton graph plus all traversals that can be found in each state plus number of traversals found for each burst.
         """
         initial_matrix = nx.to_numpy_array(self.soliton_graph.graph)
@@ -301,7 +301,7 @@ class MultiwaveSolitonAutomata:
         state_sucstate_burst = dict() # dictionary with number of found traversals for each state + successor state + burst
         state_sucstate = dict() # dictionary with bool for each state + successor state (first set to False and then only set to True if there is a burst such that there is only one traversal between these states)
 
-        for state in states: # for all states/ soliton graphs of the automata
+        for state in states: # for all states/ soliton graphs of the automaton
             state_matrix_id = self.matrix_to_string(nx.to_numpy_array(state.graph))
             all_traversals = []
             num_traversals_per_burst = []

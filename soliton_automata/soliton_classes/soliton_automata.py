@@ -1,4 +1,4 @@
-"""Soliton automata.
+"""Soliton automaton.
 """
 import copy
 
@@ -8,25 +8,25 @@ from soliton_classes.soliton_graph import SolitonGraph
 from soliton_classes.soliton_path import SolitonPath
 
 
-class SolitonAutomata:
-    """Representation of a soliton automata, which contains all soliton paths between all pairs of exterior nodes.
+class SolitonAutomaton:
+    """Representation of a soliton automaton, which contains all soliton paths between all pairs of exterior nodes.
     """
 
     def __init__(self, soliton_graph: SolitonGraph):
-        """Initializes a `SolitonAutomata` object by using a soliton graph and a stop number.
+        """Initializes a `SolitonAutomaton` object by using a soliton graph and a stop number.
         """
         self.soliton_graph: SolitonGraph = soliton_graph
-        """Soliton graph the automata is based on."""
+        """Soliton graph the automaton is based on."""
         self.deterministic: bool
-        """Whether the soliton automata is deterministic."""
+        """Whether the soliton automaton is deterministic."""
         self.strongly_deterministic: bool
-        """Whether the soliton automata is strongly deterministic."""
+        """Whether the soliton automaton is strongly deterministic."""
         self.reachability_deterministic: bool
-        """Whether the soliton automata is reachability-deterministic."""
+        """Whether the soliton automaton is reachability-deterministic."""
         self.degree_of_nondeterminism: int
         """The degree of non-determinism of the soliton automaton"""
         self.states_plus_soliton_paths: dict
-        """All states of the soliton automata plus all soliton paths that can be found in each state
+        """All states of the soliton automaton plus all soliton paths that can be found in each state
         (Id/ string of the states adjacency matrix as key and state and soliton paths as values)."""
         self.deterministic, self.strongly_deterministic, self.reachability_deterministic, self.degree_of_nondeterminism, self.states_plus_soliton_paths = self.all_paths_and_determinism()
 
@@ -177,14 +177,14 @@ class SolitonAutomata:
 
 
     def all_paths_and_determinism(self):
-        """Calls `call_find_all_paths_given_nodes` for all states of the automata and all pairs of exterior nodes in order to get all possible soliton paths in all states.
+        """Calls `call_find_all_paths_given_nodes` for all states of the automaton and all pairs of exterior nodes in order to get all possible soliton paths in all states.
         Checks for determinism with the help of the found states and soliton paths.
 
         Returns:
-            bool: Whether the soliton automata is deterministic or not.
-            bool: Whether the soliton automata is strongly deterministic or not.
-            bool: Whether the soliton automata is reachability-deterministic or not.
-            int: The degree of non-determinism of the soliton automata.
+            bool: Whether the soliton automaton is deterministic or not.
+            bool: Whether the soliton automaton is strongly deterministic or not.
+            bool: Whether the soliton automaton is reachability-deterministic or not.
+            int: The degree of non-determinism of the soliton automaton.
             dict: All states of the soliton graph plus all soliton paths that can be found in each state.
         """
         ext_nodes = []
@@ -199,7 +199,7 @@ class SolitonAutomata:
         state_sucstate = dict() # dictionary with bool for each state + successor state (first set to False and then only set to True if there is a burst such that there is only one path between these states)
         for key in self.soliton_graph.exterior_nodes:
             ext_nodes.append(key)
-        for state in states: # for all states/ soliton graphs of the automata
+        for state in states: # for all states/ soliton graphs of the automaton
             state_matrix_id = self.matrix_to_string(nx.to_numpy_array(state.graph))
             all_paths = []
             for i in range(0, len(ext_nodes)):
