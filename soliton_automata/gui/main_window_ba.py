@@ -633,13 +633,14 @@ class MainWindow(QMainWindow):
             text = text + f"- Branches are embedded in round brackets (e.g. 'C(=CC=C)C')\n"
             text = text + f"- The two connecting atoms of a ring are marked with the same number (e.g. 'C1' and 'C1') \n"
             text = text + "- Exterior nodes are marked with braces and a number (e.g. '{=1}')\n\n"
+            text = text + "Alternatively, you can choose a molecule from your history by using the drop-down menu.\n"
             text = text + "Submit by clicking \"Choose molecule\"."
             label.setText(text)
         elif self.status == 2:
             text = f"Please now choose exterior nodes. \n"
-            text = text + f"If you check \"All\", soliton paths between all pairs of the graph's exterior nodes are displayed. \n"
+            text = text + f"If you check \"All\", perfect soliton paths between all pairs of the graph's exterior nodes are displayed. \n"
             text = text + f"Alternatively, you can choose two exterior nodes. \n"
-            text = text + f"The software will then only give you paths between the first and the second exterior node. \n"
+            text = text + f"The software will then only give you perfect paths between the first and the second exterior node. \n"
             text = text + "Submit by clicking \"Choose nodes\". \n\n"
             text = text + f"You can also save the soliton graph with the save-button on the right. \n"
             text = text + f"Determinism properties and possible impervious paths can be investigated by clicking on \"Info\"."
@@ -678,6 +679,7 @@ class MainWindow(QMainWindow):
             text = text + f"- Branches are embedded in round brackets (e.g. 'C(=CC=C)C')\n"
             text = text + f"- The two connecting atoms of a ring are marked with the same number (e.g. 'C1' and 'C1') \n"
             text = text + "- Exterior nodes are marked with braces and a number (e.g. '{=1}')\n\n"
+            text = text + "Alternatively, you can choose a molecule from your history by using the drop-down menu.\n"
             text = text + "Submit by clicking \"Choose molecule\"."
             label.setText(text)
         elif self.status_m == 2:
@@ -693,7 +695,7 @@ class MainWindow(QMainWindow):
             label.setText(text)
         elif self.status_m == 3:
             text = f"Please now choose a burst. \n"
-            text = text + f"If you check \"All\", configuration trails for all bursts are displayed. \n"
+            text = text + f"If you check \"All\", perfect configuration trails for all bursts are displayed. \n"
             text = text + f"Alternatively, you can choose a specific burst. \n"
             text = text + "Submit by clicking \"Select burst(s)\". \n\n"
             text = text + f"The soliton automaton's determinism properties can be investigated by clicking on \"Info\"."
@@ -1259,7 +1261,8 @@ class MainWindow(QMainWindow):
             node1 = self.my_graph.exterior_nodes_reverse[self.node_1.currentText()]
             node2 = self.my_graph.exterior_nodes_reverse[self.node_2.currentText()]
             self.found_paths = self.automaton.call_find_all_paths_given_nodes(node1, node2, self.my_graph)
-        if self.found_paths == []: # No paths were found
+        perfectPaths = [path for path in self.found_paths if isinstance(path, SolitonPath)]
+        if perfectPaths == []: # No paths were found
             self.hide_multiple([self.parting_line2, self.soliton_paths_label, self.paths, self.row6, self.show_matrices, self.show_end_result, self.show_animation])
             self.status = 2
             self.short_help.setText("Choose a pair of exterior nodes or use all pairs for finding paths")
@@ -1301,7 +1304,8 @@ class MainWindow(QMainWindow):
             burst_index = int(self.burst.currentIndex())
             self.found_traversals = self.multi_automaton.call_find_all_travs_given_burst(self.multi_automaton.bursts_dicts[burst_index], self.my_graph_m)
             self.num_traversals_per_burst = None
-        if self.found_traversals == []: # No configuration trails were found
+        perfectTraversals = [trav for trav in self.found_traversals if isinstance(trav, Traversal)]
+        if perfectTraversals == []: # No configuration trails were found
             self.hide_multiple([self.parting_line3_m, self.traversals_label, self.traversals, self.row7_m, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
             self.status_m = 3
             self.short_help_m.setText("Choose a burst or use all bursts in the set of bursts for finding paths")
