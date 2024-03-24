@@ -821,7 +821,7 @@ class MainWindow(QMainWindow):
                 data.append(molecule)
 
             readme_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data.json')
-            with open(readme_path, "r") as json_file:
+            with open(readme_path, "w") as json_file:
                 json.dump(data, json_file, indent=4)
 
             # Change combobox items so that entered molecule (which is now the last used molecule) is the first element in the comboboxes of both windows
@@ -933,7 +933,7 @@ class MainWindow(QMainWindow):
                 data.append(molecule)
 
             readme_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data.json')
-            with open(readme_path, "r") as json_file:
+            with open(readme_path, "w") as json_file:
                 json.dump(data, json_file, indent=4)
 
             # Change combobox items so that entered molecule (which is now the last used molecule) is the first element in the comboboxes of both windows
@@ -1226,7 +1226,7 @@ class MainWindow(QMainWindow):
                     data[index_of_molecule]["sets_of_bursts"].append(burst_data)
 
             readme_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data.json')
-            with open(readme_path, "r") as json_file:
+            with open(readme_path, "w") as json_file:
                 json.dump(data, json_file, indent=4)
 
             # Change combobox items so that entered set of bursts (which is now the last used set of bursts) is the first element in the combobox
