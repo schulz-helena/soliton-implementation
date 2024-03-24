@@ -26,6 +26,7 @@ setup(
         'pysmiles>=1.0.1',
         'matplotlib>=3.5.1',
         'Pyqt5>=5.15.4',
+        'pillow==9.0.1'
     ],
     package_data={'': ['styles.css', 'styles_m.css', 'data.json']},
     include_package_data=True,

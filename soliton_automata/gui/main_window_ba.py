@@ -10,8 +10,8 @@ from json.decoder import JSONDecodeError
 from datetime import datetime
 
 import networkx as nx
-import res.resources
-from gui.startscreen import Startscreen
+import soliton_automata.res.resources
+from soliton_automata.gui.startscreen import Startscreen
 from PIL.ImageQt import ImageQt
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import Qt

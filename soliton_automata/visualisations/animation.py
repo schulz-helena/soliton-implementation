@@ -8,10 +8,10 @@ from matplotlib.axes import Axes
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.colors import hsv_to_rgb
 from PIL import Image
-from soliton_classes.soliton_graph import SolitonGraph
-from soliton_classes.soliton_path import SolitonPath
-from soliton_classes.traversal import Traversal
-from visualisations.visualisation import Visualisation
+from soliton_automata.soliton_classes.soliton_graph import SolitonGraph
+from soliton_automata.soliton_classes.soliton_path import SolitonPath
+from soliton_automata.soliton_classes.traversal import Traversal
+from soliton_automata.visualisations.visualisation import Visualisation
 
 
 class Animation:

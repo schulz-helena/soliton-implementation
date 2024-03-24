@@ -5,7 +5,7 @@ import re
 
 import networkx as nx
 import numpy as np
-from soliton_classes.soliton_graph import SolitonGraph
+from soliton_automata.soliton_classes.soliton_graph import SolitonGraph
 
 
 class Traversal:
