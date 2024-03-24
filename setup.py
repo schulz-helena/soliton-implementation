@@ -11,7 +11,7 @@ with open(readme_path, "r", encoding="utf-8") as fh:
 
 setup(
     name = 'soliton-automata-software',
-    version = '2.1.0',
+    version = '2.2.0',
     description = 'Soliton Automata Software that computes soliton paths/ total legal configuration trails for a given soliton graph (and a given set of bursts)',
     long_description=long_description,
     long_description_content_type="text/markdown",

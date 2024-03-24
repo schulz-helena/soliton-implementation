@@ -16,13 +16,13 @@ from PIL.ImageQt import ImageQt
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QDialog, QMainWindow, QMessageBox, QScrollArea, QFrame
-from soliton_classes.multiwave_soliton_automata import MultiwaveSolitonAutomaton
-from soliton_classes.soliton_automata import SolitonAutomaton
-from soliton_classes.soliton_graph import SolitonGraph
-from soliton_classes.soliton_path import SolitonPath
-from soliton_classes.traversal import Traversal
-from visualisations.animation import Animation
-from visualisations.visualisation import Visualisation
+from soliton_automata.soliton_classes.multiwave_soliton_automata import MultiwaveSolitonAutomaton
+from soliton_automata.soliton_classes.soliton_automata import SolitonAutomaton
+from soliton_automata.soliton_classes.soliton_graph import SolitonGraph
+from soliton_automata.soliton_classes.soliton_path import SolitonPath
+from soliton_automata.soliton_classes.traversal import Traversal
+from soliton_automata.visualisations.animation import Animation
+from soliton_automata.visualisations.visualisation import Visualisation
 
 
 class QHLine(QFrame):
