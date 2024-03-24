@@ -33,7 +33,7 @@ class SolitonGraph:
         self.labels: dict = nx.get_node_attributes(self.graph, 'label')
         """Node labels (node id as key, node label as value)."""
         self.way: str = user_input
-        """Way that led to the soliton graph (consists of user input of initial soliton graph of a soliton automata and soliton paths)."""
+        """Way that led to the soliton graph (consists of user input of initial soliton graph of a soliton automaton and soliton paths)."""
         self.rings: list = self.find_rings()
         """All rings with entrance node as first and last node."""
 

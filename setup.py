@@ -28,7 +28,7 @@ setup(
         'Pyqt5>=5.15.4',
         'pillow==9.0.1'
     ],
-    package_data={'': ['styles.css', 'styles_m.css']},
+    package_data={'': ['styles.css', 'styles_m.css', 'data.json']},
     include_package_data=True,
     entry_points = {
         'console_scripts': [

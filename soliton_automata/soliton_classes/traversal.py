@@ -1,4 +1,4 @@
-"""Traversal.
+"""Traversal (= Configuration trail).
 """
 import copy
 import re
@@ -101,6 +101,11 @@ class Traversal:
     
 
     def ring_passages(self):
+        """How often each ring in the soliton graph is passed.
+
+        Returns:
+            dict: Contains the number of ring passages for each ring and soliton.
+        """
         paths = self.traversal_node_ids
         rings_num = len(self.soliton_graph.rings)
         ring_passages = dict()

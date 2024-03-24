@@ -5,6 +5,9 @@ import io
 import math
 import os
 import re
+import json
+from json.decoder import JSONDecodeError
+from datetime import datetime
 
 import networkx as nx
 import soliton_automata.res.resources
@@ -12,14 +15,30 @@ from soliton_automata.gui.startscreen import Startscreen
 from PIL.ImageQt import ImageQt
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QDialog, QMainWindow, QMessageBox, QScrollArea
-from soliton_automata.soliton_classes.multiwave_soliton_automata import MultiwaveSolitonAutomata
-from soliton_automata.soliton_classes.soliton_automata import SolitonAutomata
-from soliton_automata.soliton_classes.soliton_graph import SolitonGraph
-from soliton_automata.soliton_classes.soliton_path import SolitonPath
-from soliton_automata.soliton_classes.traversal import Traversal
-from soliton_automata.visualisations.animation import Animation
-from soliton_automata.visualisations.visualisation import Visualisation
+from PyQt5.QtWidgets import QDialog, QMainWindow, QMessageBox, QScrollArea, QFrame
+from soliton_classes.multiwave_soliton_automata import MultiwaveSolitonAutomaton
+from soliton_classes.soliton_automata import SolitonAutomaton
+from soliton_classes.soliton_graph import SolitonGraph
+from soliton_classes.soliton_path import SolitonPath
+from soliton_classes.traversal import Traversal
+from visualisations.animation import Animation
+from visualisations.visualisation import Visualisation
+
+
+class QHLine(QFrame):
+    """Line Class that defines how separator lines look.
+    """
+    def __init__(self, mode: str):
+        super(QHLine, self).__init__()
+        self.setMinimumWidth(1)
+        self.setFixedHeight(1)
+        self.setFrameShape(QFrame.HLine)
+        self.setFrameShadow(QFrame.Sunken)
+        self.setSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Minimum)
+        if mode == "single":
+            self.setStyleSheet("background-color: rgb(191, 207, 255); color: rgb(191, 207, 255);")
+        elif mode == "multi":
+            self.setStyleSheet("background-color: rgb(149, 221, 185); color: rgb(149, 221, 185);")
 
 
 class MainWindow(QMainWindow):
@@ -42,10 +61,10 @@ class MainWindow(QMainWindow):
         center_point = QtWidgets.QDesktopWidget().availableGeometry().center()
         qt_rectangle.moveCenter(center_point)
         self.move(qt_rectangle.topLeft().x(), 0)
-        self.resize(QtCore.QSize(600, 650))
+        self.resize(QtCore.QSize(600, 680))
 
 
-        # SOLITON AUTOMATA WIDGET
+        # SOLITON AUTOMATON WIDGET
         self.wid_single = QtWidgets.QWidget()
         self.gridLayout = QtWidgets.QGridLayout(self.wid_single)
         # Row 0:
@@ -66,23 +85,44 @@ class MainWindow(QMainWindow):
         # "Mode" label
         self.mode = QtWidgets.QLabel(self.wid_single)
         self.gridLayout.addWidget(self.mode, 0, 1, 1, 1)
-        # Row 1: -
+        # Groupbox containg last two elements of row 0
+        self.row0 = QtWidgets.QGroupBox()
+        self.minigrid0 = QtWidgets.QGridLayout(self.row0)
+        self.minigrid0.setContentsMargins(0, 0, 0, 0)
+        self.gridLayout.addWidget(self.row0, 0, 3, 1, 1)
+        # Show Tips Checkbox
+        self.show_tips = QtWidgets.QCheckBox("Show Tips")
+        self.show_tips.setChecked(True)
+        self.minigrid0.addWidget(self.show_tips, 0, 0, 1, 1, alignment=QtCore.Qt.AlignRight)
+        # Help button
+        self.help_button = QtWidgets.QPushButton("?")
+        self.help_button.setFixedSize(QtCore.QSize(20, 20))
+        self.minigrid0.addWidget(self.help_button, 0, 1, 1, 1, alignment=QtCore.Qt.AlignRight)
+        self.help_button.setStyleSheet("QPushButton {border-radius: 10px;}")
+        # Row 1: - (Image of molecule in row 0 stretches over 2 lines)
         # Row 2:
+        # Label that displays short help/ a tip in the current status of the UI
+        self.short_help = QtWidgets.QLabel(self.wid_single)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Fixed)
+        self.short_help.setSizePolicy(sizePolicy)
+        self.short_help.setStyleSheet("QLabel {color: rgb(132, 145, 193);}")
+        self.gridLayout.addWidget(self.short_help, 2, 0, 1, 5, alignment=QtCore.Qt.AlignHCenter)
+        # Row 3:
         # "Traversal Mode" Checkbox
         self.traversal_mode = QtWidgets.QCheckBox("Traversal Mode")
         self.traversal_mode.setChecked(False)
-        self.gridLayout.addWidget(self.traversal_mode, 2, 0, 1, 1)
+        self.gridLayout.addWidget(self.traversal_mode, 3, 0, 1, 1)
         # Groupbox containg last two elements of row 2
-        self.row2 = QtWidgets.QGroupBox()
-        self.minigrid2 = QtWidgets.QGridLayout(self.row2)
+        self.row3 = QtWidgets.QGroupBox()
+        self.minigrid2 = QtWidgets.QGridLayout(self.row3)
         self.minigrid2.setContentsMargins(0, 0, 0, 0)
-        self.gridLayout.addWidget(self.row2, 2, 3, 1, 1)
+        self.gridLayout.addWidget(self.row3, 3, 3, 1, 1)
         # Info button
         self.mol_info = QtWidgets.QPushButton(self.wid_single)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Fixed)
         self.mol_info.setSizePolicy(sizePolicy)
         self.mol_info.setMinimumSize(QtCore.QSize(0, 32))
-        self.minigrid2.addWidget(self.mol_info, 2, 0, 1, 1)
+        self.minigrid2.addWidget(self.mol_info, 3, 0, 1, 1)
         # Save button for the molecule
         self.save = QtWidgets.QPushButton(self.wid_single)
         self.save.setStyleSheet("QPushButton {background-color: rgb(191, 207, 255); image: url(:/icons/save.svg);} QPushButton::pressed {background-color : rgb(132, 145, 193);}")
@@ -90,96 +130,112 @@ class MainWindow(QMainWindow):
         self.save.setSizePolicy(sizePolicy)
         self.save.setMaximumSize(QtCore.QSize(16777215, 32))
         self.save.setMinimumSize(QtCore.QSize(0, 32))
-        self.minigrid2.addWidget(self.save, 2, 1, 1, 1)
-        # Row 3:
+        self.minigrid2.addWidget(self.save, 3, 1, 1, 1)
+        # Row 4:
         # "Molecule" label
         self.molecule_label = QtWidgets.QLabel(self.wid_single)
-        self.gridLayout.addWidget(self.molecule_label, 3, 0, 1, 1)
+        self.gridLayout.addWidget(self.molecule_label, 4, 0, 1, 1)
         # Groupbox containg middle two elements of row 3
-        self.row3 = QtWidgets.QGroupBox()
-        self.minigrid3 = QtWidgets.QGridLayout(self.row3)
+        self.row4 = QtWidgets.QGroupBox()
+        self.minigrid3 = QtWidgets.QGridLayout(self.row4)
         self.minigrid3.setContentsMargins(0, 0, 0, 0)
-        self.gridLayout.addWidget(self.row3, 3, 1, 1, 2)
-        # Text field for molecule
-        self.molecule_lineedit = QtWidgets.QLineEdit(self.row3)
+        self.gridLayout.addWidget(self.row4, 4, 1, 1, 2)
+        # Text field for molecule (combobox with a line edit)
+        self.molecule_lineedit = QtWidgets.QComboBox(self.row4)
+        try:
+            with open("data.json", "r") as json_file:
+                data = json.load(json_file)
+        except:
+            pass
+        sorted_data = sorted(data, key=lambda x: x["last_used"], reverse=True)
+        for molecule in sorted_data: # Fill combobox with input strings from history
+            self.molecule_lineedit.addItem(molecule["input_string"])
+        edit = QtWidgets.QLineEdit(self.row4)
+        self.molecule_lineedit.setLineEdit(edit)
+        # Do those two things to prevent long molecules from resizing the whole window:
+        self.molecule_lineedit.setSizeAdjustPolicy(QtWidgets.QComboBox.AdjustToMinimumContentsLength)
+        self.molecule_lineedit.setMinimumContentsLength(1)
+        self.molecule_lineedit.lineEdit().clear()
+        self.molecule_lineedit.setStyleSheet("QComboBox {border: 2px solid rgb(191, 207, 255);border-radius: 10px;padding: 0 8px;}")
         self.minigrid3.addWidget(self.molecule_lineedit, 0, 0, 1, 1)
         # Submit button for molecule
         self.submit_molecule = QtWidgets.QPushButton(self.wid_single)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Fixed)
         self.submit_molecule.setSizePolicy(sizePolicy)
         self.submit_molecule.setMinimumSize(QtCore.QSize(0, 32))
-        self.gridLayout.addWidget(self.submit_molecule, 3, 3, 1, 1)
-        # Row 4: 
+        self.gridLayout.addWidget(self.submit_molecule, 4, 3, 1, 1)
+        # Parting line
+        self.parting_line1 = QHLine("single")
+        self.gridLayout.addWidget(self.parting_line1, 5, 0, 1, 4)
+        # Row 5: 
         # "Exterior nodes" label
         self.exterior_nodes_label = QtWidgets.QLabel(self.wid_single)
-        self.gridLayout.addWidget(self.exterior_nodes_label, 4, 0, 1, 1)
+        self.gridLayout.addWidget(self.exterior_nodes_label, 6, 0, 1, 1)
         # Groupbox containg middle elements of row 4
-        self.row4 = QtWidgets.QGroupBox()
-        self.minigrid4 = QtWidgets.QGridLayout(self.row4)
+        self.row5 = QtWidgets.QGroupBox()
+        self.minigrid4 = QtWidgets.QGridLayout(self.row5)
         self.minigrid4.setContentsMargins(0, 0, 0, 0)
-        self.gridLayout.addWidget(self.row4, 4, 1, 1, 2)
+        self.gridLayout.addWidget(self.row5, 6, 1, 1, 2)
         # "All" Checkbox
         self.all_exterior_nodes = QtWidgets.QCheckBox("All")
         self.all_exterior_nodes.setChecked(False)
-        self.minigrid4.addWidget(self.all_exterior_nodes, 4, 0, 1, 1)
+        self.minigrid4.addWidget(self.all_exterior_nodes, 6, 0, 1, 1)
         # Combobox to choose first exterior node
-        self.node_1 = QtWidgets.QComboBox(self.row4)
+        self.node_1 = QtWidgets.QComboBox(self.row5)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
         self.node_1.setSizePolicy(sizePolicy)
-        self.minigrid4.addWidget(self.node_1, 4, 1, 1, 1)
+        self.minigrid4.addWidget(self.node_1, 6, 1, 1, 1)
         # "&" label
-        self.exterior_nodes_label2 = QtWidgets.QLabel(self.row4)
-        self.minigrid4.addWidget(self.exterior_nodes_label2, 4, 2, 1, 1)
+        self.exterior_nodes_label2 = QtWidgets.QLabel(self.row5)
+        self.minigrid4.addWidget(self.exterior_nodes_label2, 6, 2, 1, 1)
         # Combobox to choose second exterior node
-        self.node_2 = QtWidgets.QComboBox(self.row4)
+        self.node_2 = QtWidgets.QComboBox(self.row5)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
         self.node_2.setSizePolicy(sizePolicy)
-        self.minigrid4.addWidget(self.node_2, 4, 3, 1, 1)
+        self.minigrid4.addWidget(self.node_2, 6, 3, 1, 1)
         # Submit button for exterior nodes
         self.submit_exterior_nodes = QtWidgets.QPushButton(self.wid_single)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Fixed)
         self.submit_exterior_nodes.setSizePolicy(sizePolicy)
         self.submit_exterior_nodes.setMinimumSize(QtCore.QSize(0, 32))
-        self.gridLayout.addWidget(self.submit_exterior_nodes, 4, 3, 1, 1)
-        # Row 5:
+        self.gridLayout.addWidget(self.submit_exterior_nodes, 6, 3, 1, 1)
+        # Parting line
+        self.parting_line2 = QHLine("single")
+        self.gridLayout.addWidget(self.parting_line2, 7, 0, 1, 4)
+        # Row 6:
         # "Soliton paths" label
         self.soliton_paths_label = QtWidgets.QLabel(self.wid_single)
-        self.gridLayout.addWidget(self.soliton_paths_label, 5, 0, 1, 1)
+        self.gridLayout.addWidget(self.soliton_paths_label, 8, 0, 1, 1)
         # Groupbox containg middle elements of row 5
-        self.row5 = QtWidgets.QGroupBox()
-        self.minigrid5 = QtWidgets.QGridLayout(self.row5)
+        self.row6 = QtWidgets.QGroupBox()
+        self.minigrid5 = QtWidgets.QGridLayout(self.row6)
         self.minigrid5.setContentsMargins(0, 0, 0, 0)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
-        self.row5.setSizePolicy(sizePolicy)
-        self.row5.setMinimumSize(QtCore.QSize(0, 32))
-        self.gridLayout.addWidget(self.row5, 5, 1, 1, 3)
-        # "Loops" checkbox
-        self.if_loops = QtWidgets.QCheckBox("Loops")
-        self.if_loops.setChecked(True)
-        self.if_loops.setFixedWidth(68)
-        self.minigrid5.addWidget(self.if_loops, 5, 0, 1, 1)
+        self.row6.setSizePolicy(sizePolicy)
+        self.row6.setMinimumSize(QtCore.QSize(0, 32))
+        self.gridLayout.addWidget(self.row6, 8, 1, 1, 3)
         # Combobox to choose a soliton path
-        self.paths = QtWidgets.QComboBox(self.row5)
-        self.minigrid5.addWidget(self.paths, 5, 1, 1, 2)
-        # Row 6:
+        self.paths = QtWidgets.QComboBox(self.row6)
+        self.minigrid5.addWidget(self.paths, 8, 1, 1, 2)
+        # Row 7:
         # "Show matrices" button
         self.show_matrices = QtWidgets.QPushButton(self.wid_single)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
         self.show_matrices.setSizePolicy(sizePolicy)
         self.show_matrices.setMinimumSize(QtCore.QSize(0, 32))
-        self.gridLayout.addWidget(self.show_matrices, 6, 1, 1, 1)
+        self.gridLayout.addWidget(self.show_matrices, 9, 1, 1, 1)
         # "Show end result" button
         self.show_end_result = QtWidgets.QPushButton(self.wid_single)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
         self.show_end_result.setSizePolicy(sizePolicy)
         self.show_end_result.setMinimumSize(QtCore.QSize(0, 32))
-        self.gridLayout.addWidget(self.show_end_result, 6, 2, 1, 1)
+        self.gridLayout.addWidget(self.show_end_result, 9, 2, 1, 1)
         # "Show animation" button
         self.show_animation = QtWidgets.QPushButton(self.wid_single)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
         self.show_animation.setSizePolicy(sizePolicy)
         self.show_animation.setMinimumSize(QtCore.QSize(0, 32))
-        self.gridLayout.addWidget(self.show_animation, 6, 3, 1, 1)
+        self.gridLayout.addWidget(self.show_animation, 9, 3, 1, 1)
         # Menubar:
         self.menubar = QtWidgets.QMenuBar(self)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 564, 24))
@@ -187,28 +243,30 @@ class MainWindow(QMainWindow):
 
         # Function connections of different widgets:
         self.change_window_button.clicked.connect(self.change_window)
+        self.show_tips.stateChanged.connect(lambda:self.tips(self.show_tips))
         self.traversal_mode.stateChanged.connect(lambda:self.change_mode(self.traversal_mode))
         self.mol_info.clicked.connect(self.mol_info_clicked)
         self.save.clicked.connect(self.save_clicked)
+        self.help_button.clicked.connect(self.help_clicked)
         self.submit_molecule.clicked.connect(self.submit_molecule_clicked)
         self.all_exterior_nodes.stateChanged.connect(self.all_exterior_nodes_statechanged)
         self.submit_exterior_nodes.clicked.connect(self.submit_exterior_nodes_clicked)
-        self.if_loops.stateChanged.connect(lambda:self.loops_onoff(self.if_loops))
-        self.paths.currentIndexChanged.connect(lambda: self.endless_loop_picked(self.paths))
         self.show_matrices.clicked.connect(self.show_matrices_clicked)
         self.show_end_result.clicked.connect(self.show_end_result_clicked)
         self.show_animation.clicked.connect(lambda:self.show_animation_clicked(self.show_animation))
         # Hide most widgets at the beginning (while retaining space) 
-        self.hide_retain_space([self.traversal_mode, self.row2, self.exterior_nodes_label, self.row4, self.submit_exterior_nodes, self.soliton_paths_label, self.paths, self.if_loops, self.row5, self.show_matrices, self.show_end_result, self.show_animation])
-        self.hide_multiple([self.traversal_mode, self.row2, self.exterior_nodes_label, self.row4, self.submit_exterior_nodes, self.soliton_paths_label, self.paths, self.if_loops, self.row5, self.show_matrices, self.show_end_result, self.show_animation])
+        self.hide_retain_space([self.traversal_mode, self.row3, self.parting_line1, self.exterior_nodes_label, self.row5, self.submit_exterior_nodes, self.parting_line2, self.soliton_paths_label, self.paths, self.row6, self.show_matrices, self.show_end_result, self.show_animation])
+        self.hide_multiple([self.traversal_mode, self.row3, self.parting_line1, self.exterior_nodes_label, self.row5, self.submit_exterior_nodes, self.parting_line2, self.soliton_paths_label, self.paths, self.row6, self.show_matrices, self.show_end_result, self.show_animation])
         # Stylesheet:
         readme_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../styles.css')
         with open(readme_path, "r", encoding="utf-8") as fh:
             self.style = fh.read()
         self.wid_single.setStyleSheet(self.style)
 
+        self.status = 1 # What status the UI currently has (1: enter molecule, 2: choose exterior nodes, 3: investigate found paths)
 
-        # MULTI-WAVE SOLITON AUTOMATA WIDGET
+
+        # MULTI-WAVE SOLITON AUTOMATON WIDGET
         self.wid_mult = QtWidgets.QWidget()
         self.gridLayout_m = QtWidgets.QGridLayout(self.wid_mult)
         # Row 0:
@@ -229,148 +287,196 @@ class MainWindow(QMainWindow):
         # "Mode" label
         self.mode_m = QtWidgets.QLabel(self.wid_mult)
         self.gridLayout_m.addWidget(self.mode_m, 0, 1, 1, 1)
-        # Row 1: -
+        # Groupbox containg last two elements of row 0
+        self.row0_m = QtWidgets.QGroupBox()
+        self.minigrid0_m = QtWidgets.QGridLayout(self.row0_m)
+        self.minigrid0_m.setContentsMargins(0, 0, 0, 0)
+        self.gridLayout_m.addWidget(self.row0_m, 0, 3, 1, 1)
+        # Show Tips Checkbox
+        self.show_tips_m = QtWidgets.QCheckBox("Show Tips")
+        self.show_tips_m.setChecked(True)
+        self.minigrid0_m.addWidget(self.show_tips_m, 0, 0, 1, 1, alignment=QtCore.Qt.AlignRight)
+        # Help button
+        self.help_button_m = QtWidgets.QPushButton("?")
+        self.help_button_m.setFixedSize(QtCore.QSize(20, 20))
+        self.minigrid0_m.addWidget(self.help_button_m, 0, 1, 1, 1, alignment=QtCore.Qt.AlignRight)
+        self.help_button_m.setStyleSheet("QPushButton {border-radius: 10px;}")
+        # Row 1: - (Image of molecule in row 0 stretches over 2 lines)
         # Row 2:
+        # Label that displays short help/ a tip in the current status of the UI
+        self.short_help_m = QtWidgets.QLabel(self.wid_mult)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Fixed)
+        self.short_help_m.setSizePolicy(sizePolicy)
+        self.short_help_m.setStyleSheet("QLabel {color: rgb(90, 159, 123);}")
+        self.gridLayout_m.addWidget(self.short_help_m, 2, 0, 1, 5, alignment=QtCore.Qt.AlignHCenter)
+        # Row 3:
         # "Traversal Mode" Checkbox
         self.traversal_mode_m = QtWidgets.QCheckBox("Traversal Mode")
         self.traversal_mode_m.setChecked(False)
-        self.gridLayout_m.addWidget(self.traversal_mode_m, 2, 0, 1, 1)
+        self.gridLayout_m.addWidget(self.traversal_mode_m, 3, 0, 1, 1)
         # Groupbox containg last two elements of row 2
-        self.row2_m = QtWidgets.QGroupBox()
-        self.minigrid2_m = QtWidgets.QGridLayout(self.row2_m)
+        self.row3_m = QtWidgets.QGroupBox()
+        self.minigrid2_m = QtWidgets.QGridLayout(self.row3_m)
         self.minigrid2_m.setContentsMargins(0, 0, 0, 0)
-        self.gridLayout_m.addWidget(self.row2_m, 2, 3, 1, 1)
+        self.gridLayout_m.addWidget(self.row3_m, 3, 3, 1, 1)
         # Info button
-        self.mol_info_m = QtWidgets.QPushButton(self.row2_m)
+        self.mol_info_m = QtWidgets.QPushButton(self.row3_m)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Fixed)
         self.mol_info_m.setSizePolicy(sizePolicy)
         self.mol_info_m.setMinimumSize(QtCore.QSize(0, 32))
-        self.minigrid2_m.addWidget(self.mol_info_m, 2, 0, 1, 1)
+        self.minigrid2_m.addWidget(self.mol_info_m, 3, 0, 1, 1)
         # Save button for the molecule
-        self.save_m = QtWidgets.QPushButton(self.row2_m)
+        self.save_m = QtWidgets.QPushButton(self.row3_m)
         self.save_m.setStyleSheet("QPushButton {background-color: rgb(149, 221, 185); image: url(:/icons/save.svg);} QPushButton::pressed {background-color : rgb(90, 159, 123);}")
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Fixed)
         self.save_m.setSizePolicy(sizePolicy)
         self.save_m.setMaximumSize(QtCore.QSize(16777215, 32))
         self.save_m.setMinimumSize(QtCore.QSize(0, 32))
-        self.minigrid2_m.addWidget(self.save_m, 2, 1, 1, 1)
-        # Row 3:
+        self.minigrid2_m.addWidget(self.save_m, 3, 1, 1, 1)
+        # Row 4:
         # "Molecule" label
         self.molecule_label_m = QtWidgets.QLabel(self.wid_mult)
-        self.gridLayout_m.addWidget(self.molecule_label_m, 3, 0, 1, 1)
-        # Text field for molecule
-        self.molecule_lineedit_m = QtWidgets.QLineEdit(self.wid_mult)
-        self.gridLayout_m.addWidget(self.molecule_lineedit_m, 3, 1, 1, 2)
+        self.gridLayout_m.addWidget(self.molecule_label_m, 4, 0, 1, 1)
+        # Text field for molecule (combobox with a line edit)
+        self.molecule_lineedit_m = QtWidgets.QComboBox(self.wid_mult)
+        try:
+            with open("data.json", "r") as json_file:
+                data = json.load(json_file)
+        except:
+            pass
+        sorted_data = sorted(data, key=lambda x: x["last_used"], reverse=True)
+        for molecule in sorted_data:
+            self.molecule_lineedit_m.addItem(molecule["input_string"])
+        edit = QtWidgets.QLineEdit(self.wid_mult)
+        self.molecule_lineedit_m.setLineEdit(edit)
+        # Do those two things to prevent long molecules from resizing the whole window:
+        self.molecule_lineedit_m.setSizeAdjustPolicy(QtWidgets.QComboBox.AdjustToMinimumContentsLength)
+        self.molecule_lineedit_m.setMinimumContentsLength(1)
+        self.molecule_lineedit_m.lineEdit().clear()
+        self.molecule_lineedit_m.setStyleSheet("QComboBox {border: 2px solid rgb(149, 221, 185);border-radius: 10px;padding: 0 8px;}")
+        self.gridLayout_m.addWidget(self.molecule_lineedit_m, 4, 1, 1, 2)
         # Submit button for molecule
         self.submit_molecule_m = QtWidgets.QPushButton(self.wid_mult)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Fixed)
         self.submit_molecule_m.setSizePolicy(sizePolicy)
         self.submit_molecule_m.setMinimumSize(QtCore.QSize(0, 32))
-        self.gridLayout_m.addWidget(self.submit_molecule_m, 3, 3, 1, 1)
-        # Row 4: 
+        self.gridLayout_m.addWidget(self.submit_molecule_m, 4, 3, 1, 1)
+        # Parting line
+        self.parting_line1_m = QHLine("multi")
+        self.gridLayout_m.addWidget(self.parting_line1_m, 5, 0, 1, 4)
+        # Row 5: 
         # "Set of bursts" label
         self.set_of_bursts_label = QtWidgets.QLabel(self.wid_mult)
-        self.gridLayout_m.addWidget(self.set_of_bursts_label, 4, 0, 1, 1)
+        self.gridLayout_m.addWidget(self.set_of_bursts_label, 6, 0, 1, 1)
         # Groupbox containg middle two elements of row 4
-        self.row4_m = QtWidgets.QGroupBox()
-        self.minigrid4_m = QtWidgets.QGridLayout(self.row4_m)
+        self.row5_m = QtWidgets.QGroupBox()
+        self.minigrid4_m = QtWidgets.QGridLayout(self.row5_m)
         self.minigrid4_m.setContentsMargins(0, 0, 0, 0)
-        self.gridLayout_m.addWidget(self.row4_m, 4, 1, 1, 2)
-        # Text field for set of bursts
-        self.set_of_bursts_lineedit = QtWidgets.QLineEdit(self.row4_m)
+        self.gridLayout_m.addWidget(self.row5_m, 6, 1, 1, 2)
+        # Text field for set of bursts (combobox with a line edit)
+        self.set_of_bursts_lineedit = QtWidgets.QComboBox(self.row5_m)
+        edit = QtWidgets.QLineEdit(self.row5_m)
+        self.set_of_bursts_lineedit.setLineEdit(edit)
+        # Do those two things to prevent long molecules from resizing the whole window:
+        self.set_of_bursts_lineedit.setSizeAdjustPolicy(QtWidgets.QComboBox.AdjustToMinimumContentsLength)
+        self.set_of_bursts_lineedit.setMinimumContentsLength(1)
+        self.set_of_bursts_lineedit.setStyleSheet("QComboBox {border: 2px solid rgb(149, 221, 185);border-radius: 10px;padding: 0 8px;}")
         self.minigrid4_m.addWidget(self.set_of_bursts_lineedit, 0, 0, 1, 1)
         # Submit button for set of bursts
         self.submit_set_of_bursts = QtWidgets.QPushButton(self.wid_mult)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Fixed)
         self.submit_set_of_bursts.setSizePolicy(sizePolicy)
         self.submit_set_of_bursts.setMinimumSize(QtCore.QSize(0, 32))
-        self.gridLayout_m.addWidget(self.submit_set_of_bursts, 4, 3, 1, 1)
-        # Row 5:
+        self.gridLayout_m.addWidget(self.submit_set_of_bursts, 6, 3, 1, 1)
+        # Parting line
+        self.parting_line2_m = QHLine("multi")
+        self.gridLayout_m.addWidget(self.parting_line2_m, 7, 0, 1, 4)
+        # Row 6:
         # "Bursts" label
         self.bursts_label = QtWidgets.QLabel(self.wid_mult)
-        self.gridLayout_m.addWidget(self.bursts_label, 5, 0, 1, 1)
+        self.gridLayout_m.addWidget(self.bursts_label, 8, 0, 1, 1)
         # Groupbox containg middle elements of row 5
-        self.row5_m = QtWidgets.QGroupBox()
-        self.minigrid4_m = QtWidgets.QGridLayout(self.row5_m)
+        self.row6_m = QtWidgets.QGroupBox()
+        self.minigrid4_m = QtWidgets.QGridLayout(self.row6_m)
         self.minigrid4_m.setContentsMargins(0, 0, 0, 0)
-        self.gridLayout_m.addWidget(self.row5_m, 5, 1, 1, 2)
+        self.gridLayout_m.addWidget(self.row6_m, 8, 1, 1, 2)
         # "All" checkbox
         self.all_bursts = QtWidgets.QCheckBox("All")
         self.all_bursts.setChecked(False)
-        self.minigrid4_m.addWidget(self.all_bursts, 5, 0, 1, 1)
+        self.minigrid4_m.addWidget(self.all_bursts, 8, 0, 1, 1)
         # Combobox to choose burst
-        self.burst = QtWidgets.QComboBox(self.row5_m)
+        self.burst = QtWidgets.QComboBox(self.row6_m)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
         self.burst.setSizePolicy(sizePolicy)
-        self.minigrid4_m.addWidget(self.burst, 5, 1, 1, 1)
+        self.minigrid4_m.addWidget(self.burst, 8, 1, 1, 1)
         # Submit button for burst
         self.submit_burst = QtWidgets.QPushButton(self.wid_mult)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Fixed)
         self.submit_burst.setSizePolicy(sizePolicy)
         self.submit_burst.setMinimumSize(QtCore.QSize(0, 32))
-        self.gridLayout_m.addWidget(self.submit_burst, 5, 3, 1, 1)
-        # Row 6:
+        self.gridLayout_m.addWidget(self.submit_burst, 8, 3, 1, 1)
+        # Parting line
+        self.parting_line3_m = QHLine("multi")
+        self.gridLayout_m.addWidget(self.parting_line3_m, 9, 0, 1, 4)
+        # Row 7:
         # "Traversals" label
         self.traversals_label = QtWidgets.QLabel(self.wid_mult)
-        self.gridLayout_m.addWidget(self.traversals_label, 6, 0, 1, 1)
+        self.gridLayout_m.addWidget(self.traversals_label, 10, 0, 1, 1)
         # Groupbox containg middle elements of row 6
-        self.row6_m = QtWidgets.QGroupBox()
-        self.minigrid6_m = QtWidgets.QGridLayout(self.row6_m)
+        self.row7_m = QtWidgets.QGroupBox()
+        self.minigrid6_m = QtWidgets.QGridLayout(self.row7_m)
         self.minigrid6_m.setContentsMargins(0, 0, 0, 0)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
-        self.row6_m.setSizePolicy(sizePolicy)
-        self.row6_m.setMinimumSize(QtCore.QSize(0, 32))
-        self.gridLayout_m.addWidget(self.row6_m, 6, 1, 1, 3)
-        # "Loops" Checkbox
-        self.if_loops_m = QtWidgets.QCheckBox("Loops")
-        self.if_loops_m.setChecked(True)
-        self.if_loops_m.setFixedWidth(68)
-        self.minigrid6_m.addWidget(self.if_loops_m, 6, 0, 1, 1)
+        self.row7_m.setSizePolicy(sizePolicy)
+        self.row7_m.setMinimumSize(QtCore.QSize(0, 32))
+        self.gridLayout_m.addWidget(self.row7_m, 10, 1, 1, 3)
         # Combobox to choose a traversal
-        self.traversals = QtWidgets.QComboBox(self.row6_m)
-        self.minigrid6_m.addWidget(self.traversals, 6, 1, 1, 2)
-        # Row 7:
+        self.traversals = QtWidgets.QComboBox(self.row7_m)
+        self.minigrid6_m.addWidget(self.traversals, 10, 1, 1, 2)
+        # Row 8:
         # "Show matrices" button
         self.show_matrices_m = QtWidgets.QPushButton(self.wid_mult)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
         self.show_matrices_m.setSizePolicy(sizePolicy)
         self.show_matrices_m.setMinimumSize(QtCore.QSize(0, 32))
-        self.gridLayout_m.addWidget(self.show_matrices_m, 7, 1, 1, 1)
+        self.gridLayout_m.addWidget(self.show_matrices_m, 11, 1, 1, 1)
         # "Show end result" button
         self.show_end_result_m = QtWidgets.QPushButton(self.wid_mult)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
         self.show_end_result_m.setSizePolicy(sizePolicy)
         self.show_end_result_m.setMinimumSize(QtCore.QSize(0, 32))
-        self.gridLayout_m.addWidget(self.show_end_result_m, 7, 2, 1, 1)
+        self.gridLayout_m.addWidget(self.show_end_result_m, 11, 2, 1, 1)
         # "Show animation" button
         self.show_animation_m = QtWidgets.QPushButton(self.wid_mult)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
         self.show_animation_m.setSizePolicy(sizePolicy)
         self.show_animation_m.setMinimumSize(QtCore.QSize(0, 32))
-        self.gridLayout_m.addWidget(self.show_animation_m, 7, 3, 1, 1)
+        self.gridLayout_m.addWidget(self.show_animation_m, 11, 3, 1, 1)
 
         # Function connections of different widgets:
         self.change_window_button_m.clicked.connect(self.change_window)
+        self.show_tips_m.stateChanged.connect(lambda:self.tips_m(self.show_tips_m))
         self.traversal_mode_m.stateChanged.connect(lambda:self.change_mode_m(self.traversal_mode_m))
         self.mol_info_m.clicked.connect(self.mol_info_clicked_m)
         self.save_m.clicked.connect(self.save_clicked_m)
+        self.help_button_m.clicked.connect(self.help_clicked_m)
         self.all_bursts.stateChanged.connect(self.all_bursts_statechanged)
         self.submit_molecule_m.clicked.connect(self.submit_molecule_clicked_m)
         self.submit_set_of_bursts.clicked.connect(self.submit_set_of_bursts_clicked)
         self.submit_burst.clicked.connect(self.submit_burst_clicked)
-        self.if_loops_m.stateChanged.connect(lambda:self.loops_onoff_m(self.if_loops_m))
-        self.traversals.currentIndexChanged.connect(lambda: self.endless_loop_picked_m(self.traversals))
         self.show_matrices_m.clicked.connect(self.show_matrices_clicked_m)
         self.show_end_result_m.clicked.connect(self.show_end_result_clicked_m)
         self.show_animation_m.clicked.connect(lambda:self.show_animation_clicked(self.show_animation_m))
         # Hide most widgets at the beginning (while retaining space)
-        self.hide_retain_space([self.traversal_mode_m, self.save_m, self.mol_info_m, self.set_of_bursts_label, self.row4_m, self.submit_set_of_bursts, self.bursts_label, self.row5_m, self.submit_burst, self.traversals_label, self.traversals, self.if_loops_m, self.row6_m, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
-        self.hide_multiple([self.traversal_mode_m, self.save_m, self.mol_info_m, self.set_of_bursts_label, self.row4_m, self.submit_set_of_bursts, self.bursts_label, self.row5_m, self.submit_burst, self.traversals_label, self.traversals, self.if_loops_m, self.row6_m, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
+        self.hide_retain_space([self.traversal_mode_m, self.save_m, self.mol_info_m, self.parting_line1_m, self.set_of_bursts_label, self.row5_m, self.submit_set_of_bursts, self.parting_line2_m, self.bursts_label, self.row6_m, self.submit_burst, self.parting_line3_m, self.traversals_label, self.traversals, self.row7_m, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
+        self.hide_multiple([self.traversal_mode_m, self.save_m, self.mol_info_m, self.parting_line1_m, self.set_of_bursts_label, self.row5_m, self.submit_set_of_bursts, self.parting_line2_m, self.bursts_label, self.row6_m, self.submit_burst, self.parting_line3_m, self.traversals_label, self.traversals, self.row7_m, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
         # Stylesheet:
         readme_path_m = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../styles_m.css')
         with open(readme_path_m, "r", encoding="utf-8") as fh_m:
             self.style_m = fh_m.read()
         self.wid_mult.setStyleSheet(self.style_m)
+
+        self.status_m = 1 # What status the multiwave UI currently has (1: enter molecule, 2: enter burst, 3: choose burst(s), 4: investigate found paths)
 
 
         # Add both widgets to stacked layout, default widget when starting the software is single soliton case widget
@@ -389,25 +495,27 @@ class MainWindow(QMainWindow):
         _translate = QtCore.QCoreApplication.translate
         self.setWindowTitle(_translate("MainWindow", "Soliton Automata Software"))
         self.mode.setText(_translate("MainWindow", "Single-Wave Mode"))
+        self.short_help.setText(_translate("MainWindow", "Specify a molecule or choose one from the drop-down menu"))
         self.mol_info.setText(_translate("MainWindow", "Info"))
         self.molecule_label.setText(_translate("MainWindow", "Molecule:"))
-        self.submit_molecule.setText(_translate("MainWindow", "Submit"))
+        self.submit_molecule.setText(_translate("MainWindow", "Choose molecule"))
         self.exterior_nodes_label.setText(_translate("MainWindow", "Exterior nodes:"))
         self.exterior_nodes_label2.setText(_translate("MainWindow", "&"))
-        self.submit_exterior_nodes.setText(_translate("MainWindow", "Submit"))
+        self.submit_exterior_nodes.setText(_translate("MainWindow", "Choose nodes"))
         self.soliton_paths_label.setText(_translate("MainWindow", "Soliton paths:"))
         self.show_matrices.setText(_translate("MainWindow", "Show matrices"))
         self.show_end_result.setText(_translate("MainWindow", "Show end result"))
         self.show_animation.setText(_translate("MainWindow", "Show animation"))
 
         self.mode_m.setText(_translate("MainWindow", "Multi-Wave Mode"))
+        self.short_help_m.setText(_translate("MainWindow", "Specify a molecule or choose one from the drop-down menu"))
         self.mol_info_m.setText(_translate("MainWindow", "Info"))
         self.molecule_label_m.setText(_translate("MainWindow", "Molecule:"))
-        self.submit_molecule_m.setText(_translate("MainWindow", "Submit"))
+        self.submit_molecule_m.setText(_translate("MainWindow", "Choose molecule"))
         self.set_of_bursts_label.setText(_translate("MainWindow", "Set of bursts:"))
-        self.submit_set_of_bursts.setText(_translate("MainWindow", "Submit"))
+        self.submit_set_of_bursts.setText(_translate("MainWindow", "Choose bursts"))
         self.bursts_label.setText(_translate("MainWindow", "Bursts:"))
-        self.submit_burst.setText(_translate("MainWindow", "Submit"))
+        self.submit_burst.setText(_translate("MainWindow", "Select burst(s)"))
         self.traversals_label.setText(_translate("MainWindow", "Sets of paths:"))
         self.show_matrices_m.setText(_translate("MainWindow", "Show matrices"))
         self.show_end_result_m.setText(_translate("MainWindow", "Show end result"))
@@ -427,8 +535,8 @@ class MainWindow(QMainWindow):
 
     def change_mode(self, checkbox: QtWidgets.QCheckBox):
         """Realizes the change between being in traversal mode and not being in traversal mode in single soliton widget.
-        In traversal mode, a soliton automata can be traversed by using an end result as the new soliton graph.
-        When in traversal mode, the input molecule and stop number can't be edited.
+        In traversal mode, a soliton automaton can be traversed by using an end result as the new soliton graph.
+        When in traversal mode, the input molecule can't be edited.
 
         Args:
             checkbox (QtWidgets.QCheckBox): The checkbox that changes the mode.
@@ -437,22 +545,22 @@ class MainWindow(QMainWindow):
             # make text field uneditable and button unclickable, turn both objects grey to make those properties visually recognizable
             self.submit_molecule.clicked.disconnect()
             self.submit_molecule.setStyleSheet("QPushButton {background-color: rgb(230, 230, 230);}")
-            self.molecule_lineedit.setReadOnly(True)
-            self.molecule_lineedit.setStyleSheet("QLineEdit {border: 2px solid rgb(230, 230, 230);border-radius: 10px;padding: 0 8px;}")
+            self.molecule_lineedit.setEnabled(False)
+            self.molecule_lineedit.setStyleSheet("QComboBox {border: 2px solid rgb(230, 230, 230);border-radius: 10px;padding: 0 8px;}")
             self.molecule_label.setText("Original molecule:")
         else:
             self.submit_molecule.clicked.connect(self.submit_molecule_clicked)
             self.submit_molecule.setStyleSheet("QPushButton {background-color: rgb(191, 207, 255);} QPushButton::pressed {background-color : rgb(132, 145, 193);}")
-            self.molecule_lineedit.setReadOnly(False)
-            self.molecule_lineedit.setStyleSheet("QLineEdit {border: 2px solid rgb(191, 207, 255);border-radius: 10px;padding: 0 8px;}")
+            self.molecule_lineedit.setEnabled(True)
+            self.molecule_lineedit.setStyleSheet("QComboBox {border: 2px solid rgb(191, 207, 255);border-radius: 10px;padding: 0 8px;}")
             self.molecule_label.setText("Molecule:")
             self.submit_molecule_clicked()
 
     
     def change_mode_m(self, checkbox: QtWidgets.QCheckBox):
         """Realizes the change between being in traversal mode and not being in traversal mode in multi soliton widget.
-        In traversal mode, a soliton automata can be traversed by using an end result as the new soliton graph.
-        When in traversal mode, the input molecule can't be edited.
+        In traversal mode, a soliton automaton can be traversed by using an end result as the new soliton graph.
+        When in traversal mode, the input molecule and the set of bursts can't be edited.
 
         Args:
             checkbox (QtWidgets.QCheckBox): The checkbox that changes the mode.
@@ -461,24 +569,152 @@ class MainWindow(QMainWindow):
             # make text field uneditable and button unclickable, turn both objects grey to make those properties visually recognizable
             self.submit_molecule_m.clicked.disconnect()
             self.submit_molecule_m.setStyleSheet("QPushButton {background-color: rgb(230, 230, 230);}")
-            self.molecule_lineedit_m.setReadOnly(True)
-            self.molecule_lineedit_m.setStyleSheet("QLineEdit {border: 2px solid rgb(230, 230, 230);border-radius: 10px;padding: 0 8px;}")
+            self.molecule_lineedit_m.setEnabled(False)
+            self.molecule_lineedit_m.setStyleSheet("QComboBox {border: 2px solid rgb(230, 230, 230);border-radius: 10px;padding: 0 8px;}")
             self.molecule_label_m.setText("Original molecule:")
             self.submit_set_of_bursts.clicked.disconnect()
             self.submit_set_of_bursts.setStyleSheet("QPushButton {background-color: rgb(230, 230, 230);}")
-            self.set_of_bursts_lineedit.setReadOnly(True)
-            self.set_of_bursts_lineedit.setStyleSheet("QLineEdit {border: 2px solid rgb(230, 230, 230);border-radius: 10px;padding: 0 8px;}")
+            self.set_of_bursts_lineedit.setEnabled(False)
+            self.set_of_bursts_lineedit.setStyleSheet("QComboBox {border: 2px solid rgb(230, 230, 230);border-radius: 10px;padding: 0 8px;}")
         else:
             self.submit_molecule_m.clicked.connect(self.submit_molecule_clicked_m)
             self.submit_molecule_m.setStyleSheet("QPushButton {background-color: rgb(149, 221, 185);} QPushButton::pressed {background-color : rgb(90, 159, 123);}")
-            self.molecule_lineedit_m.setReadOnly(False)
-            self.molecule_lineedit_m.setStyleSheet("QLineEdit {border: 2px solid rgb(149, 221, 185);border-radius: 10px;padding: 0 8px;}")
+            self.molecule_lineedit_m.setEnabled(True)
+            self.molecule_lineedit_m.setStyleSheet("QComboBox {border: 2px solid rgb(149, 221, 185);border-radius: 10px;padding: 0 8px;}")
             self.molecule_label_m.setText("Molecule:")
             self.submit_molecule_clicked_m()
             self.submit_set_of_bursts.clicked.connect(self.submit_set_of_bursts_clicked)
             self.submit_set_of_bursts.setStyleSheet("QPushButton {background-color: rgb(149, 221, 185);} QPushButton::pressed {background-color : rgb(90, 159, 123);}")
-            self.set_of_bursts_lineedit.setReadOnly(False)
-            self.set_of_bursts_lineedit.setStyleSheet("QLineEdit {border: 2px solid rgb(149, 221, 185);border-radius: 10px;padding: 0 8px;}")
+            self.set_of_bursts_lineedit.setEnabled(True)
+            self.set_of_bursts_lineedit.setStyleSheet("QComboBox {border: 2px solid rgb(149, 221, 185);border-radius: 10px;padding: 0 8px;}")
+
+
+    def tips(self, checkbox: QtWidgets.QCheckBox):
+        """Realizes turning on/ off the displaying of tips/ short help in single soliton widget.
+
+        Args:
+            checkbox (QtWidgets.QCheckBox): The "Tips" Checkbox
+        """
+        if checkbox.isChecked() == True:
+            self.short_help.show()
+        else:
+            self.hide_retain_space([self.short_help])
+            self.short_help.hide()
+
+
+    def tips_m(self, checkbox: QtWidgets.QCheckBox):
+        """Realizes turning on/ off the displaying of tips/ short help in multi soliton widget.
+
+        Args:
+            checkbox (QtWidgets.QCheckBox): The "Tips" Checkbox
+        """
+        if checkbox.isChecked() == True:
+            self.short_help_m.show()
+        else:
+            self.hide_retain_space([self.short_help_m])
+            self.short_help_m.hide()
+
+
+    def help_clicked(self):
+        """Is called when "?" button is clicked in single soliton widget.
+        Opens a window with some help regarding the next step(s) the user should do.
+        """
+        dlg = QDialog(self.wid_single)
+        grid = QtWidgets.QGridLayout(dlg)
+        label = QtWidgets.QLabel(dlg)
+        grid.addWidget(label, 0, 0, 1, 1)
+
+        if self.status == 1:
+            text = f"Please now enter a molecule behind \"Molecule: \"."
+            text = text + f"This is how you define one: \n"
+            text = text + f"- Carbon atoms are marked with 'C' \n"
+            text = text + f"- Single bonds are marked with '-' or no character at all \n"
+            text = text + f"- Double bonds are marked with '=' \n"
+            text = text + f"- Branches are embedded in round brackets (e.g. 'C(=CC=C)C')\n"
+            text = text + f"- The two connecting atoms of a ring are marked with the same number (e.g. 'C1' and 'C1') \n"
+            text = text + "- Exterior nodes are marked with braces and a number (e.g. '{=1}')\n\n"
+            text = text + "Alternatively, you can choose a molecule from your history by using the drop-down menu.\n"
+            text = text + "Submit by clicking \"Choose molecule\"."
+            label.setText(text)
+        elif self.status == 2:
+            text = f"Please now choose exterior nodes. \n"
+            text = text + f"If you check \"All\", perfect soliton paths between all pairs of the graph's exterior nodes are displayed. \n"
+            text = text + f"Alternatively, you can choose two exterior nodes. \n"
+            text = text + f"The software will then only give you perfect paths between the first and the second exterior node. \n"
+            text = text + "Submit by clicking \"Choose nodes\". \n\n"
+            text = text + f"You can also save the soliton graph with the save-button on the right. \n"
+            text = text + f"Determinism properties and possible impervious paths can be investigated by clicking on \"Info\"."
+            label.setText(text)
+        elif self.status == 3:
+            text = f"Please choose a soliton path from the drop-down menu. \n"
+            text = text + f"Each of the 3 buttons in the lower row will open a pop-up window with certain information. \n"
+            text = text + f"Clicking on \"Choose matrices\" will display the adjacency matrices of every timestep of the soliton's traversal. \n"
+            text = text + f"\"Show end result\" will show the resulting soliton graph after the traversal of the chosen path. \n"
+            text = text + f"In this window, you can click \"Use\", which will put the software in traversal mode. \n"
+            text = text + f"Traversal mode let's you use the resulting soliton graph as the new state of the soliton automaton. \n"
+            text = text + f"You will see that this mode locks the editing of the molecule textbox. \n"
+            text = text + f"It gives you the possibility to choose exterior nodes to then compute paths in this new state. \n"
+            text = text + f"By clicking \"Show animation\" an animation visualising the traversal of the chosen path will be played."
+            label.setText(text)
+
+        dlg.setWindowTitle("Help")
+        dlg.exec_()
+
+
+    def help_clicked_m(self):
+        """Is called when "?" button is clicked in multi soliton widget.
+        Opens a window with some help regarding the next step(s) the user should do.
+        """
+        dlg = QDialog(self.wid_single)
+        grid = QtWidgets.QGridLayout(dlg)
+        label = QtWidgets.QLabel(dlg)
+        grid.addWidget(label, 0, 0, 1, 1)
+
+        if self.status_m == 1:
+            text = f"Please now enter a molecule behind \"Molecule: \"."
+            text = text + f"This is how you define one: \n"
+            text = text + f"- Carbon atoms are marked with 'C' \n"
+            text = text + f"- Single bonds are marked with '-' or no character at all \n"
+            text = text + f"- Double bonds are marked with '=' \n"
+            text = text + f"- Branches are embedded in round brackets (e.g. 'C(=CC=C)C')\n"
+            text = text + f"- The two connecting atoms of a ring are marked with the same number (e.g. 'C1' and 'C1') \n"
+            text = text + "- Exterior nodes are marked with braces and a number (e.g. '{=1}')\n\n"
+            text = text + "Alternatively, you can choose a molecule from your history by using the drop-down menu.\n"
+            text = text + "Submit by clicking \"Choose molecule\"."
+            label.setText(text)
+        elif self.status_m == 2:
+            text = f"Please now enter a set of bursts."
+            text = f"This is how you define one: \n"
+            text = text + f"- Starting and end node of a soliton are embedded in round brackets (e.g. (3, 2))\n"
+            text = text + f"- Solitons are seperated by '||'\n"
+            text = text + f"- The number in front of a soliton's pair of exterior nodes defines how many timesteps later than the previous soliton this soliton enters the graph\n"
+            text = text + f"- A set of bursts is embedded in braces, where individual bursts are seperated by ';'\n"
+            text = text + "- Example: " + "{(3,1)||1(1,2); (3,2)||4(2,1)}\n"
+            text = text + "Submit by clicking \"Choose bursts\". \n\n"
+            text = text + f"You can also save the soliton graph with the save-button on the right."
+            label.setText(text)
+        elif self.status_m == 3:
+            text = f"Please now choose a burst. \n"
+            text = text + f"If you check \"All\", perfect configuration trails for all bursts are displayed. \n"
+            text = text + f"Alternatively, you can choose a specific burst. \n"
+            text = text + "Submit by clicking \"Select burst(s)\". \n\n"
+            text = text + f"The soliton automaton's determinism properties can be investigated by clicking on \"Info\"."
+            label.setText(text)
+        elif self.status_m == 4:
+            text = f"Please choose a configuration trail from the drop-down menu. \n"
+            text = text + f"Configuration trails are displayed as a set of paths, where each path is marked with \"S\" and a number (e.g. \"S1\" for the first soliton). \n\n"
+            text = text + f"Each of the 3 buttons in the lower row will open a pop-up window with certain information. \n"
+            text = text + f"Clicking on \"Choose matrices\" will display the adjacency matrices of every timestep of the solitons' traversal. \n"
+            text = text + f"\"Show end result\" will show the resulting soliton graph after the traversal of the chosen configuration trail. \n"
+            text = text + f"In this window, you can click \"Use\", which will put the software in traversal mode. \n"
+            text = text + f"Traversal mode let's you use the resulting soliton graph as the new state of the soliton automaton. \n"
+            text = text + f"You will see that this mode locks the editing of the molecule and the set of bursts textboxes. \n"
+            text = text + f"It gives you the possibility to choose bursts from the entered set to then compute configuration trails in this new state. \n"
+            text = text + f"By clicking \"Show animation\" an animation visualising the traversal of the chosen configuration trail will be played."
+            label.setText(text)
+
+        dlg.setWindowTitle("Help")
+        dlg.exec_()
 
 
     def submit_molecule_clicked(self):
@@ -489,16 +725,20 @@ class MainWindow(QMainWindow):
         """
         self.node_1.clear()
         self.node_2.clear()
-        self.smiles_string = self.molecule_lineedit.text()
+        self.smiles_string = self.molecule_lineedit.lineEdit().text()
         try:
+            # Try creating a soliton graph out of the entered molecule. Fails if the syntax is wrong.
             self.my_graph = SolitonGraph(self.smiles_string)
             errors = self.my_graph.validate_soliton_graph()
-            self.automata = SolitonAutomata(self.my_graph)
+            self.automaton = SolitonAutomaton(self.my_graph)
             self.graph_pic = Visualisation.visualize_soliton_graph(self.my_graph, self.my_graph.bindings, False, True)
             self.qim = ImageQt(self.graph_pic)
             self.display_molecule.setPixmap(QtGui.QPixmap.fromImage(self.qim).scaled(self.display_molecule.size(), QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation))
             if errors != []:
-                self.hide_multiple([self.traversal_mode, self.row2, self.exterior_nodes_label, self.row4, self.submit_exterior_nodes, self.soliton_paths_label, self.paths, self.if_loops, self.row5, self.show_matrices, self.show_end_result, self.show_animation])
+                # Case in which the specified molecule is not a soliton graph. User will be provided with information which are the exact problems that make the molecule no soliton graph.
+                self.hide_multiple([self.traversal_mode, self.row3, self.parting_line1, self.exterior_nodes_label, self.row5, self.submit_exterior_nodes, self.parting_line2, self.soliton_paths_label, self.paths, self.row6, self.show_matrices, self.show_end_result, self.show_animation])
+                self.status = 1
+                self.short_help.setText("Specify a molecule or choose one from the drop-down menu")
                 msg = QMessageBox(self.wid_single)
                 msg.setStyleSheet(" QPushButton{ height: 32px; width: 130px;}")
                 msg.setWindowTitle("No soliton graph")
@@ -515,7 +755,10 @@ class MainWindow(QMainWindow):
                 msg.setDetailedText(details)
                 x = msg.exec_() # show messagebox
             elif self.my_graph.exterior_nodes_name_collision() == True:
-                self.hide_multiple([self.traversal_mode, self.row2, self.exterior_nodes_label, self.row4, self.submit_exterior_nodes, self.soliton_paths_label, self.paths, self.if_loops, self.row5, self.show_matrices, self.show_end_result, self.show_animation])
+                # Case in which two or more exterior nodes got assigned the same name.
+                self.hide_multiple([self.traversal_mode, self.row3, self.parting_line1, self.exterior_nodes_label, self.row5, self.submit_exterior_nodes, self.parting_line2, self.soliton_paths_label, self.paths, self.row6, self.show_matrices, self.show_end_result, self.show_animation])
+                self.status = 1
+                self.short_help.setText("Specify a molecule or choose one from the drop-down menu")
                 msg = QMessageBox(self.wid_single)
                 msg.setStyleSheet(" QPushButton{ height: 32px; width: 130px}")
                 msg.setWindowTitle("Name collision")
@@ -524,13 +767,19 @@ class MainWindow(QMainWindow):
                 msg.setStandardButtons(QMessageBox.Retry)
                 x = msg.exec_()
             else:
-                self.show_multiple([self.traversal_mode, self.row2, self.exterior_nodes_label, self.row4, self.submit_exterior_nodes])
-                self.hide_multiple([self.soliton_paths_label, self.paths, self.if_loops, self.row5, self.show_matrices, self.show_end_result, self.show_animation])
+                # Case in which a valid soliton graph was specified. User is now able to specify pair(s) of exterior nodes.
+                self.show_multiple([self.traversal_mode, self.row3, self.parting_line1, self.exterior_nodes_label, self.row5, self.submit_exterior_nodes])
+                self.hide_multiple([self.parting_line2, self.soliton_paths_label, self.paths, self.row6, self.show_matrices, self.show_end_result, self.show_animation])
+                self.status = 2
+                self.short_help.setText("Choose a pair of exterior nodes or use all pairs for finding paths")
                 for key in self.my_graph.exterior_nodes_reverse:
                     self.node_1.addItem(key)
                     self.node_2.addItem(key)
         except:
-            self.hide_multiple([self.traversal_mode, self.row2, self.exterior_nodes_label, self.row4, self.submit_exterior_nodes, self.soliton_paths_label, self.paths, self.if_loops, self.row5, self.show_matrices, self.show_end_result, self.show_animation])
+            # No soliton graph could be created, so input syntax is wrong. A reminder is displayed, aiming to help the user to transform his input into an input with correct syntax.
+            self.hide_multiple([self.traversal_mode, self.row3, self.parting_line1, self.exterior_nodes_label, self.row5, self.submit_exterior_nodes, self.parting_line2, self.soliton_paths_label, self.paths, self.row6, self.show_matrices, self.show_end_result, self.show_animation])
+            self.status = 1
+            self.short_help.setText("Specify a molecule or choose one from the drop-down menu")
             msg = QMessageBox(self.wid_single)
             msg.setStyleSheet(" QPushButton{ height: 32px; width: 130px}")
             msg.setWindowTitle("Incorrect input")
@@ -547,6 +796,39 @@ class MainWindow(QMainWindow):
             details = details + "- Exterior nodes are marked with braces and a number (e.g. '{=1}')"
             msg.setDetailedText(details)
             x = msg.exec_()
+        # Edit json file if input string was turned into a soliton graph successfully
+        if self.status == 2:
+            try:
+                with open("data.json", "r") as json_file:
+                    data = json.load(json_file)
+            except (FileNotFoundError, JSONDecodeError):
+                data = []
+            
+            # Check if input string already exists in the data
+            existing_molecule = next((m for m in data if m.get("input_string") == self.smiles_string), None)
+            if existing_molecule:
+                existing_molecule["last_used"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S") # If the molecule exists, update "last_used"
+            else: # If the molecule doesn't exist, add a new molecule
+                molecule = {
+                    "input_string": self.smiles_string,
+                    "last_used": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                    "sets_of_bursts": [
+                    ]
+                }
+                data.append(molecule)
+
+            with open("data.json", "w") as json_file:
+                json.dump(data, json_file, indent=4)
+
+            # Change combobox items so that entered molecule (which is now the last used molecule) is the first element in the comboboxes of both windows
+            sorted_data = sorted(data, key=lambda x: x["last_used"], reverse=True)
+            self.molecule_lineedit.clear()
+            current_molecule_m = self.molecule_lineedit_m.lineEdit().text() # Save current text of line edit in multiwave window to add it again later
+            self.molecule_lineedit_m.clear()
+            for molecule in sorted_data:
+                self.molecule_lineedit.addItem(molecule["input_string"])
+                self.molecule_lineedit_m.addItem(molecule["input_string"])
+            self.molecule_lineedit_m.lineEdit().setText(current_molecule_m)
 
 
     def submit_molecule_clicked_m(self):
@@ -555,8 +837,9 @@ class MainWindow(QMainWindow):
         If the user's molecule is valid it displays the graph of the molecule. It then also reveals a save button for the graph visualisation,
         an info button and all the necessary widgets for the user to specify a set of bursts and a stop number.
         """
-        self.smiles_string_m = self.molecule_lineedit_m.text()
+        self.smiles_string_m = self.molecule_lineedit_m.lineEdit().text()
         try:
+            # Try creating a soliton graph out of the entered molecule. Fails if the syntax is wrong.
             self.my_graph_m = SolitonGraph(self.smiles_string_m)
             errors = self.my_graph_m.validate_soliton_graph()
             self.graph_pic_m = Visualisation.visualize_soliton_graph(self.my_graph_m, self.my_graph_m.bindings, False, True)
@@ -564,7 +847,10 @@ class MainWindow(QMainWindow):
             self.display_molecule_m.setPixmap(QtGui.QPixmap.fromImage(self.qim_m).scaled(self.display_molecule_m.size(), QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation))
             self.set_of_bursts_lineedit.clear()
             if errors != []:
-                self.hide_multiple([self.traversal_mode_m, self.save_m, self.mol_info_m, self.set_of_bursts_label, self.row4_m, self.submit_set_of_bursts, self.bursts_label, self.row5_m, self.submit_burst, self.traversals_label, self.traversals, self.if_loops_m, self.row6_m, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
+                # Case in which the specified molecule is not a soliton graph. User will be provided with information which are the exact problems that make the molecule no soliton graph.
+                self.hide_multiple([self.traversal_mode_m, self.save_m, self.mol_info_m, self.parting_line1_m, self.set_of_bursts_label, self.row5_m, self.submit_set_of_bursts, self.parting_line2_m, self.bursts_label, self.row6_m, self.submit_burst, self.parting_line3_m, self.traversals_label, self.traversals, self.row7_m, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
+                self.status_m = 1
+                self.short_help_m.setText("Specify a molecule or choose one from the drop-down menu")
                 msg = QMessageBox(self.wid_mult)
                 msg.setStyleSheet(" QPushButton{ height: 32px; width: 130px}")
                 msg.setWindowTitle("No soliton graph")
@@ -581,7 +867,10 @@ class MainWindow(QMainWindow):
                 msg.setDetailedText(details)
                 x = msg.exec_() # show messagebox
             elif self.my_graph_m.exterior_nodes_name_collision() == True:
-                self.hide_multiple([self.traversal_mode_m, self.save_m, self.mol_info_m, self.set_of_bursts_label, self.row4_m, self.submit_set_of_bursts, self.bursts_label, self.row5_m, self.submit_burst, self.traversals_label, self.traversals, self.if_loops_m, self.row6_m, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
+                # Case in which two or more exterior nodes got assigned the same name.
+                self.hide_multiple([self.traversal_mode_m, self.save_m, self.mol_info_m, self.parting_line1_m, self.set_of_bursts_label, self.row5_m, self.submit_set_of_bursts, self.parting_line2_m, self.bursts_label, self.row6_m, self.submit_burst, self.parting_line3_m, self.traversals_label, self.traversals, self.row7_m, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
+                self.status_m = 1
+                self.short_help_m.setText("Specify a molecule or choose one from the drop-down menu")
                 msg = QMessageBox(self.wid_mult)
                 msg.setStyleSheet(" QPushButton{ height: 32px; width: 130px}")
                 msg.setWindowTitle("Name collision")
@@ -590,10 +879,16 @@ class MainWindow(QMainWindow):
                 msg.setStandardButtons(QMessageBox.Retry)
                 x = msg.exec_()
             else:
-                self.show_multiple([self.traversal_mode_m, self.save_m, self.set_of_bursts_label, self.row4_m, self.submit_set_of_bursts])
-                self.hide_multiple([self.mol_info_m, self.bursts_label, self.row5_m, self.submit_burst, self.traversals_label, self.traversals, self.if_loops_m, self.row6_m, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
+                # Case in which a valid soliton graph was specified. User is now able to specify a set of bursts.
+                self.show_multiple([self.save_m, self.parting_line1_m, self.set_of_bursts_label, self.row5_m, self.submit_set_of_bursts])
+                self.hide_multiple([self.traversal_mode_m, self.parting_line2_m, self.mol_info_m, self.bursts_label, self.row6_m, self.submit_burst, self.parting_line3_m, self.traversals_label, self.traversals, self.row7_m, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
+                self.status_m = 2
+                self.short_help_m.setText("Specify a set of bursts or choose one from the drop-down menu")
         except:
-            self.hide_multiple([self.traversal_mode_m, self.save_m, self.mol_info_m, self.set_of_bursts_label, self.row4_m, self.submit_set_of_bursts, self.mol_info_m, self.bursts_label, self.row5_m, self.submit_burst, self.traversals_label, self.traversals, self.if_loops_m, self.row6_m, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
+            # No soliton graph could be created, so input syntax is wrong. A reminder is displayed, aiming to help the user to transform his input into an input with correct syntax.
+            self.hide_multiple([self.traversal_mode_m, self.save_m, self.parting_line1_m, self.mol_info_m, self.set_of_bursts_label, self.row5_m, self.submit_set_of_bursts, self.parting_line2_m, self.mol_info_m, self.bursts_label, self.row6_m, self.submit_burst, self.parting_line3_m, self.traversals_label, self.traversals, self.row7_m, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
+            self.status_m = 1
+            self.short_help_m.setText("Specify a molecule or choose one from the drop-down menu")
             msg = QMessageBox(self.wid_mult)
             msg.setStyleSheet(" QPushButton{ height: 32px; width: 130px}")
             msg.setWindowTitle("Incorrect input")
@@ -610,15 +905,56 @@ class MainWindow(QMainWindow):
             details = details + "- Exterior nodes are marked with braces and a number (e.g. '{=1}')"
             msg.setDetailedText(details)
             x = msg.exec_()
+        # Edit json file if input string was turned into a soliton graph successfully
+        if self.status_m == 2:
+            try:
+                with open("data.json", "r") as json_file:
+                    data = json.load(json_file)
+            except (FileNotFoundError, JSONDecodeError):
+                data = []
+            
+            # Check if input string already exists in the data
+            existing_molecule = next((m for m in data if m.get("input_string") == self.smiles_string_m), None)
+            if existing_molecule:
+                existing_molecule["last_used"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S") # If the molecule exists, update "last_used"
+            else: # If the molecule doesn't exist, add a new molecule
+                molecule = {
+                    "input_string": self.smiles_string_m,
+                    "last_used": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                    "sets_of_bursts": [
+                    ]
+                }
+                existing_molecule = molecule
+                data.append(molecule)
+
+            with open("data.json", "w") as json_file:
+                json.dump(data, json_file, indent=4)
+
+            # Change combobox items so that entered molecule (which is now the last used molecule) is the first element in the comboboxes of both windows
+            sorted_data = sorted(data, key=lambda x: x["last_used"], reverse=True)
+            self.molecule_lineedit_m.clear()
+            current_molecule = self.molecule_lineedit.lineEdit().text()
+            self.molecule_lineedit.clear()
+            for molecule in sorted_data:
+                self.molecule_lineedit_m.addItem(molecule["input_string"])
+                self.molecule_lineedit.addItem(molecule["input_string"])
+            self.molecule_lineedit.lineEdit().setText(current_molecule)
+
+            # Add all set of bursts from history of the current molecule
+            sorted_burstsets = sorted(existing_molecule["sets_of_bursts"], key=lambda x: x["last_used"], reverse=True)
+            self.set_of_bursts_lineedit.clear()
+            for burstset in sorted_burstsets:
+                self.set_of_bursts_lineedit.addItem(burstset["set_of_bursts"])
+            self.set_of_bursts_lineedit.lineEdit().clear()
 
 
     def mol_info_clicked(self):
         """Is called when "Info" button in single soliton widget is clicked. Opens a dialog window showing whether
-        the automata is deterministic and strongly deterministic and displaying all impervious paths.
+        the automaton is deterministic, strongly deterministic and reachability-deterministic and displaying the degree of non-determinism and all impervious paths.
         """
 
         def save_info():
-            """Opens a file dialog in which user can specify a path where a text file with all info on soliton automata/ soliton graph should be saved.
+            """Opens a file dialog in which user can specify a path where a text file with all info on soliton automaton/ soliton graph should be saved.
             Text file also contains the input string representing the molecule.
             Only allows `.txt` file suffix.
             """
@@ -633,43 +969,68 @@ class MainWindow(QMainWindow):
         txt_text = f"Soliton graph: {self.smiles_string} \n\n"
         dlg = QDialog(self.wid_single)
         grid = QtWidgets.QGridLayout(dlg)
+        # Deterministic
         label_det = QtWidgets.QLabel(dlg)
         label_det.setText("Deterministic:")
         txt_text = txt_text + f"Deterministic: "
         grid.addWidget(label_det, 0, 0, 1, 1)
         det_bool = QtWidgets.QLabel(dlg)
-        if self.automata.deterministic:
+        if self.automaton.deterministic:
             det_bool.setText("Yes")
             txt_text = txt_text + f"Yes \n"
         else: 
             det_bool.setText("No")
             txt_text = txt_text + f"No \n"
         grid.addWidget(det_bool, 0, 1, 1, 1)
+        # Strongly deterministic
         label_strong_det = QtWidgets.QLabel(dlg)
         label_strong_det.setText("Strongly deterministic:")
         txt_text = txt_text + f"Strongly deterministic: "
         grid.addWidget(label_strong_det, 1, 0, 1, 1)
         strong_det_bool = QtWidgets.QLabel(dlg)
-        if self.automata.strongly_deterministic:
+        if self.automaton.strongly_deterministic:
             strong_det_bool.setText("Yes")
             txt_text = txt_text + f"Yes \n"
         else: 
             strong_det_bool.setText("No")
             txt_text = txt_text + f"No \n"
         grid.addWidget(strong_det_bool, 1, 1, 1, 1)
+        # Reachability-deterministic
+        label_reach_det = QtWidgets.QLabel(dlg)
+        label_reach_det.setText("Reachability-deterministic:")
+        txt_text = txt_text + f"Reachability-deterministic: "
+        grid.addWidget(label_reach_det, 2, 0, 1, 1)
+        reach_det_bool = QtWidgets.QLabel(dlg)
+        if self.automaton.reachability_deterministic:
+            reach_det_bool.setText("Yes")
+            txt_text = txt_text + f"Yes \n"
+        else: 
+            reach_det_bool.setText("No")
+            txt_text = txt_text + f"No \n"
+        grid.addWidget(reach_det_bool, 2, 1, 1, 1)
+        # Degree of non-determinism
+        label_degree = QtWidgets.QLabel(dlg)
+        label_degree.setText("Degree of non-determinism:")
+        txt_text = txt_text + f"Degree of non-determinism: "
+        grid.addWidget(label_degree, 3, 0, 1, 1)
+        degree = QtWidgets.QLabel(dlg)
+        degree.setText(str(self.automaton.degree_of_nondeterminism))
+        txt_text = txt_text + f"{self.automaton.degree_of_nondeterminism} \n"
+        grid.addWidget(degree, 3, 1, 1, 1)
+        # Impervious paths
         label_imp_paths = QtWidgets.QLabel(dlg)
         label_imp_paths.setText("Impervious path(s):")
         txt_text = txt_text + f"Impervious path(s): "
-        grid.addWidget(label_imp_paths, 2, 0, 1, 1, alignment = QtCore.Qt.AlignTop)
+        grid.addWidget(label_imp_paths, 4, 0, 1, 1, alignment = QtCore.Qt.AlignTop)
         save_button = QtWidgets.QPushButton(dlg)
         save_button.setStyleSheet("QPushButton {background-color: rgb(191, 207, 255); image: url(:/icons/save.svg);} QPushButton::pressed {background-color : rgb(132, 145, 193);}")
         save_button.setMinimumSize(QtCore.QSize(0, 32))
-        grid.addWidget(save_button, 3, 1, 1, 1)
+        grid.addWidget(save_button, 5, 1, 1, 1)
         save_button.clicked.connect(save_info)
         group = QtWidgets.QGroupBox()
         layout = QtWidgets.QGridLayout(group)
         layout.setContentsMargins(0, 0, 0, 0)
-        impervs = self.automata.find_impervious_paths()
+        impervs = self.automaton.find_impervious_paths()
         if impervs == []:
             layout.addWidget(QtWidgets.QLabel("-"))
             txt_text = txt_text + f"-"
@@ -678,18 +1039,18 @@ class MainWindow(QMainWindow):
             txt_text = txt_text + f"{path}"
             if i != len(impervs)-1:
                 txt_text = txt_text + f", "
-        grid.addWidget(group, 2, 1, 1, 1, alignment = QtCore.Qt.AlignTop)
+        grid.addWidget(group, 4, 1, 1, 1, alignment = QtCore.Qt.AlignTop)
         dlg.setWindowTitle("Info")
         dlg.exec_()
 
     
     def mol_info_clicked_m(self):
         """Is called when "Info" button in multi soliton widget is clicked. Opens a dialog window showing whether
-        the automata is deterministic and strongly deterministic.
+        the automaton is deterministic, strongly deterministic, reachability-deterministic and displaying the degree of non-determinism.
         """
 
         def save_info():
-            """Opens a file dialog in which user can specify a path where a text file with all info on soliton automata/ soliton graph should be saved.
+            """Opens a file dialog in which user can specify a path where a text file with all info on soliton automaton/ soliton graph should be saved.
             Text file also contains the input string representing the molecule.
             Only allows `.txt` file suffix.
             """
@@ -710,7 +1071,7 @@ class MainWindow(QMainWindow):
         txt_text = txt_text + f"Deterministic: "
         grid.addWidget(label_det, 0, 0, 1, 1)
         det_bool = QtWidgets.QLabel(dlg)
-        if self.multi_automata.deterministic:
+        if self.multi_automaton.deterministic:
             det_bool.setText("Yes")
             txt_text = txt_text + f"Yes \n"
         else: 
@@ -722,17 +1083,40 @@ class MainWindow(QMainWindow):
         txt_text = txt_text + f"Strongly deterministic: "
         grid.addWidget(label_strong_det, 1, 0, 1, 1)
         strong_det_bool = QtWidgets.QLabel(dlg)
-        if self.multi_automata.strongly_deterministic:
+        if self.multi_automaton.strongly_deterministic:
             strong_det_bool.setText("Yes")
             txt_text = txt_text + f"Yes \n"
         else: 
             strong_det_bool.setText("No")
             txt_text = txt_text + f"No \n"
         grid.addWidget(strong_det_bool, 1, 1, 1, 1)
+
+        label_reach_det = QtWidgets.QLabel(dlg)
+        label_reach_det.setText("Reachability-deterministic:")
+        txt_text = txt_text + f"Reachability-deterministic: "
+        grid.addWidget(label_reach_det, 2, 0, 1, 1)
+        reach_det_bool = QtWidgets.QLabel(dlg)
+        if self.multi_automaton.reachability_deterministic:
+            reach_det_bool.setText("Yes")
+            txt_text = txt_text + f"Yes \n"
+        else: 
+            reach_det_bool.setText("No")
+            txt_text = txt_text + f"No \n"
+        grid.addWidget(reach_det_bool, 2, 1, 1, 1)
+
+        label_degree = QtWidgets.QLabel(dlg)
+        label_degree.setText("Degree of non-determinism:")
+        txt_text = txt_text + f"Degree of non-determinism: "
+        grid.addWidget(label_degree, 3, 0, 1, 1)
+        degree = QtWidgets.QLabel(dlg)
+        degree.setText(str(self.multi_automaton.degree_of_nondeterminism))
+        txt_text = txt_text + f"{self.multi_automaton.degree_of_nondeterminism} \n"
+        grid.addWidget(degree, 3, 1, 1, 1)
+
         save_button = QtWidgets.QPushButton(dlg)
         save_button.setStyleSheet("QPushButton {background-color: rgb(149, 221, 185); image: url(:/icons/save.svg);} QPushButton::pressed {background-color : rgb(90, 159, 123);}")
         save_button.setMinimumSize(QtCore.QSize(0, 32))
-        grid.addWidget(save_button, 3, 1, 1, 1)
+        grid.addWidget(save_button, 4, 1, 1, 1)
         save_button.clicked.connect(save_info)
         dlg.setWindowTitle("Info")
         dlg.exec_()
@@ -775,23 +1159,29 @@ class MainWindow(QMainWindow):
 
     
     def submit_set_of_bursts_clicked(self):
-        """Method that is called when user clicks button to submit a set of bursts.
+        """Is called when user clicks button to submit a set of bursts.
         Catches errors if user used the wrong syntax.
-        If the user's set of bursts is valid it all the necessary widgets for the user to choose a burst.
+        If the user's set of bursts is valid it displays all the necessary widgets for the user to choose a burst.
         """
-        bursts = self.set_of_bursts_lineedit.text()
+        bursts = self.set_of_bursts_lineedit.lineEdit().text()
         self.bursts = bursts
         self.burst.clear()
         try:
-            self.multi_automata = MultiwaveSolitonAutomata(self.my_graph_m, bursts)
+            # Try creating a multi soliton automaton with the graph and the entered set of bursts. Fails if syntax of set of bursts is wrong.
+            self.multi_automaton = MultiwaveSolitonAutomaton(self.my_graph_m, bursts)
             bursts = bursts.split(";")
             for burst in bursts:
                 burst = re.sub(r"[{}]+", "", burst)
                 self.burst.addItem(burst)
-            self.show_multiple([self.mol_info_m, self.bursts_label, self.row5_m, self.submit_burst])
-            self.hide_multiple([self.traversals_label, self.traversals, self.if_loops_m, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
+            self.show_multiple([self.traversal_mode_m, self.parting_line2_m, self.mol_info_m, self.bursts_label, self.row6_m, self.submit_burst])
+            self.hide_multiple([self.parting_line3_m, self.traversals_label, self.traversals, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
+            self.status_m = 3
+            self.short_help_m.setText("Choose a burst or use all bursts in the set of bursts for finding paths")
         except:
-            self.hide_multiple([self.mol_info_m, self.bursts_label, self.row5_m, self.submit_burst, self.traversals_label, self.traversals, self.if_loops_m, self.row6_m, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
+            # Case in which syntax was wrong. A reminder is displayed, aiming to help the user to transform his input into an input with correct syntax.
+            self.hide_multiple([self.traversal_mode_m, self.parting_line2_m, self.mol_info_m, self.bursts_label, self.row6_m, self.submit_burst, self.parting_line3_m, self.traversals_label, self.traversals, self.row7_m, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
+            self.status_m = 2
+            self.short_help_m.setText("Specify a set of bursts or choose one from the drop-down menu")
             msg = QMessageBox(self.wid_mult)
             msg.setStyleSheet(" QPushButton{ height: 32px; width: 130px;}")
             msg.setWindowTitle("Incorrect input")
@@ -807,6 +1197,35 @@ class MainWindow(QMainWindow):
             details = details + "- Example: " + "{(3,1)||1(1,2); (3,2)||4(2,1)}\n"
             msg.setDetailedText(details)
             x = msg.exec_()
+        if self.status_m == 3:
+            try:
+                with open("data.json", "r") as json_file:
+                    data = json.load(json_file)
+            except (FileNotFoundError, JSONDecodeError):
+                data = []
+            
+            # Look for the current molecule in the data
+            index_of_molecule = next((i for i, m in enumerate(data) if m.get("input_string") == self.smiles_string_m), None)
+            if index_of_molecule is not None:
+                existing_burst = next((b for b in data[index_of_molecule]["sets_of_bursts"] if b["set_of_bursts"] == self.bursts), None)
+
+                if existing_burst: # If the set of bursts exists, update the "last_used" field
+                    existing_burst["last_used"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                else: # If the set of bursts doesn't exist, add a new object to the "sets_of_bursts" list
+                    burst_data = {
+                        "set_of_bursts": self.bursts,
+                        "last_used": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                    }
+                    data[index_of_molecule]["sets_of_bursts"].append(burst_data)
+
+            with open("data.json", "w") as json_file:
+                json.dump(data, json_file, indent=4)
+
+            # Change combobox items so that entered set of bursts (which is now the last used set of bursts) is the first element in the combobox
+            sorted_burstsets = sorted(data[index_of_molecule]["sets_of_bursts"], key=lambda x: x["last_used"], reverse=True)
+            self.set_of_bursts_lineedit.clear()
+            for burstset in sorted_burstsets:
+                self.set_of_bursts_lineedit.addItem(burstset["set_of_bursts"])
 
 
     def all_exterior_nodes_statechanged(self):
@@ -835,38 +1254,38 @@ class MainWindow(QMainWindow):
         """
         self.path_index = None # we need this variable later in show_animation_clicked
         self.paths.clear()
-        self.if_loops.setChecked(True)
-        if self.all_exterior_nodes.isChecked():
-            key = self.automata.matrix_to_string(nx.to_numpy_array(self.my_graph.graph))
-            self.found_paths = self.automata.states_plus_soliton_paths[key][1]
-        else:
+        if self.all_exterior_nodes.isChecked(): # User wants to see all soliton paths between all pairs of exterior nodes
+            key = self.automaton.matrix_to_string(nx.to_numpy_array(self.my_graph.graph))
+            self.found_paths = self.automaton.states_plus_soliton_paths[key][1]
+        else: # User selected a specific pair of exterior nodes
             node1 = self.my_graph.exterior_nodes_reverse[self.node_1.currentText()]
             node2 = self.my_graph.exterior_nodes_reverse[self.node_2.currentText()]
-            self.found_paths = self.automata.call_find_all_paths_given_nodes(node1, node2, self.my_graph)
-        if self.found_paths == []:
-            self.hide_multiple([self.soliton_paths_label, self.paths, self.if_loops, self.row5, self.show_matrices, self.show_end_result, self.show_animation])
+            self.found_paths = self.automaton.call_find_all_paths_given_nodes(node1, node2, self.my_graph)
+        perfectPaths = [path for path in self.found_paths if isinstance(path, SolitonPath)]
+        if perfectPaths == []: # No paths were found
+            self.hide_multiple([self.parting_line2, self.soliton_paths_label, self.paths, self.row6, self.show_matrices, self.show_end_result, self.show_animation])
+            self.status = 2
+            self.short_help.setText("Choose a pair of exterior nodes or use all pairs for finding paths")
             msg = QMessageBox(self.wid_single)
             msg.setStyleSheet(" QPushButton{ height: 32px; width: 130px;}")
             msg.setWindowTitle("No path found")
             msg.setText("There exists no soliton path between these exterior nodes.")
             msg.setIcon(QMessageBox.Information)
             msg.setStandardButtons(QMessageBox.Retry)
-            msg.setInformativeText("Please try again with different exterior nodes or a different soliton automata.")
+            msg.setInformativeText("Please try again with different exterior nodes or a different soliton automaton.")
             x = msg.exec_()
-        else:
-            endless_loops = 0
-            self.loops_indices = []
+        else: # Paths were found and are now added to combobox
+            self.incomplete_paths_indices = []
             for p, soliton_path in enumerate(self.found_paths):
-                if isinstance(soliton_path, SolitonPath): # if soliton path is a real soliton path and no endless loop
+                if isinstance(soliton_path, SolitonPath): # if soliton path is a real soliton path and no incomplete path were search was terminated
                     self.paths.addItem(str(soliton_path.path_for_user))
                 else:
-                    this_path = "[!] "
-                    this_path = this_path + soliton_path[0].path_for_user + " ..."
-                    self.paths.addItem(this_path)
-                    endless_loops += 1
-                    self.loops_indices.append(p)
-            self.soliton_paths_label.setText(f"Soliton paths ({len(self.found_paths) - endless_loops}):")
-            self.show_multiple([self.soliton_paths_label, self.paths, self.if_loops, self.row5, self.show_matrices, self.show_end_result, self.show_animation])
+                    self.incomplete_paths_indices.append(p)
+            self.found_paths = [i for j, i in enumerate(self.found_paths) if j not in self.incomplete_paths_indices] # Need to display the right number of paths
+            self.soliton_paths_label.setText(f"Soliton paths ({len(self.found_paths)}):")
+            self.show_multiple([self.parting_line2, self.soliton_paths_label, self.paths, self.row6, self.show_matrices, self.show_end_result, self.show_animation])
+            self.status = 3
+            self.short_help.setText("Select a soliton path and investigate it further")
 
     
     def submit_burst_clicked(self):
@@ -877,17 +1296,19 @@ class MainWindow(QMainWindow):
         """
         self.traversal_index = None # we need this variable later in show_animation_clicked
         self.traversals.clear()
-        self.if_loops_m.setChecked(True)
-        if self.all_bursts.isChecked():
-            key = self.multi_automata.matrix_to_string(nx.to_numpy_array(self.my_graph_m.graph))
-            self.found_traversals = self.multi_automata.states_plus_traversals[key][1]
-            self.num_traversals_per_burst = self.multi_automata.states_plus_traversals[key][2]
-        else:
+        if self.all_bursts.isChecked(): # User wants to see all configuration trails for all bursts in the set of bursts
+            key = self.multi_automaton.matrix_to_string(nx.to_numpy_array(self.my_graph_m.graph))
+            self.found_traversals = self.multi_automaton.states_plus_traversals[key][1]
+            self.num_traversals_per_burst = self.multi_automaton.states_plus_traversals[key][2]
+        else: # User selected a specific burst
             burst_index = int(self.burst.currentIndex())
-            self.found_traversals = self.multi_automata.call_find_all_travs_given_burst(self.multi_automata.bursts_dicts[burst_index], self.my_graph_m)
+            self.found_traversals = self.multi_automaton.call_find_all_travs_given_burst(self.multi_automaton.bursts_dicts[burst_index], self.my_graph_m)
             self.num_traversals_per_burst = None
-        if self.found_traversals == []:
-            self.hide_multiple([self.traversals_label, self.traversals, self.if_loops_m, self.row6_m, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
+        perfectTraversals = [trav for trav in self.found_traversals if isinstance(trav, Traversal)]
+        if perfectTraversals == []: # No configuration trails were found
+            self.hide_multiple([self.parting_line3_m, self.traversals_label, self.traversals, self.row7_m, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
+            self.status_m = 3
+            self.short_help_m.setText("Choose a burst or use all bursts in the set of bursts for finding paths")
             msg = QMessageBox(self.wid_mult)
             msg.setStyleSheet(" QPushButton{ height: 32px; width: 130px;}")
             msg.setWindowTitle("No soliton paths found")
@@ -896,11 +1317,10 @@ class MainWindow(QMainWindow):
             msg.setStandardButtons(QMessageBox.Retry)
             msg.setInformativeText("Please try again with different bursts.")
             x = msg.exec_()
-        else:
-            endless_loops = 0
-            self.loops_indices_m = []
+        else: # Configuration trails were found and are now added to combobox
+            self.incomplete_traversals_indices = []
             for t, traversal in enumerate(self.found_traversals):
-                if isinstance(traversal, Traversal): # if traversal is a real traversal and no endless loop
+                if isinstance(traversal, Traversal): # if traversal is a real traversal and no incomplete configuration trail were search was terminated
                     this_traversal = ""
                     for i, path in enumerate(traversal.traversal_for_user):
                         this_traversal = this_traversal + path
@@ -908,16 +1328,12 @@ class MainWindow(QMainWindow):
                             this_traversal = this_traversal + ", "
                     self.traversals.addItem(this_traversal)
                 else:
-                    this_traversal = "[!] "
-                    for i, path in enumerate(traversal[0].traversal_for_user):
-                        this_traversal = this_traversal + path + " ..."
-                        if i != len(traversal[0].traversal_for_user)-1:
-                            this_traversal = this_traversal + ", "
-                    self.traversals.addItem(this_traversal)
-                    endless_loops += 1
-                    self.loops_indices_m.append(t)
-            self.traversals_label.setText(f"Sets of paths ({len(self.found_traversals) - endless_loops}):")
-            self.show_multiple([self.traversals_label, self.traversals, self.if_loops_m, self.row6_m, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
+                    self.incomplete_traversals_indices.append(t)
+            self.found_traversals = [i for j, i in enumerate(self.found_traversals) if j not in self.incomplete_traversals_indices]
+            self.traversals_label.setText(f"Sets of paths ({len(self.found_traversals)}):") # Display right number of configuration trails
+            self.show_multiple([self.parting_line3_m, self.traversals_label, self.traversals, self.row7_m, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
+            self.status_m = 4
+            self.short_help_m.setText("Select a set of paths and investigate it further")
             sep_index = 0
             if self.num_traversals_per_burst:
                 for n, num in enumerate(self.num_traversals_per_burst): # add seperators to distinct which traversals resulted from which burst
@@ -925,134 +1341,8 @@ class MainWindow(QMainWindow):
                         sep_index += num
                         self.traversals.insertSeparator(sep_index)
                         self.found_traversals.insert(sep_index, None) # so the indices in found_traversals correspond with the indices of the combobox items
-                        self.loops_indices_m = [(index + 1) if (index >= sep_index) else index for index in self.loops_indices_m]
+                        self.incomplete_traversals_indices = [(index + 1) if (index >= sep_index) else index for index in self.incomplete_traversals_indices]
                         sep_index += 1 # indices got shifted by one because seperator was added
-
-
-    def loops_onoff(self, checkbox: QtWidgets.QCheckBox):
-        """Is called when "loops" checkbox in single soliton widget is checked/ unchecked.
-        Hides "loop paths"/ unhides them.
-
-        Args:
-            checkbox (QtWidgets.QCheckBox): "Loops" checkbox.
-        """
-        if checkbox.isChecked() == True:
-            for index in self.loops_indices:
-                if index < self.paths.count():
-                    view = self.paths.view()
-                    view.setRowHidden(index, False)
-                    model = self.paths.model()
-                    item = model.item(index)
-                    item.setFlags(item.flags() | Qt.ItemIsEnabled)
-            self.paths.setCurrentIndex(0)
-        else:
-            for index in self.loops_indices:
-                if index < self.paths.count():
-                    view = self.paths.view()
-                    view.setRowHidden(index, True)
-                    model = self.paths.model()
-                    item = model.item(index)
-                    item.setFlags(item.flags() & ~Qt.ItemIsEnabled)
-            curIndex = 0
-            for i in range (0, len(self.found_paths)):
-                if curIndex not in self.loops_indices:
-                    break
-                else:
-                    curIndex += 1
-            self.paths.setCurrentIndex(curIndex)
-
-
-    def loops_onoff_m(self, checkbox: QtWidgets.QCheckBox):
-        """Is called when "loops" checkbox in multi soliton widget is checked/ unchecked.
-        Hides "loop traversals"/ unhides them.
-
-        Args:
-            checkbox (QtWidgets.QCheckBox): "Loops" checkbox.
-        """
-        if checkbox.isChecked() == True:
-            for index in self.loops_indices_m:
-                if index < self.traversals.count():
-                    view = self.traversals.view()
-                    view.setRowHidden(index, False)
-                    model = self.traversals.model()
-                    item = model.item(index)
-                    item.setFlags(item.flags() | Qt.ItemIsEnabled)
-            self.traversals.setCurrentIndex(0)
-        else:
-            for index in self.loops_indices_m:
-                if index < self.traversals.count():
-                    view = self.traversals.view()
-                    view.setRowHidden(index, True)
-                    model = self.traversals.model()
-                    item = model.item(index)
-                    item.setFlags(item.flags() & ~Qt.ItemIsEnabled)
-            curIndex = 0
-            for i in range (0, len(self.found_traversals)):
-                if curIndex not in self.loops_indices_m:
-                    break
-                else:
-                    curIndex += 1
-            self.traversals.setCurrentIndex(curIndex)
-
-    
-    def endless_loop_picked(self, combobox: QtWidgets.QComboBox):
-        """Is called when an element of combobox containing found paths is picked in single soliton widget. Disables "show matrices"
-        and "show end result" buttons if "loop path" is picked/ enables them again if valid soliton path is picked.
-
-        Args:
-            combobox (QtWidgets.QComboBox): Contains all found soliton paths and "loop paths".
-        """
-        if not isinstance(self.found_paths[combobox.currentIndex()], SolitonPath): # disable
-            try:
-                self.show_matrices.clicked.disconnect()
-                self.show_matrices.setStyleSheet("QPushButton {background-color: rgb(230, 230, 230);}")
-                self.show_end_result.clicked.disconnect()
-                self.show_end_result.setStyleSheet("QPushButton {background-color: rgb(230, 230, 230);}")
-            except:
-                pass
-        else: # enable
-            try:
-                self.show_matrices.clicked.disconnect()
-                self.show_matrices.clicked.connect(self.show_matrices_clicked)
-                self.show_matrices.setStyleSheet("QPushButton {background-color: rgb(191, 207, 255);} QPushButton::pressed {background-color : rgb(132, 145, 193);}")
-                self.show_end_result.clicked.disconnect()
-                self.show_end_result.clicked.connect(self.show_end_result_clicked)
-                self.show_end_result.setStyleSheet("QPushButton {background-color: rgb(191, 207, 255);} QPushButton::pressed {background-color : rgb(132, 145, 193);}")
-            except:
-                self.show_matrices.clicked.connect(self.show_matrices_clicked)
-                self.show_matrices.setStyleSheet("QPushButton {background-color: rgb(191, 207, 255);} QPushButton::pressed {background-color : rgb(132, 145, 193);}")
-                self.show_end_result.clicked.connect(self.show_end_result_clicked)
-                self.show_end_result.setStyleSheet("QPushButton {background-color: rgb(191, 207, 255);} QPushButton::pressed {background-color : rgb(132, 145, 193);}")
-
-
-    def endless_loop_picked_m(self, combobox: QtWidgets.QComboBox):
-        """Is called when an element of combobox containing found traversals is picked in multi soliton widget. Disables "show matrices"
-        and "show end result" buttons if "loop traversal" is picked/ enables them again if traversal is picked.
-
-        Args:
-            combobox (QtWidgets.QComboBox): Contains all found traversals and "loop traversals".
-        """
-        if not isinstance(self.found_traversals[combobox.currentIndex()], Traversal):
-            try:
-                self.show_matrices_m.clicked.disconnect()
-                self.show_matrices_m.setStyleSheet("QPushButton {background-color: rgb(230, 230, 230);}")
-                self.show_end_result_m.clicked.disconnect()
-                self.show_end_result_m.setStyleSheet("QPushButton {background-color: rgb(230, 230, 230);}")
-            except:
-                pass
-        else:
-            try:
-                self.show_matrices_m.clicked.disconnect()
-                self.show_matrices_m.clicked.connect(self.show_matrices_clicked_m)
-                self.show_matrices_m.setStyleSheet("QPushButton {background-color: rgb(149, 221, 185);} QPushButton::pressed {background-color : rgb(90, 159, 123);}")
-                self.show_end_result_m.clicked.disconnect()
-                self.show_end_result_m.clicked.connect(self.show_end_result_clicked_m)
-                self.show_end_result_m.setStyleSheet("QPushButton {background-color: rgb(149, 221, 185);} QPushButton::pressed {background-color : rgb(90, 159, 123);}")
-            except:
-                self.show_matrices_m.clicked.connect(self.show_matrices_clicked_m)
-                self.show_matrices_m.setStyleSheet("QPushButton {background-color: rgb(149, 221, 185);} QPushButton::pressed {background-color : rgb(90, 159, 123);}")
-                self.show_end_result_m.clicked.connect(self.show_end_result_clicked_m)
-                self.show_end_result_m.setStyleSheet("QPushButton {background-color: rgb(149, 221, 185);} QPushButton::pressed {background-color : rgb(90, 159, 123);}")
 
 
     def show_matrices_clicked(self):
@@ -1277,7 +1567,9 @@ class MainWindow(QMainWindow):
             self.display_molecule.setPixmap(QtGui.QPixmap.fromImage(self.qim).scaled(self.display_molecule.size(), QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation))
 
             self.traversal_mode.setChecked(True)
-            self.hide_multiple([self.soliton_paths_label, self.paths, self.if_loops, self.row5, self.show_matrices, self.show_end_result, self.show_animation])
+            self.hide_multiple([self.parting_line2, self.soliton_paths_label, self.paths, self.row6, self.show_matrices, self.show_end_result, self.show_animation])
+            self.status = 2
+            self.short_help.setText("Choose a pair of exterior nodes or use all pairs for finding paths")
             self.node_1.setCurrentIndex(0)
             self.node_2.setCurrentIndex(0)
             dlg.close()
@@ -1341,7 +1633,9 @@ class MainWindow(QMainWindow):
             self.display_molecule_m.setPixmap(QtGui.QPixmap.fromImage(self.qim_m).scaled(self.display_molecule_m.size(), QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation))
 
             self.traversal_mode_m.setChecked(True)
-            self.hide_multiple([self.traversals_label, self.traversals, self.if_loops_m, self.row6_m, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
+            self.hide_multiple([self.parting_line3_m, self.traversals_label, self.traversals, self.row7_m, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
+            self.status_m = 3
+            self.short_help_m.setText("Choose a burst or use all bursts in the set of bursts for finding paths")
             self.burst.setCurrentIndex(0)
             dlg.close()
 
@@ -1372,8 +1666,7 @@ class MainWindow(QMainWindow):
         """Is called when user clicks button to have the animation of the soliton traversing the graph displayed.
         Makes a small window pop up that shows the animation and provides a "pause"/ "play" button, a "back" and a "forward" button and a save button.
         Instead of displaying the `gif` it uses a sequence of `PIL` images and always shows the next image after a certain time.
-        Calls different animation functions depending on whether application is in single or multi soliton widget.
-        If a "loop path"/ "loop traversal" was chosen, save button is disabled and animation loops after loop point is reached.
+        Calls different animation functions depending on whether application is in single or multi soliton widget. 
 
         Args:
             button (QtWidgets.QPushButton): Button that called the function (either button in single or in multi soliton widget).
@@ -1396,22 +1689,12 @@ class MainWindow(QMainWindow):
             """Displays next image of animation.
             """
             self.step += 1
-            if button == self.show_animation:
-                if isinstance(self.desired_path, SolitonPath):
-                    if self.step == len(self.desired_path.path): # start animation all over again as soon as end is reached (endless loop)
-                        self.step = 0
-                else:
-                    if self.step == len(self.desired_path[0].path):
-                        self.over_looppoint_count += 1 # another "round" of loop made
-                        self.step = self.desired_path[1] # we reached the "end" (which in reality is the point where we noticed we are stuck in a loop) so we have to continue at the loop point now
-            else:
-                if isinstance(self.desired_traversal, Traversal):
-                    if self.step == len(self.desired_traversal.pos):
-                        self.step = 0
-                else:
-                    if self.step == len(self.desired_traversal[0].pos):
-                        self.over_looppoint_count += 1
-                        self.step = self.desired_traversal[1]
+            if button == self.show_animation: # Single soliton widget
+                if self.step == len(self.desired_path.path): # start animation all over again as soon as end is reached (endless loop)
+                    self.step = 0
+            else: # Multi soliton widget
+                if self.step == len(self.desired_traversal.pos):
+                    self.step = 0
             im = self.pil_images[self.step]
             qim = ImageQt(im)
             self.label.setPixmap(QtGui.QPixmap.fromImage(qim.copy()))
@@ -1422,25 +1705,11 @@ class MainWindow(QMainWindow):
             """
             self.step -= 1
             if button == self.show_animation:
-                if isinstance(self.desired_path, SolitonPath):
-                    if self.step == -1: # if start of animation was reached in the step before then continue at end of animation
-                        self.step = len(self.desired_path.path) - 1
-                else:
-                    if self.step == -1:
-                        self.step = 0 # we can't go back to the end of the animation because it has no end, instead we stay at the beginning
-                    elif self.step == self.desired_path[1] - 1 and self.over_looppoint_count != 0: # before we go back to before the loop point we have to dismantle all "rounds" of loop that we made
-                        self.step = len(self.desired_path[0].path) - 1 # continue again at the "end"
-                        self.over_looppoint_count -= 1 # dismantle
+                if self.step == -1: # if start of animation was reached in the step before then continue at end of animation
+                    self.step = len(self.desired_path.path) - 1
             else:
-                if isinstance(self.desired_traversal, Traversal):
-                    if self.step == -1:
-                        self.step = len(self.desired_traversal.pos) - 1
-                else:
-                    if self.step == -1:
-                        self.step = 0 
-                    elif self.step == self.desired_traversal[1] - 1 and self.over_looppoint_count != 0:
-                        self.step = len(self.desired_traversal[0].pos) - 1
-                        self.over_looppoint_count -= 1
+                if self.step == -1:
+                    self.step = len(self.desired_traversal.pos) - 1
             im = self.pil_images[self.step]
             qim = ImageQt(im)
             self.label.setPixmap(QtGui.QPixmap.fromImage(qim.copy()))
@@ -1460,7 +1729,7 @@ class MainWindow(QMainWindow):
                 else: button.setStyleSheet("QPushButton {background-color: rgb(149, 221, 185); image: url(:/icons/play.svg);} QPushButton::pressed {background-color : rgb(90, 159, 123);}")
             else: # play
                 update_image()
-                self.timer.start(800)
+                self.timer.start(800)  # triggers event every 800 millisecond
                 if button.parentWidget().parentWidget() == self.wid_single:
                     button.setStyleSheet("QPushButton {background-color: rgb(191, 207, 255); image: url(:/icons/pause.svg);} QPushButton::pressed {background-color : rgb(132, 145, 193);}")
                 else: button.setStyleSheet("QPushButton {background-color: rgb(149, 221, 185); image: url(:/icons/pause.svg);} QPushButton::pressed {background-color : rgb(90, 159, 123);}")
@@ -1508,19 +1777,13 @@ class MainWindow(QMainWindow):
             if self.path_index != self.paths.currentIndex():
                 self.path_index = self.paths.currentIndex()
                 self.desired_path = self.found_paths[self.path_index]
-                if isinstance(self.desired_path, SolitonPath): # soliton path
-                    plots_and_arrays = Animation.list_of_plots_and_arrays(self.my_graph, self.desired_path)
-                else: # "loop path"
-                    plots_and_arrays = Animation.list_of_plots_and_arrays(self.my_graph, self.desired_path[0])
+                plots_and_arrays = Animation.list_of_plots_and_arrays(self.my_graph, self.desired_path)
                 self.pil_images = Animation.list_of_pil_images(plots_and_arrays)
         else:
             if self.traversal_index != self.traversals.currentIndex():
                 self.traversal_index = self.traversals.currentIndex()
                 self.desired_traversal = self.found_traversals[self.traversal_index]
-                if isinstance(self.desired_traversal, Traversal):
-                    plots_and_arrays = Animation.list_of_plots_and_arrays_multiwave(self.my_graph_m, self.desired_traversal)
-                else: 
-                    plots_and_arrays = Animation.list_of_plots_and_arrays_multiwave(self.my_graph_m, self.desired_traversal[0])
+                plots_and_arrays = Animation.list_of_plots_and_arrays_multiwave(self.my_graph_m, self.desired_traversal)
                 self.pil_images = Animation.list_of_pil_images(plots_and_arrays)
 
         save_button = QtWidgets.QPushButton(dlg)
@@ -1535,22 +1798,14 @@ class MainWindow(QMainWindow):
         prev_button.setGeometry(QtCore.QRect(205, 375, 30, 30))
         prev_button.clicked.connect(lambda: prev_img(pause_button))
         if button == self.show_animation:
-            if isinstance(self.desired_path, SolitonPath):
-                save_button.setStyleSheet("QPushButton {background-color: rgb(191, 207, 255); image: url(:/icons/save.svg);} QPushButton::pressed {background-color : rgb(132, 145, 193);}")
-                save_button.clicked.connect(save_animation)
-            else:
-                self.over_looppoint_count = 0 # how many times we passed the loop point
-                save_button.setStyleSheet("QPushButton {background-color: rgb(230, 230, 230); image: url(:/icons/save.svg);}")
+            save_button.setStyleSheet("QPushButton {background-color: rgb(191, 207, 255); image: url(:/icons/save.svg);} QPushButton::pressed {background-color : rgb(132, 145, 193);}")
+            save_button.clicked.connect(save_animation)
             pause_button.setStyleSheet("QPushButton {background-color: rgb(191, 207, 255); image: url(:/icons/play.svg);} QPushButton::pressed {background-color : rgb(132, 145, 193);}")
             next_button.setStyleSheet("QPushButton {background-color: rgb(191, 207, 255); image: url(:/icons/right-arrow.svg);} QPushButton::pressed {background-color : rgb(132, 145, 193);}")
             prev_button.setStyleSheet("QPushButton {background-color: rgb(191, 207, 255); image: url(:/icons/left-arrow.svg);} QPushButton::pressed {background-color : rgb(132, 145, 193)}")
         else:
-            if isinstance(self.desired_traversal, Traversal):
-                save_button.setStyleSheet("QPushButton {background-color: rgb(149, 221, 185); image: url(:/icons/save.svg);} QPushButton::pressed {background-color : rgb(90, 159, 123);}")
-                save_button.clicked.connect(save_animation)
-            else:
-                self.over_looppoint_count = 0
-                save_button.setStyleSheet("QPushButton {background-color: rgb(230, 230, 230); image: url(:/icons/save.svg);}")
+            save_button.setStyleSheet("QPushButton {background-color: rgb(149, 221, 185); image: url(:/icons/save.svg);} QPushButton::pressed {background-color : rgb(90, 159, 123);}")
+            save_button.clicked.connect(save_animation)
             pause_button.setStyleSheet("QPushButton {background-color: rgb(149, 221, 185); image: url(:/icons/play.svg);} QPushButton::pressed {background-color : rgb(90, 159, 123);}")
             next_button.setStyleSheet("QPushButton {background-color: rgb(149, 221, 185); image: url(:/icons/right-arrow.svg);} QPushButton::pressed {background-color : rgb(90, 159, 123);}")
             prev_button.setStyleSheet("QPushButton {background-color: rgb(149, 221, 185); image: url(:/icons/left-arrow.svg);} QPushButton::pressed {background-color : rgb(90, 159, 123)}")
@@ -1559,7 +1814,6 @@ class MainWindow(QMainWindow):
         self.timer = QtCore.QTimer(self)
         self.timer.timeout.connect(update_image) # timer calls `update_image` everytime event is triggered
         update_image()
-        #self.timer.start(800) # triggers event every 800 millisecond
 
         dlg.setWindowTitle("Animation")
         dlg.setFixedSize(545, 410)
@@ -1577,10 +1831,10 @@ class MainWindow(QMainWindow):
 
 
     def hide_retain_space(self, widgets: list):
-        """Retains the space of a widget even when it's hidden.
+        """Retains the space of widgets even when they are hidden.
 
         Args:
-            widget (QtWidgets.QWidget ): Widget whose space should be retained.
+            widgets (list): Widgets whose spaces should be retained.
         """
         for widget in widgets:
             retain = widget.sizePolicy()

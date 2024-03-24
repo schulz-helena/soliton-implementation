@@ -1,4 +1,4 @@
-"""Multiwave soliton automata.
+"""Multiwave soliton automaton.
 """
 import copy
 import re
@@ -9,27 +9,31 @@ from soliton_automata.soliton_classes.soliton_graph import SolitonGraph
 from soliton_automata.soliton_classes.traversal import Traversal
 
 
-class MultiwaveSolitonAutomata:
-    """Representation of a multiwave soliton automata, which finds all traversals for a burst.
+class MultiwaveSolitonAutomaton:
+    """Representation of a multiwave soliton automaton, which contains all traversals for a burst.
     """
 
     def __init__(self, soliton_graph: SolitonGraph, bursts: str):
-        """Initializes a `MultiwaveSolitonAutomata` object by using a soliton graph, a burst and a stop number.
+        """Initializes a `MultiwaveSolitonAutomaton` object by using a soliton graph and a burst.
         """
         self.soliton_graph: SolitonGraph = soliton_graph
-        """Soliton graph the automata is based on."""
+        """Soliton graph the automaton is based on."""
         self.bursts = bursts
         """The set of input burst."""
         self.bursts_dicts: list = self.build_bursts_dicts()
         """List of the bursts as dictionaries (soliton number as key and a list containing exterior nodes and entry time as value)."""
         self.deterministic: bool
-        """Whether the multiwave soliton automata is deterministic."""
+        """Whether the multiwave soliton automaton is deterministic."""
         self.strongly_deterministic: bool
         """Whether the multiwave soliton graph is strongly deterministic."""
+        self.reachability_deterministic: bool
+        """Whether the multiwave soliton graph is reachability-deterministic."""
+        self.degree_of_nondeterminism: int
+        """The degree of non-determinism of the soliton automaton"""
         self.states_plus_traversals: dict
-        """All states of the soliton automata plus all traversals that can be found in each state plus number of traversals found for each burst
+        """All states of the soliton automaton plus all traversals that can be found in each state plus number of traversals found for each burst
         (Id/ string of the states adjacency matrix as key and state, traversals and list of numbers as values)."""
-        self.deterministic, self.strongly_deterministic, self.states_plus_traversals = self.all_traversals()
+        self.deterministic, self.strongly_deterministic, self.reachability_deterministic, self.degree_of_nondeterminism, self.states_plus_traversals = self.all_traversals()
 
 
     def build_bursts_dicts(self):
@@ -87,7 +91,7 @@ class MultiwaveSolitonAutomata:
         """
         traversals = []
         for trav in travs:
-            if isinstance(trav[len(trav)-1], int): # if trav is not a real traversal but part of an endlessly looping traversal
+            if isinstance(trav[len(trav)-1], int): # if trav is not a real traversal
                 traversal = Traversal(soliton_graph, trav[0])
                 traversals.append([traversal, trav[1]])
             else:
@@ -125,6 +129,7 @@ class MultiwaveSolitonAutomata:
             s_pos_all_timesteps (list): Soliton positions for all past timesteps.
             bindings_all_timesteps (list): Binding types of all edges in the graph for all past timesteps.
             binds_all_timesteps (list): Binding type of the last edge that was traversed by each soliton for all past timesteps.
+            poss_suc_combs_all_timesteps (list): Possible combinations of successor nodes for all past timesteps.
             travs (list): All currently found traversals.
 
         Returns:
@@ -206,17 +211,17 @@ class MultiwaveSolitonAutomata:
             travs.append(trav) # trav = traversal of all solitons through the graph
             return travs
 
-        # base case 2: if some solitons are stuck in an endless loop
+        # base case 2: if we have two successor-equivalent configurations in the configuration trail
         count = 1
         for k in range(0, len(bindings_all_timesteps)-1):
-            if akt_bindings == bindings_all_timesteps[k] and akt_positions == s_pos_all_timesteps[k] and nodes_combs == poss_suc_combs_all_timesteps[k] and -1 not in nodes_combs[0].values(): # and nodes_combs == poss_suc_combs_all_timesteps[k] # if we already had that exact graph, position map and successor position combinations (and all solitons already entered the graph) in this configuration trail
+            if akt_bindings == bindings_all_timesteps[k] and akt_positions == s_pos_all_timesteps[k] and nodes_combs == poss_suc_combs_all_timesteps[k] and -1 not in nodes_combs[0].values(): # if we already had that exact graph, position map and successor position combinations (and all solitons already entered the graph) in this configuration trail
                 count += 1
                 if count == 2:
                     trav = []
                     for i, pos in enumerate(s_pos_all_timesteps):
                         this_timestep = (pos, bindings_all_timesteps[i])
                         trav.append(this_timestep)
-                    travs.append([trav, k+1]) # append the found trav plus the loop point/ timestep (+1, because otherwise in animation we would display the loop point twice)
+                    travs.append([trav[:k+1], k])
                     return travs
 
         # iterate over all possible combinations
@@ -277,11 +282,13 @@ class MultiwaveSolitonAutomata:
 
 
     def all_traversals (self):
-        """Calls `call_find_all_travs_given_burst` for all states of the automata and all bursts in order to get all possible traversals in all states.
+        """Calls `call_find_all_travs_given_burst` for all states of the automaton and all bursts in order to get all possible traversals in all states.
 
         Returns:
-            bool: Whether the soliton automata is deterministic or not.
-            bool: Whether the soliton automata is strongly deterministic or not.
+            bool: Whether the soliton automaton is deterministic or not.
+            bool: Whether the soliton automaton is strongly deterministic or not.
+            bool: Whether the soliton automaton is reachability-deterministic or not.
+            int: The degree of non-determinism of the soliton automaton.
             dict: All states of the soliton graph plus all traversals that can be found in each state plus number of traversals found for each burst.
         """
         initial_matrix = nx.to_numpy_array(self.soliton_graph.graph)
@@ -289,19 +296,26 @@ class MultiwaveSolitonAutomata:
         states_plus_traversals = {self.matrix_to_string(initial_matrix): [self.soliton_graph, [], []]} # stores all states plus all traversals that can be found in that state plus number of traversals found for each burst
         deterministic = True
         strongly_deterministic = True
+        reachability_deterministic = True
+        degree_of_nondeterminism = 1
+        state_sucstate_burst = dict() # dictionary with number of found traversals for each state + successor state + burst
+        state_sucstate = dict() # dictionary with bool for each state + successor state (first set to False and then only set to True if there is a burst such that there is only one traversal between these states)
 
-        for state in states: # for all states/ soliton graphs of the automata
+        for state in states: # for all states/ soliton graphs of the automaton
             state_matrix_id = self.matrix_to_string(nx.to_numpy_array(state.graph))
             all_traversals = []
             num_traversals_per_burst = []
             for burst_dict in self.bursts_dicts: # loop over all bursts
-                traversals = self.call_find_all_travs_given_burst(burst_dict, state) # find soliton paths with all bursts
+                suc_states_matrix_ids = []
+                traversals = self.call_find_all_travs_given_burst(burst_dict, state) # find traversals with all bursts
                 num_traversals_per_burst.append(len(traversals))
-                loops_num = 0
                 first_real_trav = -1
+                maybe_imperf = []
+                real_travs_this_nodepair = []
                 for t, traversal in enumerate(traversals):
-                    all_traversals.append(traversal)
-                    if isinstance(traversal, Traversal): # if traversal is a real traversal and no endless loop
+                    if isinstance(traversal, Traversal): # if traversal is a real traversal
+                        all_traversals.append(traversal)
+                        real_travs_this_nodepair.append(traversal)
                         if first_real_trav == -1:
                             first_real_trav = t
                         resulting_matrix = traversal.adjacency_matrices_list[len(traversal.adjacency_matrices_list)-1] # adjacency matrix of the soliton graph the traversal results in
@@ -309,15 +323,59 @@ class MultiwaveSolitonAutomata:
                         if resulting_matrix_id not in states_plus_traversals: # if we found a new state
                             states_plus_traversals[resulting_matrix_id] = [traversal.resulting_soliton_graph, [], []] # add it to the dictionary
                             states.append(traversal.resulting_soliton_graph)
+                        if resulting_matrix_id not in suc_states_matrix_ids: # if we found a new state
+                                suc_states_matrix_ids.append(resulting_matrix_id)
+                                if len(suc_states_matrix_ids) > degree_of_nondeterminism:
+                                    degree_of_nondeterminism = len(suc_states_matrix_ids)
                         if np.array_equal(resulting_matrix, traversals[first_real_trav].adjacency_matrices_list[len(traversals[first_real_trav].adjacency_matrices_list)-1]) == False:
-                                deterministic = False # two or more different soliton graphs have emerged although the same pair of exterior nodes was used
-                    else: loops_num += 1
-                if (len(traversals) - loops_num) > 1:
-                        strongly_deterministic = False # more than one soliton path was found between one pair of exterior nodes
+                                deterministic = False # two or more different soliton graphs have emerged although the same burst was used
+                                reachability_deterministic = False
+                        if (state_matrix_id, resulting_matrix_id, str(list(burst_dict.values()))) not in state_sucstate_burst: # use str(list(...)) since dictionaries are not hashable
+                            state_sucstate_burst[(state_matrix_id, resulting_matrix_id, str(list(burst_dict.values())))] = 1
+                        else: state_sucstate_burst[(state_matrix_id, resulting_matrix_id, str(list(burst_dict.values())))] += 1
+                        state_sucstate[(state_matrix_id, resulting_matrix_id)] = False # put in an entry in the dictionary for these two states
+                    else:
+                        maybe_imperf.append([traversal, state_matrix_id, str(list(burst_dict.values()))]) # this uncompleted traversal between these two states and with this burst may be an imperfect traversal (or no traversal at all)
+                imperf_found, state_sucstate_burst = self.identify_imperf_travs(real_travs_this_nodepair, maybe_imperf, state_sucstate_burst)
+                if (len(traversals) - len(maybe_imperf)) > 1:
+                        strongly_deterministic = False # more than one traversal was found for one burst
+                elif (len(traversals) - len(maybe_imperf)) == 1 and imperf_found:
+                        strongly_deterministic = False # we have only one perfect traversal but at least one imperfect traversal as well
             states_plus_traversals[state_matrix_id][1] = all_traversals # add all found traversals in this state
             states_plus_traversals[state_matrix_id][2] = num_traversals_per_burst # add number of traversals found for each burst (in this state)
 
-        return deterministic, strongly_deterministic, states_plus_traversals
+        for key in state_sucstate_burst:
+            if state_sucstate_burst[key] == 1:
+                state_sucstate[key[0], key[1]] = True # there is a burst such that these is only one traversal between this state and this successor state
+        for key in state_sucstate:
+            if state_sucstate[key] == False: # no such burst exists for these two states
+                reachability_deterministic = False
+                break
+
+        return deterministic, strongly_deterministic, reachability_deterministic, degree_of_nondeterminism, states_plus_traversals
+    
+
+    def identify_imperf_travs(self, real_travs: list, maybe_imperf: list, state_sucstate_burst: dict):
+        """Uses the list of perfect traversals and a list of possible imperfect traversals for a state and a burst to identify which traversals are actually imperfect traversals. 
+
+        Args:
+            real_travs (list): All real/ perfect traversals that were found.
+            maybe_imperf (list): All traversals that might be imperfect configuration trails.
+            state_sucstate_burst (dict): Dictionary that contains a triple of state, successor state and a burst as key and the number of found traversals between the two states with the burst as value.
+
+        Returns:
+            bool: Whether an imperfect path was found.
+            dict: Modified `state_sucstate_burst`; if imperfect path was found then number of found traversals for state, successor state and burst was raised.
+        """
+        imperf_found = False
+        for candidate in maybe_imperf:
+            for trav in real_travs:
+                if candidate[0][0].pos_and_bindings == trav.pos_and_bindings[0:len(candidate[0][0].pos_and_bindings)]:
+                    imperf_found = True # we found an imperfect path
+                    resulting_matrix = trav.adjacency_matrices_list[len(trav.adjacency_matrices_list)-1] # adjacency matrix of the soliton graph the traversal results in
+                    resulting_matrix_id = self.matrix_to_string(resulting_matrix)
+                    state_sucstate_burst[(candidate[1], resulting_matrix_id, candidate[2])] += 1 # an imperfect traversal between these two states and with this burst was found
+        return imperf_found, state_sucstate_burst
 
         
     def matrix_to_string(self, matrix: np.ndarray):
