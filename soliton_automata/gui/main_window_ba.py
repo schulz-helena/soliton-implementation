@@ -143,7 +143,8 @@ class MainWindow(QMainWindow):
         # Text field for molecule (combobox with a line edit)
         self.molecule_lineedit = QtWidgets.QComboBox(self.row4)
         try:
-            with open("data.json", "r") as json_file:
+            readme_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data.json')
+            with open(readme_path, "r") as json_file:
                 data = json.load(json_file)
         except:
             pass
@@ -340,7 +341,8 @@ class MainWindow(QMainWindow):
         # Text field for molecule (combobox with a line edit)
         self.molecule_lineedit_m = QtWidgets.QComboBox(self.wid_mult)
         try:
-            with open("data.json", "r") as json_file:
+            readme_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data.json')
+            with open(readme_path, "r") as json_file:
                 data = json.load(json_file)
         except:
             pass
@@ -799,7 +801,8 @@ class MainWindow(QMainWindow):
         # Edit json file if input string was turned into a soliton graph successfully
         if self.status == 2:
             try:
-                with open("data.json", "r") as json_file:
+                readme_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data.json')
+                with open(readme_path, "r") as json_file:
                     data = json.load(json_file)
             except (FileNotFoundError, JSONDecodeError):
                 data = []
@@ -817,7 +820,8 @@ class MainWindow(QMainWindow):
                 }
                 data.append(molecule)
 
-            with open("data.json", "w") as json_file:
+            readme_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data.json')
+            with open(readme_path, "r") as json_file:
                 json.dump(data, json_file, indent=4)
 
             # Change combobox items so that entered molecule (which is now the last used molecule) is the first element in the comboboxes of both windows
@@ -908,7 +912,8 @@ class MainWindow(QMainWindow):
         # Edit json file if input string was turned into a soliton graph successfully
         if self.status_m == 2:
             try:
-                with open("data.json", "r") as json_file:
+                readme_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data.json')
+                with open(readme_path, "r") as json_file:
                     data = json.load(json_file)
             except (FileNotFoundError, JSONDecodeError):
                 data = []
@@ -927,7 +932,8 @@ class MainWindow(QMainWindow):
                 existing_molecule = molecule
                 data.append(molecule)
 
-            with open("data.json", "w") as json_file:
+            readme_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data.json')
+            with open(readme_path, "r") as json_file:
                 json.dump(data, json_file, indent=4)
 
             # Change combobox items so that entered molecule (which is now the last used molecule) is the first element in the comboboxes of both windows
@@ -1199,7 +1205,8 @@ class MainWindow(QMainWindow):
             x = msg.exec_()
         if self.status_m == 3:
             try:
-                with open("data.json", "r") as json_file:
+                readme_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data.json')
+                with open(readme_path, "r") as json_file:
                     data = json.load(json_file)
             except (FileNotFoundError, JSONDecodeError):
                 data = []
@@ -1218,7 +1225,8 @@ class MainWindow(QMainWindow):
                     }
                     data[index_of_molecule]["sets_of_bursts"].append(burst_data)
 
-            with open("data.json", "w") as json_file:
+            readme_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data.json')
+            with open(readme_path, "r") as json_file:
                 json.dump(data, json_file, indent=4)
 
             # Change combobox items so that entered set of bursts (which is now the last used set of bursts) is the first element in the combobox
