@@ -1,97 +1,26 @@
 [
     {
         "input_string": "C1({1})=C({2})C1({=3})",
-        "last_used": "2024-03-23 16:11:52",
+        "last_used": "2024-03-23 15:41:38",
         "sets_of_bursts": [
             {
                 "set_of_bursts": "(3,3)",
-                "last_used": "2024-03-23 15:23:56"
-            },
-            {
-                "set_of_bursts": "(3,1)",
-                "last_used": "2024-03-20 11:41:52"
-            },
-            {
-                "set_of_bursts": "(1,2)",
-                "last_used": "2024-03-19 14:32:32"
+                "last_used": "2024-03-23 15:34:24"
             },
             {
                 "set_of_bursts": "{(3,1)||1(1,2); (3,2)||4(2,1)}",
-                "last_used": "2024-03-23 15:59:18"
+                "last_used": "2024-03-23 15:23:56"
             }
         ]
     },
     {
         "input_string": "C1=CC=CC=C1C=C({1})C=CC({2})=CC2=CC=CC=C2",
-        "last_used": "2024-03-23 16:08:35",
+        "last_used": "2024-03-23 15:28:35",
         "sets_of_bursts": [
-            {
-                "set_of_bursts": "(1,1)",
-                "last_used": "2024-03-21 15:33:18"
-            },
-            {
-                "set_of_bursts": "(1,1)||1(1,1)",
-                "last_used": "2024-03-20 11:41:46"
-            },
-            {
-                "set_of_bursts": "{(1,1)||1(1,1); (1,1)||1(1,2)}",
-                "last_used": "2024-03-23 16:08:39"
-            },
             {
                 "set_of_bursts": "{(1,1)||1(1,1); (2,2)||0(1,1)||2(2,2)}",
                 "last_used": "2024-03-23 15:33:10"
-            },
-            {
-                "set_of_bursts": "(1,1)||0(1,1)",
-                "last_used": "2024-03-23 16:00:12"
             }
         ]
-    },
-    {
-        "input_string": "C1(=CC{=1})C=CC=CC=C1",
-        "last_used": "2024-03-23 15:21:17",
-        "sets_of_bursts": []
-    },
-    {
-        "input_string": "C1(=CC{=1})C=CC=CC=CC=CC=C1",
-        "last_used": "2024-03-23 15:21:44",
-        "sets_of_bursts": []
-    },
-    {
-        "input_string": "{1}=CC{=2}",
-        "last_used": "2024-03-23 15:21:03",
-        "sets_of_bursts": []
-    },
-    {
-        "input_string": "C1(C=C{1})=CC=CC=C1",
-        "last_used": "2024-03-23 15:24:51",
-        "sets_of_bursts": [
-            {
-                "set_of_bursts": "(1,1)||1(1,1)",
-                "last_used": "2024-03-23 15:25:04"
-            },
-            {
-                "set_of_bursts": "(1,1)||10(1,1)",
-                "last_used": "2024-03-23 15:25:38"
-            },
-            {
-                "set_of_bursts": "(1,1)||9(1,1)",
-                "last_used": "2024-03-23 15:25:45"
-            },
-            {
-                "set_of_bursts": "(1,1)||3(1,1)",
-                "last_used": "2024-03-23 15:25:50"
-            }
-        ]
-    },
-    {
-        "input_string": "C1=CC({1})=CC=C1C({2})=CC=CC=C({3})C2=C({4})C=CC=C2",
-        "last_used": "2024-03-23 15:20:55",
-        "sets_of_bursts": []
-    },
-    {
-        "input_string": "C1=CC=C1C=C({1})C(C3=CC=C3)=CC({2})=CC2=CC=C2",
-        "last_used": "2024-03-23 15:25:59",
-        "sets_of_bursts": []
     }
 ]
