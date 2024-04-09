@@ -142,13 +142,14 @@ class MainWindow(QMainWindow):
         self.gridLayout.addWidget(self.row4, 4, 1, 1, 2)
         # Text field for molecule (combobox with a line edit)
         self.molecule_lineedit = QtWidgets.QComboBox(self.row4)
+        sorted_data = []
         try:
             readme_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data.json')
             with open(readme_path, "r") as json_file:
                 data = json.load(json_file)
+            sorted_data = sorted(data, key=lambda x: x["last_used"], reverse=True)
         except:
             pass
-        sorted_data = sorted(data, key=lambda x: x["last_used"], reverse=True)
         for molecule in sorted_data: # Fill combobox with input strings from history
             self.molecule_lineedit.addItem(molecule["input_string"])
         edit = QtWidgets.QLineEdit(self.row4)
@@ -259,8 +260,11 @@ class MainWindow(QMainWindow):
         self.hide_retain_space([self.traversal_mode, self.row3, self.parting_line1, self.exterior_nodes_label, self.row5, self.submit_exterior_nodes, self.parting_line2, self.soliton_paths_label, self.paths, self.row6, self.show_matrices, self.show_end_result, self.show_animation])
         self.hide_multiple([self.traversal_mode, self.row3, self.parting_line1, self.exterior_nodes_label, self.row5, self.submit_exterior_nodes, self.parting_line2, self.soliton_paths_label, self.paths, self.row6, self.show_matrices, self.show_end_result, self.show_animation])
         # Stylesheet:
-        readme_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../styles.css')
-        with open(readme_path, "r", encoding="utf-8") as fh:
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        parent_dir = os.path.dirname(current_dir)
+        css_path = os.path.join(parent_dir, "styles.css")
+        #readme_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../styles.css')
+        with open(css_path, "r", encoding="utf-8") as fh:
             self.style = fh.read()
         self.wid_single.setStyleSheet(self.style)
 
@@ -340,13 +344,14 @@ class MainWindow(QMainWindow):
         self.gridLayout_m.addWidget(self.molecule_label_m, 4, 0, 1, 1)
         # Text field for molecule (combobox with a line edit)
         self.molecule_lineedit_m = QtWidgets.QComboBox(self.wid_mult)
+        sorted_data = []
         try:
             readme_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../data.json')
             with open(readme_path, "r") as json_file:
                 data = json.load(json_file)
+            sorted_data = sorted(data, key=lambda x: x["last_used"], reverse=True)
         except:
             pass
-        sorted_data = sorted(data, key=lambda x: x["last_used"], reverse=True)
         for molecule in sorted_data:
             self.molecule_lineedit_m.addItem(molecule["input_string"])
         edit = QtWidgets.QLineEdit(self.wid_mult)
@@ -473,8 +478,11 @@ class MainWindow(QMainWindow):
         self.hide_retain_space([self.traversal_mode_m, self.save_m, self.mol_info_m, self.parting_line1_m, self.set_of_bursts_label, self.row5_m, self.submit_set_of_bursts, self.parting_line2_m, self.bursts_label, self.row6_m, self.submit_burst, self.parting_line3_m, self.traversals_label, self.traversals, self.row7_m, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
         self.hide_multiple([self.traversal_mode_m, self.save_m, self.mol_info_m, self.parting_line1_m, self.set_of_bursts_label, self.row5_m, self.submit_set_of_bursts, self.parting_line2_m, self.bursts_label, self.row6_m, self.submit_burst, self.parting_line3_m, self.traversals_label, self.traversals, self.row7_m, self.show_matrices_m, self.show_end_result_m, self.show_animation_m])
         # Stylesheet:
-        readme_path_m = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../styles_m.css')
-        with open(readme_path_m, "r", encoding="utf-8") as fh_m:
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        parent_dir = os.path.dirname(current_dir)
+        css_path_m = os.path.join(parent_dir, "styles_m.css")
+        #readme_path_m = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../styles_m.css')
+        with open(css_path_m, "r", encoding="utf-8") as fh_m:
             self.style_m = fh_m.read()
         self.wid_mult.setStyleSheet(self.style_m)
 
