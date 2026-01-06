@@ -8,7 +8,8 @@ The software's graphical interface gives the user the possibility to specify a s
 It also shows visualisations of this graph and the found soliton paths/ total legal configurationtrails.
 
 ## Getting started
-First, make sure that the latest version of pip is installed on your computer/ virtual environment.
+First, make sure that any Python version between 3.10 and 3.12 is installed on your computer/ virtual environment.
+Also, the latest version of pip should be installed.
 
 You can download the package containing the software via terminal by using the command
 ```shell
